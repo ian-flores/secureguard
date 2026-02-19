@@ -1,0 +1,65 @@
+url: https://ian-flores.github.io/secureguard/
+
+template:
+  bootstrap: 5
+
+reference:
+  - title: Core
+    desc: Guardrail creation, composition, and execution
+    contents:
+      - new_guardrail
+      - guardrail_result
+      - compose_guardrails
+      - run_guardrail
+      - check_all
+
+  - title: Input Guardrails
+    desc: Validate LLM input before processing
+    contents:
+      - guard_prompt_injection
+      - guard_topic_scope
+      - guard_input_pii
+
+  - title: Code Guardrails
+    desc: Analyse LLM-generated R code before execution
+    contents:
+      - guard_code_analysis
+      - default_blocked_functions
+      - guard_code_complexity
+      - guard_code_dependencies
+      - guard_code_dataflow
+
+  - title: Output Guardrails
+    desc: Filter and validate execution output
+    contents:
+      - guard_output_pii
+      - guard_output_size
+      - guard_output_secrets
+      - output_to_text
+
+  - title: AST Utilities
+    desc: Parse and walk R code abstract syntax trees
+    contents:
+      - parse_code
+      - walk_ast
+      - walk_code
+      - call_fn_name
+      - ast_depth
+      - ast_stats
+
+  - title: Pattern Libraries
+    desc: Regex pattern collections for detection
+    contents:
+      - pii_patterns
+      - detect_pii
+      - secret_patterns
+      - detect_secrets
+      - injection_patterns
+      - detect_injection
+
+  - title: Integration
+    desc: Compose guardrails into pipelines and securer hooks
+    contents:
+      - as_pre_execute_hook
+      - guard_output
+      - secure_pipeline

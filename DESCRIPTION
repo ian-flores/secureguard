@@ -1,0 +1,32 @@
+Package: secureguard
+Title: Input, Code, and Output Guardrails for R LLM Agents
+Version: 0.1.0
+Authors@R:
+    person("Ian", "Flores Siaca", , "iflores.siaca@hey.com", role = c("aut", "cre"))
+Description: Composable guardrails for large language model (LLM) agent
+    workflows in R. Provides three defense layers -- input validation
+    (prompt injection detection, topic scoping, PII filtering), code
+    analysis (AST-based function blocking, complexity limits, dependency
+    control, data flow restrictions), and output filtering (PII redaction,
+    secret detection, size limits). All analysis is local with zero
+    external API calls. Integrates with 'securer' pre-execution hooks for
+    seamless sandboxed execution.
+License: MIT + file LICENSE
+URL: https://github.com/ian-flores/secureguard
+BugReports: https://github.com/ian-flores/secureguard/issues
+Depends:
+    R (>= 4.1.0)
+Imports:
+    cli (>= 3.0.0),
+    rlang (>= 1.0.0)
+Suggests:
+    securer (>= 0.1.0),
+    testthat (>= 3.0.0),
+    withr,
+    knitr,
+    rmarkdown
+Config/testthat/edition: 3
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.3
+VignetteBuilder: knitr
