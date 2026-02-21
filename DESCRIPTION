@@ -12,7 +12,8 @@ Description: Composable guardrails for large language model (LLM) agent
     external API calls. Integrates with 'securer' pre-execution hooks for
     seamless sandboxed execution.
 License: MIT + file LICENSE
-URL: https://github.com/ian-flores/secureguard
+URL: https://github.com/ian-flores/secureguard,
+    https://ian-flores.github.io/secureguard/
 BugReports: https://github.com/ian-flores/secureguard/issues
 Depends:
     R (>= 4.1.0)
