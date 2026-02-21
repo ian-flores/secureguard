@@ -1,0 +1,219 @@
+# secureguard
+
+> \[!CAUTION\] **Alpha software.** This package is part of a broader
+> effort by [Ian Flores Siaca](https://github.com/ian-flores) to develop
+> proper AI infrastructure for the R ecosystem. It is under active
+> development and should **not** be used in production until an official
+> release is published. APIs may change without notice.
+
+Composable guardrails for LLM agent workflows in R. Three defense layers
+– input validation, code analysis, and output filtering – all running
+locally with zero external API calls.
+
+## Installation
+
+``` r
+# install.packages("pak")
+pak::pak("ian-flores/secureguard")
+```
+
+## Quick Example
+
+``` r
+library(secureguard)
+
+# Block dangerous code before it runs
+hook <- as_pre_execute_hook(
+  guard_code_analysis(),
+  guard_code_complexity(max_ast_depth = 15)
+)
+hook("mean(1:10)")    # TRUE -- safe
+hook("system('ls')")  # FALSE -- blocked
+
+# Check output for sensitive data
+out <- guard_output(
+  "User SSN: 123-45-6789",
+  guard_output_pii(),
+  guard_output_secrets()
+)
+out$pass     # FALSE
+out$reasons  # "PII detected in output: ssn"
+```
+
+## Features
+
+### Input Guardrails
+
+| Function                                                                                                   | Description                         |
+|------------------------------------------------------------------------------------------------------------|-------------------------------------|
+| [`guard_prompt_injection()`](https://ian-flores.github.io/secureguard/reference/guard_prompt_injection.md) | Detect prompt injection attempts    |
+| [`guard_topic_scope()`](https://ian-flores.github.io/secureguard/reference/guard_topic_scope.md)           | Enforce allowed/blocked topic lists |
+| [`guard_input_pii()`](https://ian-flores.github.io/secureguard/reference/guard_input_pii.md)               | Filter PII from user prompts        |
+
+### Code Guardrails
+
+| Function                                                                                                     | Description                                 |
+|--------------------------------------------------------------------------------------------------------------|---------------------------------------------|
+| [`guard_code_analysis()`](https://ian-flores.github.io/secureguard/reference/guard_code_analysis.md)         | AST-based blocked function detection        |
+| [`guard_code_complexity()`](https://ian-flores.github.io/secureguard/reference/guard_code_complexity.md)     | Depth, call count, expression limits        |
+| [`guard_code_dependencies()`](https://ian-flores.github.io/secureguard/reference/guard_code_dependencies.md) | Namespace allow/block lists                 |
+| [`guard_code_dataflow()`](https://ian-flores.github.io/secureguard/reference/guard_code_dataflow.md)         | Assignment and global variable restrictions |
+
+### Output Guardrails
+
+| Function                                                                                               | Description                                     |
+|--------------------------------------------------------------------------------------------------------|-------------------------------------------------|
+| [`guard_output_pii()`](https://ian-flores.github.io/secureguard/reference/guard_output_pii.md)         | PII detection with block/redact/warn actions    |
+| [`guard_output_secrets()`](https://ian-flores.github.io/secureguard/reference/guard_output_secrets.md) | Secret detection with block/redact/warn actions |
+| [`guard_output_size()`](https://ian-flores.github.io/secureguard/reference/guard_output_size.md)       | Character, line, and element limits             |
+
+### Integration
+
+| Function                                                                                             | Description                                  |
+|------------------------------------------------------------------------------------------------------|----------------------------------------------|
+| [`as_pre_execute_hook()`](https://ian-flores.github.io/secureguard/reference/as_pre_execute_hook.md) | Convert code guardrails to a securer hook    |
+| [`guard_output()`](https://ian-flores.github.io/secureguard/reference/guard_output.md)               | Run output guardrails with redaction support |
+| [`secure_pipeline()`](https://ian-flores.github.io/secureguard/reference/secure_pipeline.md)         | Bundle input + code + output guardrails      |
+
+## securer Integration
+
+secureguard integrates with
+[securer](https://github.com/ian-flores/securer) for sandboxed R
+execution:
+
+``` r
+library(securer)
+library(secureguard)
+
+pipeline <- secure_pipeline(
+  input_guardrails = list(guard_prompt_injection()),
+  code_guardrails = list(guard_code_analysis()),
+  output_guardrails = list(guard_output_pii(), guard_output_secrets(action = "redact"))
+)
+
+sess <- SecureSession$new(
+  pre_execute_hook = pipeline$as_pre_execute_hook()
+)
+
+# Safe code executes normally
+result <- sess$execute("mean(1:10)")
+
+# Dangerous code is blocked before reaching the sandbox
+sess$execute("system('ls')")  # Error: blocked by guardrail
+
+# Check output
+out <- pipeline$check_output(result)
+sess$close()
+```
+
+## License
+
+MIT
+
+# Package index
+
+## Core
+
+Guardrail creation, composition, and execution
+
+- [`new_guardrail()`](https://ian-flores.github.io/secureguard/reference/new_guardrail.md)
+  : Create a new guardrail
+- [`guardrail_result()`](https://ian-flores.github.io/secureguard/reference/guardrail_result.md)
+  : Create a guardrail result
+- [`compose_guardrails()`](https://ian-flores.github.io/secureguard/reference/compose_guardrails.md)
+  : Compose guardrails
+- [`run_guardrail()`](https://ian-flores.github.io/secureguard/reference/run_guardrail.md)
+  : Run a single guardrail
+- [`check_all()`](https://ian-flores.github.io/secureguard/reference/check_all.md)
+  : Run all guardrails and collect results
+
+## Input Guardrails
+
+Validate LLM input before processing
+
+- [`guard_prompt_injection()`](https://ian-flores.github.io/secureguard/reference/guard_prompt_injection.md)
+  : Prompt injection guardrail
+- [`guard_topic_scope()`](https://ian-flores.github.io/secureguard/reference/guard_topic_scope.md)
+  : Topic scope guardrail
+- [`guard_input_pii()`](https://ian-flores.github.io/secureguard/reference/guard_input_pii.md)
+  : Input PII guardrail
+
+## Code Guardrails
+
+Analyse LLM-generated R code before execution
+
+- [`guard_code_analysis()`](https://ian-flores.github.io/secureguard/reference/guard_code_analysis.md)
+  : Code AST analysis guardrail
+- [`default_blocked_functions()`](https://ian-flores.github.io/secureguard/reference/default_blocked_functions.md)
+  : Default blocked functions
+- [`guard_code_complexity()`](https://ian-flores.github.io/secureguard/reference/guard_code_complexity.md)
+  : Code complexity guardrail
+- [`guard_code_dependencies()`](https://ian-flores.github.io/secureguard/reference/guard_code_dependencies.md)
+  : Code dependency guardrail
+- [`guard_code_dataflow()`](https://ian-flores.github.io/secureguard/reference/guard_code_dataflow.md)
+  : Code data flow guardrail
+
+## Output Guardrails
+
+Filter and validate execution output
+
+- [`guard_output_pii()`](https://ian-flores.github.io/secureguard/reference/guard_output_pii.md)
+  : PII output guardrail
+- [`guard_output_size()`](https://ian-flores.github.io/secureguard/reference/guard_output_size.md)
+  : Output size guardrail
+- [`guard_output_secrets()`](https://ian-flores.github.io/secureguard/reference/guard_output_secrets.md)
+  : Secret output guardrail
+- [`output_to_text()`](https://ian-flores.github.io/secureguard/reference/output_to_text.md)
+  : Convert an R object to scannable text
+
+## AST Utilities
+
+Parse and walk R code abstract syntax trees
+
+- [`parse_code()`](https://ian-flores.github.io/secureguard/reference/parse_code.md)
+  : Parse code string into expressions
+- [`walk_ast()`](https://ian-flores.github.io/secureguard/reference/walk_ast.md)
+  : Walk an AST node recursively
+- [`walk_code()`](https://ian-flores.github.io/secureguard/reference/walk_code.md)
+  : Walk all expressions in a code string
+- [`call_fn_name()`](https://ian-flores.github.io/secureguard/reference/call_fn_name.md)
+  : Extract function name from a call expression
+- [`ast_depth()`](https://ian-flores.github.io/secureguard/reference/ast_depth.md)
+  : Compute maximum AST nesting depth
+- [`ast_stats()`](https://ian-flores.github.io/secureguard/reference/ast_stats.md)
+  : Compute summary statistics for R code AST
+
+## Pattern Libraries
+
+Regex pattern collections for detection
+
+- [`pii_patterns()`](https://ian-flores.github.io/secureguard/reference/pii_patterns.md)
+  : PII detection patterns
+- [`detect_pii()`](https://ian-flores.github.io/secureguard/reference/detect_pii.md)
+  : Detect PII in text
+- [`secret_patterns()`](https://ian-flores.github.io/secureguard/reference/secret_patterns.md)
+  : Secret detection patterns
+- [`detect_secrets()`](https://ian-flores.github.io/secureguard/reference/detect_secrets.md)
+  : Detect secrets in text
+- [`injection_patterns()`](https://ian-flores.github.io/secureguard/reference/injection_patterns.md)
+  : Prompt injection detection patterns
+- [`detect_injection()`](https://ian-flores.github.io/secureguard/reference/detect_injection.md)
+  : Detect prompt injection attempts
+
+## Integration
+
+Compose guardrails into pipelines and securer hooks
+
+- [`as_pre_execute_hook()`](https://ian-flores.github.io/secureguard/reference/as_pre_execute_hook.md)
+  : Convert code guardrails to a securer pre-execute hook
+- [`guard_output()`](https://ian-flores.github.io/secureguard/reference/guard_output.md)
+  : Run output guardrails on a result
+- [`secure_pipeline()`](https://ian-flores.github.io/secureguard/reference/secure_pipeline.md)
+  : Create a complete guardrail pipeline
+
+# Articles
+
+### All vignettes
+
+- [Getting Started with
+  secureguard](https://ian-flores.github.io/secureguard/articles/secureguard.md):
