@@ -57,10 +57,17 @@
   <main id="main" class="col-md-9"><div class="section level1">
 <div class="page-header"><h1 id="secureguard">secureguard<a class="anchor" aria-label="anchor" href="#secureguard"></a>
 </h1></div>
+<!-- badges: start -->
+
 <blockquote>
 <p>[!CAUTION] <strong>Alpha software.</strong> This package is part of a broader effort by <a href="https://github.com/ian-flores" class="external-link">Ian Flores Siaca</a> to develop proper AI infrastructure for the R ecosystem. It is under active development and should <strong>not</strong> be used in production until an official release is published. APIs may change without notice.</p>
 </blockquote>
 <p>Composable guardrails for LLM agent workflows in R. Three defense layers – input validation, code analysis, and output filtering – all running locally with zero external API calls.</p>
+<div class="section level2">
+<h2 id="why-secureguard">Why secureguard?<a class="anchor" aria-label="anchor" href="#why-secureguard"></a>
+</h2>
+<p>Most guardrail solutions require external API calls or cloud services. secureguard runs entirely locally – regex-based prompt injection detection, R AST analysis for dangerous code patterns, and PII/secret scanning – all without sending your data anywhere.</p>
+</div>
 <div class="section level2">
 <h2 id="part-of-the-secure-r-dev-ecosystem">Part of the secure-r-dev Ecosystem<a class="anchor" aria-label="anchor" href="#part-of-the-secure-r-dev-ecosystem"></a>
 </h2>
@@ -295,6 +302,20 @@
 <span><span class="va">sess</span><span class="op">$</span><span class="fu">close</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
+<h2 id="documentation">Documentation<a class="anchor" aria-label="anchor" href="#documentation"></a>
+</h2>
+<ul>
+<li><a href="https://ian-flores.github.io/secureguard/articles/secureguard.html">Getting Started with secureguard</a></li>
+<li><a href="https://ian-flores.github.io/secureguard/articles/advanced-patterns.html">Advanced Guardrail Patterns</a></li>
+<li><a href="https://ian-flores.github.io/secureguard/">Full reference documentation</a></li>
+</ul>
+</div>
+<div class="section level2">
+<h2 id="contributing">Contributing<a class="anchor" aria-label="anchor" href="#contributing"></a>
+</h2>
+<p>Contributions are welcome! Please file issues on GitHub and submit pull requests.</p>
+</div>
+<div class="section level2">
 <h2 id="license">License<a class="anchor" aria-label="anchor" href="#license"></a>
 </h2>
 <p>MIT</p>
@@ -331,7 +352,15 @@
 </ul>
 </div>
 
-
+<div class="dev-status">
+<h2 data-toc-skip>Dev status</h2>
+<ul class="list-unstyled">
+<li><a href="https://github.com/ian-flores/secureguard/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/ian-flores/secureguard/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></li>
+<li><a href="https://app.codecov.io/gh/ian-flores/secureguard" class="external-link"><img src="https://codecov.io/gh/ian-flores/secureguard/graph/badge.svg" alt="Codecov test coverage"></a></li>
+<li><a href="https://lifecycle.r-lib.org/articles/stages.html#experimental" class="external-link"><img src="https://img.shields.io/badge/lifecycle-experimental-orange.svg" alt="Lifecycle: experimental"></a></li>
+<li><a href="https://ian-flores.github.io/secureguard/"><img src="https://github.com/ian-flores/secureguard/actions/workflows/pkgdown.yaml/badge.svg" alt="pkgdown"></a></li>
+</ul>
+</div>
 
   </aside>
 </div>
