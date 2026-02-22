@@ -24,12 +24,12 @@ as_pre_execute_hook <- function(...) {
 
   for (i in seq_along(guardrails)) {
     g <- guardrails[[i]]
-    if (!inherits(g, "secureguard")) {
+    if (!S7_inherits(g, secureguard_class)) {
       cli_abort("Argument {i} is not a guardrail (class {.cls secureguard}).")
     }
-    if (g$type != "code") {
+    if (g@type != "code") {
       cli_abort(
-        "Argument {i} ({.val {g$name}}) has type {.val {g$type}}, expected {.val code}."
+        "Argument {i} ({.val {g@name}}) has type {.val {g@type}}, expected {.val code}."
       )
     }
   }
@@ -82,12 +82,12 @@ guard_output <- function(result, ...) {
 
   for (i in seq_along(guardrails)) {
     g <- guardrails[[i]]
-    if (!inherits(g, "secureguard")) {
+    if (!S7_inherits(g, secureguard_class)) {
       cli_abort("Argument {i} is not a guardrail (class {.cls secureguard}).")
     }
-    if (g$type != "output") {
+    if (g@type != "output") {
       cli_abort(
-        "Argument {i} ({.val {g$name}}) has type {.val {g$type}}, expected {.val output}."
+        "Argument {i} ({.val {g@name}}) has type {.val {g@type}}, expected {.val output}."
       )
     }
   }
@@ -100,19 +100,19 @@ guard_output <- function(result, ...) {
   for (g in guardrails) {
     res <- run_guardrail(g, current_result)
 
-    if (length(res$warnings) > 0L) {
-      all_warnings <- c(all_warnings, res$warnings)
+    if (length(res@warnings) > 0L) {
+      all_warnings <- c(all_warnings, res@warnings)
     }
 
-    if (!res$pass) {
+    if (!res@pass) {
       pass <- FALSE
-      reason <- res$reason %||% "check failed"
+      reason <- res@reason %||% "check failed"
       all_reasons <- c(all_reasons, reason)
     }
 
     # Apply redaction if present
-    if (!is.null(res$details$redacted_text)) {
-      current_result <- res$details$redacted_text
+    if (!is.null(res@details$redacted_text)) {
+      current_result <- res@details$redacted_text
     }
   }
 
@@ -155,14 +155,14 @@ secure_pipeline <- function(input_guardrails = list(),
     }
     for (i in seq_along(guardrails)) {
       g <- guardrails[[i]]
-      if (!inherits(g, "secureguard")) {
+      if (!S7_inherits(g, secureguard_class)) {
         cli_abort(
           "Element {i} of {.arg {arg_name}} is not a guardrail (class {.cls secureguard})."
         )
       }
-      if (g$type != expected_type) {
+      if (g@type != expected_type) {
         cli_abort(
-          "Element {i} of {.arg {arg_name}} has type {.val {g$type}}, expected {.val {expected_type}}."
+          "Element {i} of {.arg {arg_name}} has type {.val {g@type}}, expected {.val {expected_type}}."
         )
       }
     }

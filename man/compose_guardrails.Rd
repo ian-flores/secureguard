@@ -13,8 +13,24 @@ compose_guardrails(..., mode = c("all", "any"))
 \code{"any"} passes if at least one guardrail passes.}
 }
 \value{
-A composite guardrail of class \code{"secureguard"}.
+A composite guardrail of class \code{secureguard}.
 }
 \description{
 Combine multiple guardrails into a single composite guardrail.
+}
+\examples{
+# Compose two code guardrails (both must pass)
+g <- compose_guardrails(
+  guard_code_analysis(),
+  guard_code_complexity()
+)
+run_guardrail(g, "x <- 1 + 2")
+
+# Use "any" mode (at least one must pass)
+g2 <- compose_guardrails(
+  guard_code_analysis(),
+  guard_code_complexity(),
+  mode = "any"
+)
+run_guardrail(g2, "x <- 1")
 }

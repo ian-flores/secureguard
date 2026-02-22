@@ -9,6 +9,12 @@
 #' @return A named list of character(1) regex patterns.
 #' @keywords internal
 #' @export
+#' @examples
+#' pats <- injection_patterns("low")
+#' names(pats)
+#'
+#' pats_high <- injection_patterns("high")
+#' length(pats_high) > length(pats)
 injection_patterns <- function(sensitivity = c("medium", "low", "high")) {
   sensitivity <- match.arg(sensitivity)
 

@@ -12,14 +12,15 @@ Description: Composable guardrails for large language model (LLM) agent
     external API calls. Integrates with 'securer' pre-execution hooks for
     seamless sandboxed execution.
 License: MIT + file LICENSE
-URL: https://github.com/ian-flores/secureguard,
-    https://ian-flores.github.io/secureguard/
+URL: https://ian-flores.github.io/secureguard/,
+    https://github.com/ian-flores/secureguard
 BugReports: https://github.com/ian-flores/secureguard/issues
 Depends:
     R (>= 4.1.0)
 Imports:
     cli (>= 3.0.0),
-    rlang (>= 1.0.0)
+    rlang (>= 1.0.0),
+    S7 (>= 0.2.0)
 Suggests:
     securer (>= 0.1.0),
     testthat (>= 3.0.0),
@@ -30,6 +31,8 @@ Remotes:
     ian-flores/securer
 Config/testthat/edition: 3
 Encoding: UTF-8
+Language: en-US
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
+Config/Needs/website: pkgdown
 VignetteBuilder: knitr

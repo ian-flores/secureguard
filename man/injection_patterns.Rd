@@ -18,4 +18,11 @@ A named list of character(1) regex patterns.
 Returns a named list of regex patterns for detecting prompt injection
 attacks, filtered by sensitivity level.
 }
+\examples{
+pats <- injection_patterns("low")
+names(pats)
+
+pats_high <- injection_patterns("high")
+length(pats_high) > length(pats)
+}
 \keyword{internal}

@@ -14,4 +14,9 @@ A named list of character(1) regex patterns. Names: \code{ssn}, \code{email},
 Returns a named list of regex patterns for detecting personally identifiable
 information (PII) in text.
 }
+\examples{
+pats <- pii_patterns()
+names(pats)
+grepl(pats$ssn, "123-45-6789")
+}
 \keyword{internal}

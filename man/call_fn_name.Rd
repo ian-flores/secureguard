@@ -18,3 +18,10 @@ Returns the function name for simple calls (\code{fn(x)}), namespaced calls
 (\code{pkg::fn(x)}, \code{pkg:::fn(x)}), and \code{do.call()} with a string literal
 first argument (\code{do.call("fn", list(x))}).
 }
+\examples{
+expr <- parse_code("mean(x)")[[1]]
+call_fn_name(expr)
+
+expr2 <- parse_code("stats::median(x)")[[1]]
+call_fn_name(expr2)
+}

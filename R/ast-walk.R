@@ -6,6 +6,12 @@
 #' @param code Character(1). R code to parse.
 #' @return A parsed expression object (from [base::parse()]).
 #' @export
+#' @examples
+#' expr <- parse_code("x <- 1 + 2")
+#' length(expr)
+#'
+#' expr2 <- parse_code("f <- function(x) x + 1\nf(10)")
+#' length(expr2)
 parse_code <- function(code) {
   if (!is_string(code)) {
     cli_abort("{.arg code} must be a single character string.")
@@ -44,6 +50,13 @@ parse_code <- function(code) {
 #' @return A list of findings accumulated from visitor callbacks
 #'   (excluding `NULL` returns).
 #' @export
+#' @examples
+#' # Collect all function call names from an expression
+#' expr <- parse_code("mean(x) + sum(y)")[[1]]
+#' visitor <- list(
+#'   on_call = function(expr, fn_name, depth) fn_name
+#' )
+#' walk_ast(expr, visitor)
 walk_ast <- function(expr, visitor, depth = 0L) {
   if (!is.list(visitor)) {
     cli_abort("{.arg visitor} must be a list of callback functions.")
@@ -108,6 +121,12 @@ walk_ast <- function(expr, visitor, depth = 0L) {
 #' @param visitor A visitor list (see [walk_ast()]).
 #' @return A list of accumulated findings from all top-level expressions.
 #' @export
+#' @examples
+#' # Find all function calls in a code string
+#' visitor <- list(
+#'   on_call = function(expr, fn_name, depth) fn_name
+#' )
+#' walk_code("x <- mean(1:10)\ny <- sum(x)", visitor)
 walk_code <- function(code, visitor) {
   parsed <- parse_code(code)
   findings <- list()
@@ -127,6 +146,12 @@ walk_code <- function(code, visitor) {
 #' @return Character(1). The function name, or `NA_character_` if it cannot
 #'   be determined (e.g., anonymous function calls).
 #' @export
+#' @examples
+#' expr <- parse_code("mean(x)")[[1]]
+#' call_fn_name(expr)
+#'
+#' expr2 <- parse_code("stats::median(x)")[[1]]
+#' call_fn_name(expr2)
 call_fn_name <- function(expr) {
   if (!is.call(expr)) {
     cli_abort("{.arg expr} must be a call expression.")
@@ -170,6 +195,12 @@ call_fn_name <- function(expr) {
 #' @param depth Integer. Current depth (internal).
 #' @return Integer. Maximum nesting depth.
 #' @export
+#' @examples
+#' expr <- parse_code("f(g(h(1)))")[[1]]
+#' ast_depth(expr)
+#'
+#' expr2 <- parse_code("x <- 1")[[1]]
+#' ast_depth(expr2)
 ast_depth <- function(expr, depth = 0L) {
   if (is.call(expr)) {
     child_depths <- vapply(
@@ -223,6 +254,11 @@ ast_depth <- function(expr, depth = 0L) {
 #'     \item{`n_expressions`}{Number of top-level expressions.}
 #'   }
 #' @export
+#' @examples
+#' stats <- ast_stats("x <- mean(1:10)\ny <- x + 1")
+#' stats$n_calls
+#' stats$n_assignments
+#' stats$depth
 ast_stats <- function(code) {
   parsed <- parse_code(code)
 

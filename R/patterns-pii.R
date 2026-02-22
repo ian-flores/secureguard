@@ -7,6 +7,10 @@
 #'   `phone`, `credit_card`, `ip_address`.
 #' @keywords internal
 #' @export
+#' @examples
+#' pats <- pii_patterns()
+#' names(pats)
+#' grepl(pats$ssn, "123-45-6789")
 pii_patterns <- function() {
   list(
     ssn = "\\b\\d{3}-\\d{2}-\\d{4}\\b",

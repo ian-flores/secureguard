@@ -16,3 +16,10 @@ A parsed expression object (from \code{\link[base:parse]{base::parse()}}).
 Parses an R code string into a list of expressions, with clear
 error messages on failure.
 }
+\examples{
+expr <- parse_code("x <- 1 + 2")
+length(expr)
+
+expr2 <- parse_code("f <- function(x) x + 1\nf(10)")
+length(expr2)
+}

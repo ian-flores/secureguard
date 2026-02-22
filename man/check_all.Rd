@@ -19,3 +19,15 @@ individual results), \code{warnings} (character vector), and \code{reasons}
 \description{
 Run all guardrails and collect results
 }
+\examples{
+guards <- list(
+  guard_code_analysis(),
+  guard_code_complexity()
+)
+result <- check_all(guards, "x <- 1 + 2")
+result$pass
+
+result2 <- check_all(guards, "system('ls')")
+result2$pass
+result2$reasons
+}

@@ -17,3 +17,10 @@ Integer. Maximum nesting depth.
 \description{
 Compute maximum AST nesting depth
 }
+\examples{
+expr <- parse_code("f(g(h(1)))")[[1]]
+ast_depth(expr)
+
+expr2 <- parse_code("x <- 1")[[1]]
+ast_depth(expr2)
+}

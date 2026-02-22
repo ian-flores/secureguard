@@ -17,3 +17,12 @@ A \code{\link[=guardrail_result]{guardrail_result()}}.
 \description{
 Run a single guardrail
 }
+\examples{
+g <- guard_code_analysis()
+result <- run_guardrail(g, "x <- 1 + 2")
+result@pass
+
+result2 <- run_guardrail(g, "system('ls')")
+result2@pass
+result2@reason
+}

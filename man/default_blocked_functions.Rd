@@ -14,3 +14,8 @@ Returns the default character vector of function names considered dangerous
 for LLM-generated code. These include system-level calls, dynamic evaluation,
 and file/network operations.
 }
+\examples{
+fns <- default_blocked_functions()
+"system" \%in\% fns
+"eval" \%in\% fns
+}

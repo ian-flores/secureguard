@@ -33,3 +33,11 @@ Visits every node in a parsed R expression, calling visitor callbacks
 for calls, symbols, and literals. Findings from callbacks are accumulated
 and returned.
 }
+\examples{
+# Collect all function call names from an expression
+expr <- parse_code("mean(x) + sum(y)")[[1]]
+visitor <- list(
+  on_call = function(expr, fn_name, depth) fn_name
+)
+walk_ast(expr, visitor)
+}

@@ -14,4 +14,9 @@ A named list of character(1) regex patterns. Names: \code{api_key},
 Returns a named list of regex patterns for detecting secrets and credentials
 in text.
 }
+\examples{
+pats <- secret_patterns()
+names(pats)
+grepl(pats$aws_key, "AKIAIOSFODNN7EXAMPLE")
+}
 \keyword{internal}

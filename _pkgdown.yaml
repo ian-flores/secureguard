@@ -63,3 +63,12 @@ reference:
       - as_pre_execute_hook
       - guard_output
       - secure_pipeline
+
+articles:
+  - title: Getting Started
+    navbar: ~
+    contents:
+      - secureguard
+  - title: Advanced
+    contents:
+      - advanced-patterns

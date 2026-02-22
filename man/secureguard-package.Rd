@@ -11,6 +11,7 @@ Composable guardrails for large language model (LLM) agent workflows in R. Provi
 \seealso{
 Useful links:
 \itemize{
+  \item \url{https://ian-flores.github.io/secureguard/}
   \item \url{https://github.com/ian-flores/secureguard}
   \item Report bugs at \url{https://github.com/ian-flores/secureguard/issues}
 }

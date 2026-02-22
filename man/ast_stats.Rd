@@ -24,3 +24,9 @@ A named list with components:
 Parses the code and returns counts of calls, assignments, symbols,
 expressions, and maximum nesting depth.
 }
+\examples{
+stats <- ast_stats("x <- mean(1:10)\ny <- x + 1")
+stats$n_calls
+stats$n_assignments
+stats$depth
+}

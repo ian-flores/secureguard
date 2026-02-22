@@ -17,9 +17,25 @@ new_guardrail(name, type, check_fn, description = "")
 \item{description}{Character(1). Human-readable description.}
 }
 \value{
-An S3 object of class \code{"secureguard"}.
+An S7 object of class \code{secureguard}.
 }
 \description{
 Low-level constructor for guardrail objects. Prefer the \verb{guard_*()} factory
 functions for end-user guardrails.
+}
+\examples{
+g <- new_guardrail(
+  name = "no_eval",
+  type = "code",
+  check_fn = function(code) {
+    if (grepl("\\\\beval\\\\b", code)) {
+      guardrail_result(pass = FALSE, reason = "eval() detected")
+    } else {
+      guardrail_result(pass = TRUE)
+    }
+  },
+  description = "Blocks eval() calls"
+)
+g@name
+run_guardrail(g, "x <- 1")
 }

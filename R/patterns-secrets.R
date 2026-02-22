@@ -7,6 +7,10 @@
 #'   `aws_key`, `password`, `token`, `private_key`, `github_token`.
 #' @keywords internal
 #' @export
+#' @examples
+#' pats <- secret_patterns()
+#' names(pats)
+#' grepl(pats$aws_key, "AKIAIOSFODNN7EXAMPLE")
 secret_patterns <- function() {
   list(
     api_key = "(?i)api[_-]?key\\s*[:=]\\s*['\"]?[A-Za-z0-9_\\-]{20,}",

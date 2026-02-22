@@ -17,3 +17,10 @@ A list of accumulated findings from all top-level expressions.
 \description{
 Parses the code and walks each top-level expression with the visitor.
 }
+\examples{
+# Find all function calls in a code string
+visitor <- list(
+  on_call = function(expr, fn_name, depth) fn_name
+)
+walk_code("x <- mean(1:10)\ny <- sum(x)", visitor)
+}

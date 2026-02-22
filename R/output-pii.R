@@ -7,6 +7,10 @@
 #' @return Character(1). A text representation of `x`.
 #' @keywords internal
 #' @export
+#' @examples
+#' output_to_text("hello")
+#' output_to_text(data.frame(a = 1:3, b = letters[1:3]))
+#' output_to_text(list(x = 1, y = "two"))
 output_to_text <- function(x) {
   if (is.character(x)) {
     return(paste(x, collapse = "\n"))
@@ -40,7 +44,7 @@ output_to_text <- function(x) {
 #'
 #' g_redact <- guard_output_pii(action = "redact")
 #' result <- run_guardrail(g_redact, "My SSN is 123-45-6789")
-#' result$details$redacted_text
+#' result@details$redacted_text
 guard_output_pii <- function(detect = NULL,
                              action = c("block", "redact", "warn")) {
   action <- match.arg(action)

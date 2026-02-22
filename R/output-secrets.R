@@ -17,7 +17,7 @@
 #'
 #' g_redact <- guard_output_secrets(action = "redact")
 #' result <- run_guardrail(g_redact, "AKIAIOSFODNN7EXAMPLE")
-#' result$details$redacted_text
+#' result@details$redacted_text
 guard_output_secrets <- function(detect = NULL,
                                  action = c("block", "redact", "warn")) {
   action <- match.arg(action)

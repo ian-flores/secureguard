@@ -6,6 +6,10 @@
 #'
 #' @return Character vector of blocked function names.
 #' @export
+#' @examples
+#' fns <- default_blocked_functions()
+#' "system" %in% fns
+#' "eval" %in% fns
 default_blocked_functions <- function() {
   c(
     "system", "system2", "shell",

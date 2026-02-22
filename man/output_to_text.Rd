@@ -16,4 +16,9 @@ Character(1). A text representation of \code{x}.
 Converts arbitrary R objects to a single character string for pattern
 scanning by output guardrails.
 }
+\examples{
+output_to_text("hello")
+output_to_text(data.frame(a = 1:3, b = letters[1:3]))
+output_to_text(list(x = 1, y = "two"))
+}
 \keyword{internal}
