@@ -8,7 +8,9 @@ reference:
     desc: Guardrail creation, composition, and execution
     contents:
       - new_guardrail
+      - secureguard_class
       - guardrail_result
+      - guardrail_result_class
       - compose_guardrails
       - run_guardrail
       - check_all
