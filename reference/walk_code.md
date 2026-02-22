@@ -22,3 +22,28 @@ walk_code(code, visitor)
 ## Value
 
 A list of accumulated findings from all top-level expressions.
+
+## Examples
+
+``` r
+# Find all function calls in a code string
+visitor <- list(
+  on_call = function(expr, fn_name, depth) fn_name
+)
+walk_code("x <- mean(1:10)\ny <- sum(x)", visitor)
+#> [[1]]
+#> [1] "<-"
+#> 
+#> [[2]]
+#> [1] "mean"
+#> 
+#> [[3]]
+#> [1] ":"
+#> 
+#> [[4]]
+#> [1] "<-"
+#> 
+#> [[5]]
+#> [1] "sum"
+#> 
+```

@@ -10,6 +10,44 @@ Composable guardrails for LLM agent workflows in R. Three defense layers
 – input validation, code analysis, and output filtering – all running
 locally with zero external API calls.
 
+## Part of the secure-r-dev Ecosystem
+
+secureguard is part of a 7-package ecosystem for building governed AI
+agents in R:
+
+                        ┌─────────────┐
+                        │   securer    │
+                        └──────┬──────┘
+              ┌────────────────┼──────────────────┐
+              │                │                   │
+       ┌──────▼──────┐  ┌─────▼───────────┐  ┌───▼──────────────┐
+       │ securetools  │  │>>> secureguard<<<│  │  securecontext   │
+       └──────┬───────┘  └─────┬───────────┘  └───┬──────────────┘
+              └────────────────┼──────────────────┘
+                        ┌──────▼───────┐
+                        │   orchestr   │
+                        └──────┬───────┘
+              ┌────────────────┼─────────────────┐
+              │                                  │
+       ┌──────▼──────┐                    ┌──────▼──────┐
+       │ securetrace  │                   │ securebench  │
+       └─────────────┘                    └─────────────┘
+
+secureguard provides the guardrail layer – input validation, code
+analysis, and output filtering that can run standalone or integrate with
+securer’s pre-execute hooks. securebench at the bottom of the stack
+benchmarks guardrail accuracy with precision/recall/F1 metrics.
+
+| Package                                                      | Role                                                    |
+|--------------------------------------------------------------|---------------------------------------------------------|
+| [securer](https://github.com/ian-flores/securer)             | Sandboxed R execution with tool-call IPC                |
+| [securetools](https://github.com/ian-flores/securetools)     | Pre-built security-hardened tool definitions            |
+| [secureguard](https://github.com/ian-flores/secureguard)     | Input/code/output guardrails (injection, PII, secrets)  |
+| [orchestr](https://github.com/ian-flores/orchestr)           | Graph-based agent orchestration                         |
+| [securecontext](https://github.com/ian-flores/securecontext) | Document chunking, embeddings, RAG retrieval            |
+| [securetrace](https://github.com/ian-flores/securetrace)     | Structured tracing, token/cost accounting, JSONL export |
+| [securebench](https://github.com/ian-flores/securebench)     | Guardrail benchmarking with precision/recall/F1 metrics |
+
 ## Installation
 
 ``` r
@@ -118,8 +156,12 @@ Guardrail creation, composition, and execution
 
 - [`new_guardrail()`](https://ian-flores.github.io/secureguard/reference/new_guardrail.md)
   : Create a new guardrail
+- [`secureguard_class()`](https://ian-flores.github.io/secureguard/reference/secureguard_class.md)
+  : S7 class: secureguard
 - [`guardrail_result()`](https://ian-flores.github.io/secureguard/reference/guardrail_result.md)
   : Create a guardrail result
+- [`guardrail_result_class()`](https://ian-flores.github.io/secureguard/reference/guardrail_result_class.md)
+  : S7 class: guardrail_result
 - [`compose_guardrails()`](https://ian-flores.github.io/secureguard/reference/compose_guardrails.md)
   : Compose guardrails
 - [`run_guardrail()`](https://ian-flores.github.io/secureguard/reference/run_guardrail.md)
@@ -213,7 +255,12 @@ Compose guardrails into pipelines and securer hooks
 
 # Articles
 
-### All vignettes
+### Getting Started
 
 - [Getting Started with
   secureguard](https://ian-flores.github.io/secureguard/articles/secureguard.md):
+
+### Advanced
+
+- [Advanced Guardrail
+  Patterns](https://ian-flores.github.io/secureguard/articles/advanced-patterns.md):

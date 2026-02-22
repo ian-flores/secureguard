@@ -30,4 +30,25 @@ new_guardrail(name, type, check_fn, description = "")
 
 ## Value
 
-An S3 object of class `"secureguard"`.
+An S7 object of class `secureguard`.
+
+## Examples
+
+``` r
+g <- new_guardrail(
+  name = "no_eval",
+  type = "code",
+  check_fn = function(code) {
+    if (grepl("\\beval\\b", code)) {
+      guardrail_result(pass = FALSE, reason = "eval() detected")
+    } else {
+      guardrail_result(pass = TRUE)
+    }
+  },
+  description = "Blocks eval() calls"
+)
+g@name
+#> [1] "no_eval"
+run_guardrail(g, "x <- 1")
+#> <guardrail_result> PASS
+```

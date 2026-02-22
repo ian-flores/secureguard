@@ -49,3 +49,23 @@ walk_ast(expr, visitor, depth = 0L)
 
 A list of findings accumulated from visitor callbacks (excluding `NULL`
 returns).
+
+## Examples
+
+``` r
+# Collect all function call names from an expression
+expr <- parse_code("mean(x) + sum(y)")[[1]]
+visitor <- list(
+  on_call = function(expr, fn_name, depth) fn_name
+)
+walk_ast(expr, visitor)
+#> [[1]]
+#> [1] "+"
+#> 
+#> [[2]]
+#> [1] "mean"
+#> 
+#> [[3]]
+#> [1] "sum"
+#> 
+```

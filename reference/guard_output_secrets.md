@@ -41,6 +41,6 @@ run_guardrail(g, "AKIAIOSFODNN7EXAMPLE")
 
 g_redact <- guard_output_secrets(action = "redact")
 result <- run_guardrail(g_redact, "AKIAIOSFODNN7EXAMPLE")
-result$details$redacted_text
+result@details$redacted_text
 #> [1] "[REDACTED_AWS_KEY]"
 ```

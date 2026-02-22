@@ -39,3 +39,15 @@ A named list with components:
 - `n_expressions`:
 
   Number of top-level expressions.
+
+## Examples
+
+``` r
+stats <- ast_stats("x <- mean(1:10)\ny <- x + 1")
+stats$n_calls
+#> [1] 5
+stats$n_assignments
+#> [1] 2
+stats$depth
+#> [1] 3
+```

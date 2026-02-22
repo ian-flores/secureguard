@@ -13,3 +13,13 @@ default_blocked_functions()
 ## Value
 
 Character vector of blocked function names.
+
+## Examples
+
+``` r
+fns <- default_blocked_functions()
+"system" %in% fns
+#> [1] TRUE
+"eval" %in% fns
+#> [1] TRUE
+```

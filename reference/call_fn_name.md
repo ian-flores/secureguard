@@ -21,3 +21,15 @@ call_fn_name(expr)
 
 Character(1). The function name, or `NA_character_` if it cannot be
 determined (e.g., anonymous function calls).
+
+## Examples
+
+``` r
+expr <- parse_code("mean(x)")[[1]]
+call_fn_name(expr)
+#> [1] "mean"
+
+expr2 <- parse_code("stats::median(x)")[[1]]
+call_fn_name(expr2)
+#> [1] "stats::median"
+```

@@ -20,3 +20,15 @@ injection_patterns(sensitivity = c("medium", "low", "high"))
 ## Value
 
 A named list of character(1) regex patterns.
+
+## Examples
+
+``` r
+pats <- injection_patterns("low")
+names(pats)
+#> [1] "instruction_override" "role_play"           
+
+pats_high <- injection_patterns("high")
+length(pats_high) > length(pats)
+#> [1] TRUE
+```

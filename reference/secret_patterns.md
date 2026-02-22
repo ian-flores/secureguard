@@ -13,3 +13,14 @@ secret_patterns()
 
 A named list of character(1) regex patterns. Names: `api_key`,
 `aws_key`, `password`, `token`, `private_key`, `github_token`.
+
+## Examples
+
+``` r
+pats <- secret_patterns()
+names(pats)
+#> [1] "api_key"      "aws_key"      "password"     "token"        "private_key" 
+#> [6] "github_token"
+grepl(pats$aws_key, "AKIAIOSFODNN7EXAMPLE")
+#> [1] TRUE
+```

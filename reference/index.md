@@ -6,8 +6,12 @@ Guardrail creation, composition, and execution
 
 - [`new_guardrail()`](https://ian-flores.github.io/secureguard/reference/new_guardrail.md)
   : Create a new guardrail
+- [`secureguard_class()`](https://ian-flores.github.io/secureguard/reference/secureguard_class.md)
+  : S7 class: secureguard
 - [`guardrail_result()`](https://ian-flores.github.io/secureguard/reference/guardrail_result.md)
   : Create a guardrail result
+- [`guardrail_result_class()`](https://ian-flores.github.io/secureguard/reference/guardrail_result_class.md)
+  : S7 class: guardrail_result
 - [`compose_guardrails()`](https://ian-flores.github.io/secureguard/reference/compose_guardrails.md)
   : Compose guardrails
 - [`run_guardrail()`](https://ian-flores.github.io/secureguard/reference/run_guardrail.md)

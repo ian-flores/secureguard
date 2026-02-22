@@ -34,4 +34,26 @@ guardrail_result(
 
 ## Value
 
-A list of class `"guardrail_result"`.
+An S7 object of class `guardrail_result`.
+
+## Examples
+
+``` r
+# A passing result
+r <- guardrail_result(pass = TRUE)
+r@pass
+#> [1] TRUE
+
+# A failing result with details
+r <- guardrail_result(
+  pass = FALSE,
+  reason = "Blocked function detected",
+  details = list(blocked_calls = "system")
+)
+r@reason
+#> [1] "Blocked function detected"
+r@details
+#> $blocked_calls
+#> [1] "system"
+#> 
+```

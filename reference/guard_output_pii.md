@@ -41,6 +41,6 @@ run_guardrail(g, "My SSN is 123-45-6789")
 
 g_redact <- guard_output_pii(action = "redact")
 result <- run_guardrail(g_redact, "My SSN is 123-45-6789")
-result$details$redacted_text
+result@details$redacted_text
 #> [1] "My SSN is [REDACTED_SSN]"
 ```

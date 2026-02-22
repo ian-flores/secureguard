@@ -3,10 +3,12 @@
 <url><loc>https://ian-flores.github.io/secureguard/CLAUDE.html</loc></url>
 <url><loc>https://ian-flores.github.io/secureguard/LICENSE-text.html</loc></url>
 <url><loc>https://ian-flores.github.io/secureguard/LICENSE.html</loc></url>
+<url><loc>https://ian-flores.github.io/secureguard/articles/advanced-patterns.html</loc></url>
 <url><loc>https://ian-flores.github.io/secureguard/articles/index.html</loc></url>
 <url><loc>https://ian-flores.github.io/secureguard/articles/secureguard.html</loc></url>
 <url><loc>https://ian-flores.github.io/secureguard/authors.html</loc></url>
 <url><loc>https://ian-flores.github.io/secureguard/index.html</loc></url>
+<url><loc>https://ian-flores.github.io/secureguard/news/index.html</loc></url>
 <url><loc>https://ian-flores.github.io/secureguard/reference/as_pre_execute_hook.html</loc></url>
 <url><loc>https://ian-flores.github.io/secureguard/reference/ast_depth.html</loc></url>
 <url><loc>https://ian-flores.github.io/secureguard/reference/ast_stats.html</loc></url>
@@ -29,6 +31,7 @@
 <url><loc>https://ian-flores.github.io/secureguard/reference/guard_prompt_injection.html</loc></url>
 <url><loc>https://ian-flores.github.io/secureguard/reference/guard_topic_scope.html</loc></url>
 <url><loc>https://ian-flores.github.io/secureguard/reference/guardrail_result.html</loc></url>
+<url><loc>https://ian-flores.github.io/secureguard/reference/guardrail_result_class.html</loc></url>
 <url><loc>https://ian-flores.github.io/secureguard/reference/index.html</loc></url>
 <url><loc>https://ian-flores.github.io/secureguard/reference/injection_patterns.html</loc></url>
 <url><loc>https://ian-flores.github.io/secureguard/reference/new_guardrail.html</loc></url>
@@ -39,6 +42,7 @@
 <url><loc>https://ian-flores.github.io/secureguard/reference/secret_patterns.html</loc></url>
 <url><loc>https://ian-flores.github.io/secureguard/reference/secure_pipeline.html</loc></url>
 <url><loc>https://ian-flores.github.io/secureguard/reference/secureguard-package.html</loc></url>
+<url><loc>https://ian-flores.github.io/secureguard/reference/secureguard_class.html</loc></url>
 <url><loc>https://ian-flores.github.io/secureguard/reference/walk_ast.html</loc></url>
 <url><loc>https://ian-flores.github.io/secureguard/reference/walk_code.html</loc></url>
 </urlset>

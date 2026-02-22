@@ -21,3 +21,15 @@ ast_depth(expr, depth = 0L)
 ## Value
 
 Integer. Maximum nesting depth.
+
+## Examples
+
+``` r
+expr <- parse_code("f(g(h(1)))")[[1]]
+ast_depth(expr)
+#> [1] 3
+
+expr2 <- parse_code("x <- 1")[[1]]
+ast_depth(expr2)
+#> [1] 1
+```
