@@ -1,9 +1,20 @@
 # secureguard
 
+<!-- badges: start -->
+[![R-CMD-check](https://github.com/ian-flores/secureguard/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/ian-flores/secureguard/actions/workflows/R-CMD-check.yaml)
+[![Codecov test coverage](https://codecov.io/gh/ian-flores/secureguard/graph/badge.svg)](https://app.codecov.io/gh/ian-flores/secureguard)
+[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
+[![pkgdown](https://github.com/ian-flores/secureguard/actions/workflows/pkgdown.yaml/badge.svg)](https://ian-flores.github.io/secureguard/)
+<!-- badges: end -->
+
 > [!CAUTION]
 > **Alpha software.** This package is part of a broader effort by [Ian Flores Siaca](https://github.com/ian-flores) to develop proper AI infrastructure for the R ecosystem. It is under active development and should **not** be used in production until an official release is published. APIs may change without notice.
 
 Composable guardrails for LLM agent workflows in R. Three defense layers -- input validation, code analysis, and output filtering -- all running locally with zero external API calls.
+
+## Why secureguard?
+
+Most guardrail solutions require external API calls or cloud services. secureguard runs entirely locally -- regex-based prompt injection detection, R AST analysis for dangerous code patterns, and PII/secret scanning -- all without sending your data anywhere.
 
 ## Part of the secure-r-dev Ecosystem
 
@@ -134,6 +145,16 @@ sess$execute("system('ls')")  # Error: blocked by guardrail
 out <- pipeline$check_output(result)
 sess$close()
 ```
+
+## Documentation
+
+- [Getting Started with secureguard](https://ian-flores.github.io/secureguard/articles/secureguard.html)
+- [Advanced Guardrail Patterns](https://ian-flores.github.io/secureguard/articles/advanced-patterns.html)
+- [Full reference documentation](https://ian-flores.github.io/secureguard/)
+
+## Contributing
+
+Contributions are welcome! Please file issues on GitHub and submit pull requests.
 
 ## License
 
