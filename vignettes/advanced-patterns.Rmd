@@ -14,24 +14,103 @@ knitr::opts_chunk$set(
 )
 ```
 
-This vignette covers advanced usage patterns for secureguard: building custom
-guardrails, composing them into layered defenses, assembling full pipelines,
+## What This Vignette Covers
+
+The getting-started vignette (`vignette("secureguard")`) introduces the three
+defense layers and the built-in guardrails. This vignette goes deeper. It
+covers building your own guardrails for domain-specific threats, composing
+guardrails into layered defenses with fine-grained control over pass/fail
+logic, assembling full pipelines that protect every stage of an agent turn,
 and integrating with securer for sandboxed execution.
 
-If you are new to secureguard, start with `vignette("secureguard")` for an
-overview of the three defense layers.
+If you are new to secureguard, start with `vignette("secureguard")` first.
+
+## How a Guardrail Pipeline Works
+
+Before diving into custom guardrails, it helps to see how the pieces fit
+together in a complete agent workflow. The following diagram shows the flow
+of data through a `secure_pipeline()` -- the recommended way to wire
+guardrails into an agent loop:
+
+```
+         User prompt
+              |
+              v
+    +--------------------+
+    |  check_input()     |    Input guardrails:
+    |  - injection       |    prompt injection, topic scope, PII
+    |  - topic scope     |
+    |  - input PII       |
+    +--------------------+
+              |
+         Pass? ----No----> Return failure (stage: input)
+              |
+             Yes
+              |
+              v
+         LLM generates code
+              |
+              v
+    +--------------------+
+    |  check_code()      |    Code guardrails:
+    |  - AST analysis    |    blocked functions, complexity,
+    |  - complexity      |    dependencies, data flow
+    |  - dependencies    |
+    |  - data flow       |
+    +--------------------+
+              |
+         Pass? ----No----> Return failure (stage: code)
+              |
+             Yes
+              |
+              v
+      Execute in sandbox
+        (securer)
+              |
+              v
+    +--------------------+
+    |  check_output()    |    Output guardrails:
+    |  - PII             |    PII blocking, secret redaction,
+    |  - secrets         |    size limits
+    |  - size            |
+    +--------------------+
+              |
+         Pass? ----No----> Return failure (stage: output)
+              |
+             Yes
+              |
+              v
+      Return result to user
+      (possibly redacted)
+```
+
+Each stage short-circuits on failure: if input guardrails reject the prompt,
+the LLM never sees it. If code guardrails reject the generated code, it never
+executes. This minimizes both risk and wasted computation.
 
 ## Creating Custom Guardrails
 
-Every guardrail in secureguard is an S7 object of class `secureguard` with
-four properties: `name`, `type`, `check_fn`, and `description`. The
-`new_guardrail()` constructor validates these and returns a guardrail you can
-use with `run_guardrail()`, `compose_guardrails()`, and `secure_pipeline()`.
+The built-in guardrails cover the most common threats: prompt injection, dangerous
+function calls, PII leakage, and secret exposure. But every application has
+domain-specific risks that generic guardrails cannot anticipate. An agent that
+generates SQL needs SQL injection detection. A healthcare application needs
+HIPAA-specific PII patterns. A financial tool needs checks for account numbers
+and routing numbers.
+
+secureguard is designed for extensibility. Every guardrail -- built-in or
+custom -- is an S3 object of class `secureguard` with four properties: `name`,
+`type`, `check_fn`, and `description`. The `new_guardrail()` constructor
+validates these and returns a guardrail you can use with `run_guardrail()`,
+`compose_guardrails()`, and `secure_pipeline()`. Custom guardrails compose
+seamlessly with built-in ones because they share the same interface.
 
 ### A SQL Injection Detector
 
-Suppose your agent generates SQL queries. You want a guardrail that blocks
-common SQL injection patterns before any query reaches a database.
+SQL injection is one of the oldest and most well-understood attack vectors in
+software. When an LLM generates SQL queries, the risk is amplified: the model
+may produce syntactically valid but semantically dangerous queries, especially
+if the user's prompt contains adversarial patterns. A purpose-built guardrail
+can catch these patterns before any query reaches a database.
 
 ```{r sql-injection-guard}
 library(secureguard)
@@ -139,11 +218,20 @@ result@details
 
 ## Composing Guardrails
 
+Individual guardrails are building blocks. In practice, you almost always want
+to run multiple guardrails together -- checking both for dangerous functions
+and excessive complexity, or detecting both prompt injection and off-topic
+prompts. secureguard provides two composition mechanisms that make this
+natural.
+
 ### compose_guardrails(): Same-Type Composition
 
 `compose_guardrails()` merges multiple guardrails of the **same type** into a
-single composite guardrail. This is useful when you want to treat a group of
-checks as one unit.
+single composite guardrail. The result is itself a guardrail, which means you
+can pass it to `run_guardrail()`, nest it inside another composition, or use
+it in a pipeline. This is useful when you want to treat a group of checks as
+one unit -- for example, bundling all your code checks into a single "strict
+code" guardrail.
 
 ```{r compose-all-mode}
 # Compose three code guardrails -- ALL must pass (default)
@@ -167,9 +255,11 @@ run_guardrail(strict_code, "processx::run('ls')")
 
 ### mode = "any": At Least One Must Pass
 
-When `mode = "any"`, the composite passes if **any** child guardrail passes.
-This is useful for allowlist-style checks where multiple patterns are
-acceptable:
+The default `mode = "all"` is the right choice for security checks: all
+guards must pass. But sometimes you need the opposite logic -- an allowlist
+where the input is acceptable if it matches **any** of several categories.
+With `mode = "any"`, the composite passes if at least one child guardrail
+passes:
 
 ```{r compose-any-mode}
 # Accept prompts about either statistics OR machine learning
@@ -213,10 +303,37 @@ result$pass
 result$reasons
 ```
 
+### When to Use compose_guardrails() vs check_all()
+
+Both functions combine multiple guardrails, but they serve different purposes
+and return different types:
+
+**Use `compose_guardrails()`** when you want a single guardrail object that
+you can pass to `run_guardrail()`, nest inside another `compose_guardrails()`,
+or use in a `secure_pipeline()`. The composed guardrail behaves as one unit:
+you get a single pass/fail result. This is the right choice when you are
+building reusable guardrail configurations (e.g., a "strict code" composite)
+that you want to treat as a single check.
+
+**Use `check_all()`** when you need diagnostic detail. It returns individual
+results for each guardrail in the list, so you can report exactly which checks
+failed and why. This is useful in logging, debugging, and user-facing error
+messages where "code guardrail failed" is less helpful than "blocked function
+`system()` detected by code_analysis; exceeded max AST depth of 10 per
+code_complexity."
+
+In practice, many applications use both: `compose_guardrails()` to build
+reusable guardrail groups, and `check_all()` at the top level to get per-group
+diagnostics.
+
 ## Building Pipelines with secure_pipeline()
 
-A pipeline bundles guardrails for all three layers -- input, code, and output
--- into a single object with dedicated methods for each stage.
+Individual guardrails and compositions are useful for targeted checks, but a
+production agent needs all three defense layers working together. A pipeline
+bundles guardrails for input, code, and output into a single object with
+dedicated methods for each stage. This ensures consistent configuration --
+you define your security policy once and apply it uniformly across every
+agent turn.
 
 ### Defining a Pipeline
 
@@ -268,9 +385,11 @@ output_result$result  # possibly redacted text
 
 ### Pipeline in an Agent Loop
 
-Here is how a pipeline fits into a typical agent turn. This pattern processes
-one user request through all three layers sequentially, short-circuiting on
-failure:
+The three `check_*` methods are designed to be called sequentially in an
+agent loop. Each stage short-circuits on failure: if `check_input()` rejects
+the prompt, you skip the LLM call entirely, saving both time and cost. If
+`check_code()` rejects the generated code, you skip execution, preventing
+any side effects. Here is the complete pattern:
 
 ```{r agent-loop, eval = FALSE}
 process_turn <- function(pipeline, user_prompt, llm_fn, execute_fn) {
@@ -317,8 +436,12 @@ process_turn <- function(pipeline, user_prompt, llm_fn, execute_fn) {
 
 ## Mixing Custom and Built-In Guardrails
 
-Custom guardrails compose seamlessly with built-in ones. You can mix them in
-`compose_guardrails()`, `check_all()`, and `secure_pipeline()`:
+One of the key design principles in secureguard is that custom and built-in
+guardrails share the same interface. This means custom guardrails compose
+seamlessly with built-in ones -- you can mix them freely in
+`compose_guardrails()`, `check_all()`, and `secure_pipeline()`. There is no
+special registration step or plugin system; if it is a `secureguard` object,
+it works everywhere:
 
 ```{r mix-custom}
 # The SQL injection guard from earlier alongside built-in input guards
@@ -347,11 +470,16 @@ run_guardrail(code_guards, "x <- mean(1:10)")
 
 ## Integration with securer
 
-secureguard integrates with the
-[securer](https://github.com/ian-flores/securer) package to guard sandboxed R
-execution sessions. securer is a suggested dependency -- all of the patterns
-above work without it. The integration layer adds two capabilities:
-pre-execution hooks and output guarding after execution.
+secureguard provides semantic analysis of code and outputs -- it understands
+what the code does. [securer](https://github.com/ian-flores/securer) provides
+OS-level sandboxing -- it limits what the code **can** do, regardless of
+what it tries. Together they form two independent defense layers: secureguard
+catches known-dangerous patterns before execution, and securer contains
+unknown threats at the operating system level.
+
+securer is a suggested dependency -- all of the patterns above work without
+it. The integration layer adds two capabilities: pre-execution hooks and
+output guarding after execution.
 
 ### Pre-Execute Hooks
 
@@ -429,10 +557,19 @@ sess$close()
 
 ## Advanced Composition Patterns
 
+The patterns above cover the common case: apply the same guardrails uniformly
+to every request. In practice, you often need to vary guardrail strictness
+based on context -- who the user is, where the request came from, and what
+level of trust is appropriate. The following patterns show how to build
+adaptive guardrail configurations.
+
 ### Layered Sensitivity
 
-Use different sensitivity levels for different contexts. For example, a public
-chatbot may need stricter injection detection than an internal tool:
+Not all contexts require the same level of strictness. A public-facing chatbot
+is exposed to adversarial users and needs high-sensitivity injection detection
+and tight topic scoping. An internal analytics tool used by trusted data
+scientists can afford lower sensitivity to avoid false positives on legitimate
+analytical prompts:
 
 ```{r layered-sensitivity}
 # Public-facing: high sensitivity, strict topic scoping
@@ -461,7 +598,11 @@ run_guardrail(
 
 ### Graduated Code Restrictions
 
-Tighten code guardrails progressively depending on trust level:
+The same principle applies to code guardrails. A trusted internal user running
+vetted analysis scripts needs fewer restrictions than an untrusted external
+user whose prompts generate arbitrary code. By defining multiple guardrail
+configurations and selecting one based on context, you can balance security
+with usability:
 
 ```{r graduated-code}
 # Trusted context: only block the most dangerous operations
@@ -495,9 +636,12 @@ run_guardrail(untrusted_code, code)
 
 ### Redact vs Block Decision
 
-Output guardrails support three actions: `"block"`, `"redact"`, and `"warn"`.
-Combining these in a pipeline lets you redact recoverable issues while blocking
-critical ones:
+Not all sensitive data in output requires the same response. PII like social
+security numbers or patient records should block the entire response -- partial
+disclosure is still a privacy violation. But API keys and tokens can often be
+redacted in place, preserving the useful parts of the response while removing
+the sensitive value. Output guardrails support three actions (`"block"`,
+`"redact"`, `"warn"`) that let you make this distinction explicitly:
 
 ```{r redact-vs-block}
 # PII blocks the output entirely
@@ -526,12 +670,15 @@ result$reasons
 | Pattern | Function | Use Case |
 |---------|----------|----------|
 | Custom guardrail | `new_guardrail()` | Domain-specific checks |
-| Same-type composition | `compose_guardrails()` | Merge guards into one |
-| Batch check | `check_all()` | Individual results per guard |
-| Full pipeline | `secure_pipeline()` | Three-layer defense |
+| Same-type composition | `compose_guardrails()` | Merge guards into one reusable unit |
+| Batch check | `check_all()` | Individual results per guard (diagnostics) |
+| Full pipeline | `secure_pipeline()` | Three-layer defense for production |
 | Pre-execute hook | `as_pre_execute_hook()` | securer integration |
 | Output guard | `guard_output()` | Post-execution filtering |
 
-The key design principle: guardrails are composable values. Build small,
-focused guards, compose them for your context, and assemble them into
-pipelines that protect every stage of an agent workflow.
+The key design principle is that guardrails are composable values. Build small,
+focused guards that each address one threat. Compose them for your context using
+`compose_guardrails()` or `check_all()`. Assemble them into pipelines that
+protect every stage of an agent workflow. And when the built-in guardrails do
+not cover your domain, extend the system with `new_guardrail()` -- custom
+guards compose identically to built-in ones.
