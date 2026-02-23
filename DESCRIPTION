@@ -1,6 +1,6 @@
 Package: secureguard
 Title: Input, Code, and Output Guardrails for Large Language Model Agents
-Version: 0.1.0
+Version: 0.2.0
 Authors@R:
     person("Ian", "Flores Siaca", , "iflores.siaca@hey.com", role = c("aut", "cre", "cph"))
 Description: Composable guardrails for Large Language Model (LLM) agent

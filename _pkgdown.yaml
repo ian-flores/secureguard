@@ -37,6 +37,7 @@ reference:
       - guard_output_pii
       - guard_output_size
       - guard_output_secrets
+      - guard_output_entropy
       - output_to_text
 
   - title: AST Utilities
@@ -58,6 +59,8 @@ reference:
       - detect_secrets
       - injection_patterns
       - detect_injection
+      - shannon_entropy
+      - is_high_entropy
 
   - title: Integration
     desc: Compose guardrails into pipelines and securer hooks
