@@ -9,7 +9,7 @@ information (PII) in text."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">secureguard</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -54,15 +54,20 @@ information (PII) in text.</p>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A named list of character(1) regex patterns. Names: <code>ssn</code>, <code>email</code>,
-<code>phone</code>, <code>credit_card</code>, <code>ip_address</code>.</p>
+<code>phone</code>, <code>credit_card</code>, <code>ip_address_v4</code>, <code>ip_address_v6</code>, <code>phone_intl</code>,
+<code>iban</code>, <code>dob</code>, <code>mac_address</code>, <code>us_passport</code>, <code>drivers_license</code>, <code>itin</code>,
+<code>vin</code>.</p>
     </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">pats</span> <span class="op">&lt;-</span> <span class="fu">pii_patterns</span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">pats</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "ssn"         "email"       "phone"       "credit_card" "ip_address" </span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grepl</a></span><span class="op">(</span><span class="va">pats</span><span class="op">$</span><span class="va">ssn</span>, <span class="st">"123-45-6789"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "ssn"             "email"           "phone"           "credit_card"    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [5] "ip_address_v4"   "ip_address_v6"   "phone_intl"      "iban"           </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [9] "dob"             "mac_address"     "us_passport"     "drivers_license"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [13] "itin"            "vin"            </span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grepl</a></span><span class="op">(</span><span class="va">pats</span><span class="op">$</span><span class="va">ssn</span>, <span class="st">"123-45-6789"</span>, perl <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
 </code></pre></div>
     </div>

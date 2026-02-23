@@ -12,14 +12,19 @@ pii_patterns()
 ## Value
 
 A named list of character(1) regex patterns. Names: `ssn`, `email`,
-`phone`, `credit_card`, `ip_address`.
+`phone`, `credit_card`, `ip_address_v4`, `ip_address_v6`, `phone_intl`,
+`iban`, `dob`, `mac_address`, `us_passport`, `drivers_license`, `itin`,
+`vin`.
 
 ## Examples
 
 ``` r
 pats <- pii_patterns()
 names(pats)
-#> [1] "ssn"         "email"       "phone"       "credit_card" "ip_address" 
-grepl(pats$ssn, "123-45-6789")
+#>  [1] "ssn"             "email"           "phone"           "credit_card"    
+#>  [5] "ip_address_v4"   "ip_address_v6"   "phone_intl"      "iban"           
+#>  [9] "dob"             "mac_address"     "us_passport"     "drivers_license"
+#> [13] "itin"            "vin"            
+grepl(pats$ssn, "123-45-6789", perl = TRUE)
 #> [1] TRUE
 ```

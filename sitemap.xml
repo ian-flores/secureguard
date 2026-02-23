@@ -25,6 +25,7 @@
 <url><loc>https://ian-flores.github.io/secureguard/reference/guard_code_dependencies.html</loc></url>
 <url><loc>https://ian-flores.github.io/secureguard/reference/guard_input_pii.html</loc></url>
 <url><loc>https://ian-flores.github.io/secureguard/reference/guard_output.html</loc></url>
+<url><loc>https://ian-flores.github.io/secureguard/reference/guard_output_entropy.html</loc></url>
 <url><loc>https://ian-flores.github.io/secureguard/reference/guard_output_pii.html</loc></url>
 <url><loc>https://ian-flores.github.io/secureguard/reference/guard_output_secrets.html</loc></url>
 <url><loc>https://ian-flores.github.io/secureguard/reference/guard_output_size.html</loc></url>
@@ -34,6 +35,7 @@
 <url><loc>https://ian-flores.github.io/secureguard/reference/guardrail_result_class.html</loc></url>
 <url><loc>https://ian-flores.github.io/secureguard/reference/index.html</loc></url>
 <url><loc>https://ian-flores.github.io/secureguard/reference/injection_patterns.html</loc></url>
+<url><loc>https://ian-flores.github.io/secureguard/reference/is_high_entropy.html</loc></url>
 <url><loc>https://ian-flores.github.io/secureguard/reference/new_guardrail.html</loc></url>
 <url><loc>https://ian-flores.github.io/secureguard/reference/output_to_text.html</loc></url>
 <url><loc>https://ian-flores.github.io/secureguard/reference/parse_code.html</loc></url>
@@ -43,6 +45,7 @@
 <url><loc>https://ian-flores.github.io/secureguard/reference/secure_pipeline.html</loc></url>
 <url><loc>https://ian-flores.github.io/secureguard/reference/secureguard-package.html</loc></url>
 <url><loc>https://ian-flores.github.io/secureguard/reference/secureguard_class.html</loc></url>
+<url><loc>https://ian-flores.github.io/secureguard/reference/shannon_entropy.html</loc></url>
 <url><loc>https://ian-flores.github.io/secureguard/reference/walk_ast.html</loc></url>
 <url><loc>https://ian-flores.github.io/secureguard/reference/walk_code.html</loc></url>
 </urlset>

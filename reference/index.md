@@ -55,6 +55,8 @@ Filter and validate execution output
   : Output size guardrail
 - [`guard_output_secrets()`](https://ian-flores.github.io/secureguard/reference/guard_output_secrets.md)
   : Secret output guardrail
+- [`guard_output_entropy()`](https://ian-flores.github.io/secureguard/reference/guard_output_entropy.md)
+  : Entropy output guardrail
 - [`output_to_text()`](https://ian-flores.github.io/secureguard/reference/output_to_text.md)
   : Convert an R object to scannable text
 
@@ -91,6 +93,10 @@ Regex pattern collections for detection
   : Prompt injection detection patterns
 - [`detect_injection()`](https://ian-flores.github.io/secureguard/reference/detect_injection.md)
   : Detect prompt injection attempts
+- [`shannon_entropy()`](https://ian-flores.github.io/secureguard/reference/shannon_entropy.md)
+  : Shannon entropy of a string
+- [`is_high_entropy()`](https://ian-flores.github.io/secureguard/reference/is_high_entropy.md)
+  : Check if a string has high entropy
 
 ## Integration
 

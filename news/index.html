@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">secureguard</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -38,6 +38,29 @@
       <small>Source: <a href="https://github.com/ian-flores/secureguard/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.2.0" id="secureguard-020">secureguard 0.2.0<a class="anchor" aria-label="anchor" href="#secureguard-020"></a></h2>
+<div class="section level3">
+<h3 id="pii-detection-0-2-0">PII detection<a class="anchor" aria-label="anchor" href="#pii-detection-0-2-0"></a></h3>
+<ul><li>Expanded from 5 to 14 PII types: added <code>ip_address_v6</code>, <code>phone_intl</code> (E.164), <code>iban</code>, <code>dob</code>, <code>mac_address</code>, <code>us_passport</code>, <code>drivers_license</code>, <code>itin</code>, and <code>vin</code>.</li>
+<li>Upgraded <code>ssn</code> pattern to exclude invalid area numbers (000, 666, 900-999), group (00), and serial (0000); now supports no-dash format.</li>
+<li>Upgraded <code>credit_card</code> pattern with card-type-aware prefixes (Visa/MC/Amex/Discover) and Luhn checksum validation to reduce false positives.</li>
+<li>Renamed <code>ip_address</code> to <code>ip_address_v4</code> for clarity. <strong>Breaking change.</strong>
+</li>
+<li>Keyword-contextual patterns (<code>dob</code>, <code>us_passport</code>, <code>drivers_license</code>, <code>vin</code>) require keyword proximity to reduce false positives.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="secret-detection-0-2-0">Secret detection<a class="anchor" aria-label="anchor" href="#secret-detection-0-2-0"></a></h3>
+<ul><li>Expanded from 6 to 51 secret types across 10 categories: Cloud, SaaS/Messaging, Payment, Package Registries, Version Control, AI/ML, E-commerce, Infrastructure, Database, and Social.</li>
+<li>New patterns include AWS secret keys, Stripe/Square/PayPal tokens, Slack/Discord tokens, OpenAI/Anthropic API keys, Shopify tokens, JWTs, database connection strings, and more.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="entropy-detection-0-2-0">Entropy detection<a class="anchor" aria-label="anchor" href="#entropy-detection-0-2-0"></a></h3>
+<ul><li>New <code><a href="../reference/shannon_entropy.html">shannon_entropy()</a></code> calculates Shannon entropy (bits) of a string.</li>
+<li>New <code><a href="../reference/is_high_entropy.html">is_high_entropy()</a></code> detects suspiciously high-entropy strings with separate thresholds for base64-like and hex-like character classes.</li>
+<li>New <code><a href="../reference/guard_output_entropy.html">guard_output_entropy()</a></code> output guardrail scans output for high-entropy substrings with block/redact/warn modes.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.0" id="secureguard-010">secureguard 0.1.0<a class="anchor" aria-label="anchor" href="#secureguard-010"></a></h2>
 <ul><li>Initial CRAN release.</li>

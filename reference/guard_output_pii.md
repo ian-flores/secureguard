@@ -15,7 +15,9 @@ guard_output_pii(detect = NULL, action = c("block", "redact", "warn"))
 
   Character vector of PII types to detect. Defaults to all types from
   [`pii_patterns()`](https://ian-flores.github.io/secureguard/reference/pii_patterns.md):
-  `"ssn"`, `"email"`, `"phone"`, `"credit_card"`, `"ip_address"`.
+  `"ssn"`, `"email"`, `"phone"`, `"credit_card"`, `"ip_address_v4"`,
+  `"ip_address_v6"`, `"phone_intl"`, `"iban"`, `"dob"`, `"mac_address"`,
+  `"us_passport"`, `"drivers_license"`, `"itin"`, `"vin"`.
 
 - action:
 
