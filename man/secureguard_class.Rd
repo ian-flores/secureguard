@@ -21,6 +21,9 @@ secureguard_class(
 
 \item{description}{Character(1). Human-readable description.}
 }
+\value{
+An S7 object of class \code{secureguard}.
+}
 \description{
 An S7 value type representing a guardrail. Prefer the \verb{guard_*()} factory
 functions for end-user guardrails.

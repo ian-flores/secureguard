@@ -21,6 +21,9 @@ guardrail_result_class(
 \item{details}{Named list of additional information (e.g. matched patterns,
 redacted text).}
 }
+\value{
+An S7 object of class \code{guardrail_result}.
+}
 \description{
 An S7 value type representing a structured return value from guardrail checks.
 }

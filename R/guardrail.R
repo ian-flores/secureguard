@@ -8,6 +8,7 @@
 #' @param check_fn A function taking a single argument and returning a
 #'   [guardrail_result()].
 #' @param description Character(1). Human-readable description.
+#' @return An S7 object of class `secureguard`.
 #' @export
 #' @examples
 #' # Prefer new_guardrail() or guard_*() factories over direct construction
@@ -78,6 +79,7 @@ new_guardrail <- function(name, type, check_fn, description = "") {
 #' @param warnings Character vector of advisory warnings.
 #' @param details Named list of additional information (e.g. matched patterns,
 #'   redacted text).
+#' @return An S7 object of class `guardrail_result`.
 #' @export
 #' @examples
 #' # Prefer guardrail_result() constructor over direct construction
@@ -297,7 +299,6 @@ check_all <- function(guardrails, x) {
   )
 }
 
-#' @export
 method(print, secureguard_class) <- function(x, ...) {
   cli_text("<secureguard> {.strong {x@name}} ({x@type})")
   if (nzchar(x@description)) {
@@ -306,7 +307,6 @@ method(print, secureguard_class) <- function(x, ...) {
   invisible(x)
 }
 
-#' @export
 method(print, guardrail_result_class) <- function(x, ...) {
   status <- if (x@pass) "PASS" else "FAIL"
   cli_text("<guardrail_result> {status}")

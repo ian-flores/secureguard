@@ -1,16 +1,17 @@
 Package: secureguard
-Title: Input, Code, and Output Guardrails for R LLM Agents
+Title: Input, Code, and Output Guardrails for Large Language Model Agents
 Version: 0.1.0
 Authors@R:
-    person("Ian", "Flores Siaca", , "iflores.siaca@hey.com", role = c("aut", "cre"))
-Description: Composable guardrails for large language model (LLM) agent
-    workflows in R. Provides three defense layers -- input validation
-    (prompt injection detection, topic scoping, PII filtering), code
-    analysis (AST-based function blocking, complexity limits, dependency
-    control, data flow restrictions), and output filtering (PII redaction,
-    secret detection, size limits). All analysis is local with zero
-    external API calls. Integrates with 'securer' pre-execution hooks for
-    seamless sandboxed execution.
+    person("Ian", "Flores Siaca", , "iflores.siaca@hey.com", role = c("aut", "cre", "cph"))
+Description: Composable guardrails for Large Language Model (LLM) agent
+    workflows. Provides three defense layers -- input validation
+    (prompt injection detection, topic scoping, Personally Identifiable
+    Information (PII) filtering), code analysis (Abstract Syntax Tree (AST)
+    based function blocking, complexity limits, dependency control, data
+    flow restrictions), and output filtering (PII redaction, secret
+    detection, size limits). All analysis is local with zero external API
+    calls. Integrates with 'securer' pre-execution hooks for seamless
+    sandboxed execution.
 License: MIT + file LICENSE
 URL: https://ian-flores.github.io/secureguard/,
     https://github.com/ian-flores/secureguard
@@ -26,9 +27,10 @@ Suggests:
     testthat (>= 3.0.0),
     withr,
     knitr,
-    rmarkdown
-Remotes:
-    ian-flores/securer
+    rmarkdown,
+    dplyr,
+    processx,
+    pak
 Config/testthat/edition: 3
 Encoding: UTF-8
 Language: en-US

@@ -56,14 +56,14 @@ test_that("env_access can be allowed", {
 
 test_that("download.file is blocked", {
   g <- guard_code_dataflow(block_network = TRUE)
-  result <- run_guardrail(g, "download.file('http://example.com', 'out.txt')")
+  result <- run_guardrail(g, "download.file('https://example.com', 'out.txt')")
   expect_false(result@pass)
   expect_true("network" %in% result@details$categories)
 })
 
 test_that("url() is blocked", {
   g <- guard_code_dataflow(block_network = TRUE)
-  result <- run_guardrail(g, "con <- url('http://example.com')")
+  result <- run_guardrail(g, "con <- url('https://example.com')")
   expect_false(result@pass)
 })
 
@@ -75,26 +75,26 @@ test_that("socketConnection is blocked", {
 
 test_that("curl:: namespace is blocked", {
   g <- guard_code_dataflow(block_network = TRUE)
-  result <- run_guardrail(g, "curl::curl_fetch_memory('http://example.com')")
+  result <- run_guardrail(g, "curl::curl_fetch_memory('https://example.com')")
   expect_false(result@pass)
   expect_true("network" %in% result@details$categories)
 })
 
 test_that("httr:: namespace is blocked", {
   g <- guard_code_dataflow(block_network = TRUE)
-  result <- run_guardrail(g, "httr::GET('http://example.com')")
+  result <- run_guardrail(g, "httr::GET('https://example.com')")
   expect_false(result@pass)
 })
 
 test_that("httr2:: namespace is blocked", {
   g <- guard_code_dataflow(block_network = TRUE)
-  result <- run_guardrail(g, "httr2::request('http://example.com')")
+  result <- run_guardrail(g, "httr2::request('https://example.com')")
   expect_false(result@pass)
 })
 
 test_that("network can be allowed", {
   g <- guard_code_dataflow(block_network = FALSE)
-  result <- run_guardrail(g, "download.file('http://example.com', 'out.txt')")
+  result <- run_guardrail(g, "download.file('https://example.com', 'out.txt')")
   expect_true(result@pass)
 })
 
@@ -174,7 +174,7 @@ test_that("file_read allowed by default", {
 
 test_that("multiple categories detected together", {
   g <- guard_code_dataflow()
-  code <- "Sys.getenv('KEY')\ndownload.file('http://example.com', 'out')"
+  code <- "Sys.getenv('KEY')\ndownload.file('https://example.com', 'out')"
   result <- run_guardrail(g, code)
   expect_false(result@pass)
   expect_true("env_access" %in% result@details$categories)

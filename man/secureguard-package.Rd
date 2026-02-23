@@ -4,9 +4,9 @@
 \name{secureguard-package}
 \alias{secureguard}
 \alias{secureguard-package}
-\title{secureguard: Input, Code, and Output Guardrails for R LLM Agents}
+\title{secureguard: Input, Code, and Output Guardrails for Large Language Model Agents}
 \description{
-Composable guardrails for large language model (LLM) agent workflows in R. Provides three defense layers -- input validation (prompt injection detection, topic scoping, PII filtering), code analysis (AST-based function blocking, complexity limits, dependency control, data flow restrictions), and output filtering (PII redaction, secret detection, size limits). All analysis is local with zero external API calls. Integrates with 'securer' pre-execution hooks for seamless sandboxed execution.
+Composable guardrails for Large Language Model (LLM) agent workflows. Provides three defense layers -- input validation (prompt injection detection, topic scoping, Personally Identifiable Information (PII) filtering), code analysis (Abstract Syntax Tree (AST) based function blocking, complexity limits, dependency control, data flow restrictions), and output filtering (PII redaction, secret detection, size limits). All analysis is local with zero external API calls. Integrates with 'securer' pre-execution hooks for seamless sandboxed execution.
 }
 \seealso{
 Useful links:
@@ -18,7 +18,7 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Ian Flores Siaca \email{iflores.siaca@hey.com}
+\strong{Maintainer}: Ian Flores Siaca \email{iflores.siaca@hey.com} [copyright holder]
 
 }
 \keyword{internal}
