@@ -33,6 +33,10 @@ guardrail_result_class(
   Named list of additional information (e.g. matched patterns, redacted
   text).
 
+## Value
+
+An S7 object of class `guardrail_result`.
+
 ## Examples
 
 ``` r

@@ -26,7 +26,8 @@ guard_code_analysis(
 
   Character vector of package prefixes to allow even if a function from
   that package appears in `blocked_functions`. For example,
-  `allow_namespaces = "dplyr"` would allow `dplyr::filter`.
+  `allow_namespaces = "dplyr"` would allow
+  [`dplyr::filter`](https://dplyr.tidyverse.org/reference/filter.html).
 
 - detect_indirect:
 

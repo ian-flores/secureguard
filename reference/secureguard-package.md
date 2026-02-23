@@ -1,9 +1,10 @@
-# secureguard: Input, Code, and Output Guardrails for R LLM Agents
+# secureguard: Input, Code, and Output Guardrails for Large Language Model Agents
 
-Composable guardrails for large language model (LLM) agent workflows in
-R. Provides three defense layers – input validation (prompt injection
-detection, topic scoping, PII filtering), code analysis (AST-based
-function blocking, complexity limits, dependency control, data flow
+Composable guardrails for Large Language Model (LLM) agent workflows.
+Provides three defense layers – input validation (prompt injection
+detection, topic scoping, Personally Identifiable Information (PII)
+filtering), code analysis (Abstract Syntax Tree (AST) based function
+blocking, complexity limits, dependency control, data flow
 restrictions), and output filtering (PII redaction, secret detection,
 size limits). All analysis is local with zero external API calls.
 Integrates with 'securer' pre-execution hooks for seamless sandboxed
@@ -21,4 +22,5 @@ Useful links:
 
 ## Author
 
-**Maintainer**: Ian Flores Siaca <iflores.siaca@hey.com>
+**Maintainer**: Ian Flores Siaca <iflores.siaca@hey.com> \[copyright
+holder\]

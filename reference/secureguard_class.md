@@ -33,6 +33,10 @@ secureguard_class(
 
   Character(1). Human-readable description.
 
+## Value
+
+An S7 object of class `secureguard`.
+
 ## Examples
 
 ``` r

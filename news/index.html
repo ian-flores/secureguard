@@ -41,8 +41,55 @@
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.0" id="secureguard-010">secureguard 0.1.0<a class="anchor" aria-label="anchor" href="#secureguard-010"></a></h2>
 <ul><li>Initial CRAN release.</li>
+</ul><div class="section level3">
+<h3 id="input-guardrails-0-1-0">Input guardrails<a class="anchor" aria-label="anchor" href="#input-guardrails-0-1-0"></a></h3>
+<ul><li>
+<code><a href="../reference/guard_prompt_injection.html">guard_prompt_injection()</a></code> detects common prompt injection patterns using regex-based analysis.</li>
+<li>
+<code><a href="../reference/guard_topic_scope.html">guard_topic_scope()</a></code> enforces keyword-based topic allow/block lists.</li>
+<li>
+<code><a href="../reference/guard_input_pii.html">guard_input_pii()</a></code> detects personally identifiable information in prompts.</li>
 </ul></div>
-  </main></div>
+<div class="section level3">
+<h3 id="code-guardrails-0-1-0">Code guardrails<a class="anchor" aria-label="anchor" href="#code-guardrails-0-1-0"></a></h3>
+<ul><li>
+<code><a href="../reference/guard_code_analysis.html">guard_code_analysis()</a></code> blocks dangerous function calls via AST inspection.</li>
+<li>
+<code><a href="../reference/guard_code_complexity.html">guard_code_complexity()</a></code> enforces depth, call count, and expression limits.</li>
+<li>
+<code><a href="../reference/guard_code_dependencies.html">guard_code_dependencies()</a></code> restricts allowed/blocked package namespaces.</li>
+<li>
+<code><a href="../reference/guard_code_dataflow.html">guard_code_dataflow()</a></code> detects environment access, network, file read/write patterns.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="output-guardrails-0-1-0">Output guardrails<a class="anchor" aria-label="anchor" href="#output-guardrails-0-1-0"></a></h3>
+<ul><li>
+<code><a href="../reference/guard_output_pii.html">guard_output_pii()</a></code> detects and optionally redacts PII in output.</li>
+<li>
+<code><a href="../reference/guard_output_secrets.html">guard_output_secrets()</a></code> detects and optionally redacts secrets and credentials.</li>
+<li>
+<code><a href="../reference/guard_output_size.html">guard_output_size()</a></code> enforces character, line, and element size limits.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="core-0-1-0">Core<a class="anchor" aria-label="anchor" href="#core-0-1-0"></a></h3>
+<ul><li>
+<code><a href="../reference/new_guardrail.html">new_guardrail()</a></code> and <code>secureguard_class</code> for creating guardrail objects.</li>
+<li>
+<code><a href="../reference/guardrail_result.html">guardrail_result()</a></code> for structured check results.</li>
+<li>
+<code><a href="../reference/compose_guardrails.html">compose_guardrails()</a></code> combines multiple same-type guardrails.</li>
+<li>
+<code><a href="../reference/run_guardrail.html">run_guardrail()</a></code> and <code><a href="../reference/check_all.html">check_all()</a></code> for executing guardrails.</li>
+<li>
+<code><a href="../reference/as_pre_execute_hook.html">as_pre_execute_hook()</a></code> converts code guardrails to ‘securer’ hooks.</li>
+<li>
+<code><a href="../reference/guard_output.html">guard_output()</a></code> runs output guardrails with optional redaction.</li>
+<li>
+<code><a href="../reference/secure_pipeline.html">secure_pipeline()</a></code> bundles input, code, and output guardrails.</li>
+</ul></div>
+</div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">
