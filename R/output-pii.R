@@ -31,7 +31,8 @@ output_to_text <- function(x) {
 #'
 #' @param detect Character vector of PII types to detect. Defaults to all types
 #'   from [pii_patterns()]: `"ssn"`, `"email"`, `"phone"`, `"credit_card"`,
-#'   `"ip_address"`.
+#'   `"ip_address_v4"`, `"ip_address_v6"`, `"phone_intl"`, `"iban"`, `"dob"`,
+#'   `"mac_address"`, `"us_passport"`, `"drivers_license"`, `"itin"`, `"vin"`.
 #' @param action Character(1). What to do when PII is found:
 #'   - `"block"` (default): fail the check.
 #'   - `"redact"`: pass but replace PII with `[REDACTED_SSN]` etc.

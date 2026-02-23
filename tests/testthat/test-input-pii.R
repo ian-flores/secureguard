@@ -95,11 +95,11 @@ test_that("guard_input_pii respects custom detect types", {
   expect_true(r2@pass)
 })
 
-test_that("guard_input_pii detects ip_address when requested", {
-  g <- guard_input_pii(detect = c("ssn", "ip_address"))
+test_that("guard_input_pii detects ip_address_v4 when requested", {
+  g <- guard_input_pii(detect = c("ssn", "ip_address_v4"))
   r <- run_guardrail(g, "Server at 192.168.1.1")
   expect_false(r@pass)
-  expect_match(r@reason, "ip_address")
+  expect_match(r@reason, "ip_address_v4")
 })
 
 # -- Validation --
@@ -117,7 +117,8 @@ test_that("guard_input_pii rejects non-string input at runtime", {
 
 test_that("guard_input_pii match counts are correct", {
   g <- guard_input_pii()
-  r <- run_guardrail(g, "SSN1: 123-45-6789, SSN2: 987-65-4321")
+  # Use two valid SSNs (987-65-4321 is now rejected as 9XX area is ITIN range)
+  r <- run_guardrail(g, "SSN1: 123-45-6789, SSN2: 234-56-7890")
   expect_false(r@pass)
   expect_length(r@details$matches$ssn, 2L)
   expect_match(r@reason, "2")

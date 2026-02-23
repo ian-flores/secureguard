@@ -8,7 +8,9 @@ pii_patterns()
 }
 \value{
 A named list of character(1) regex patterns. Names: \code{ssn}, \code{email},
-\code{phone}, \code{credit_card}, \code{ip_address}.
+\code{phone}, \code{credit_card}, \code{ip_address_v4}, \code{ip_address_v6}, \code{phone_intl},
+\code{iban}, \code{dob}, \code{mac_address}, \code{us_passport}, \code{drivers_license}, \code{itin},
+\code{vin}.
 }
 \description{
 Returns a named list of regex patterns for detecting personally identifiable
@@ -17,6 +19,6 @@ information (PII) in text.
 \examples{
 pats <- pii_patterns()
 names(pats)
-grepl(pats$ssn, "123-45-6789")
+grepl(pats$ssn, "123-45-6789", perl = TRUE)
 }
 \keyword{internal}

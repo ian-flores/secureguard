@@ -11,7 +11,9 @@ detect_pii(text, types = NULL)
 
 \item{types}{Character vector of PII types to check. Defaults to all
 available types from \code{\link[=pii_patterns]{pii_patterns()}}. Valid values: \code{"ssn"}, \code{"email"},
-\code{"phone"}, \code{"credit_card"}, \code{"ip_address"}.}
+\code{"phone"}, \code{"credit_card"}, \code{"ip_address_v4"}, \code{"ip_address_v6"},
+\code{"phone_intl"}, \code{"iban"}, \code{"dob"}, \code{"mac_address"}, \code{"us_passport"},
+\code{"drivers_license"}, \code{"itin"}, \code{"vin"}.}
 }
 \value{
 A named list where each element is a character vector of matches

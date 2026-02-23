@@ -9,7 +9,8 @@ guard_output_pii(detect = NULL, action = c("block", "redact", "warn"))
 \arguments{
 \item{detect}{Character vector of PII types to detect. Defaults to all types
 from \code{\link[=pii_patterns]{pii_patterns()}}: \code{"ssn"}, \code{"email"}, \code{"phone"}, \code{"credit_card"},
-\code{"ip_address"}.}
+\code{"ip_address_v4"}, \code{"ip_address_v6"}, \code{"phone_intl"}, \code{"iban"}, \code{"dob"},
+\code{"mac_address"}, \code{"us_passport"}, \code{"drivers_license"}, \code{"itin"}, \code{"vin"}.}
 
 \item{action}{Character(1). What to do when PII is found:
 \itemize{
