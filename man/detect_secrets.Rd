@@ -10,8 +10,8 @@ detect_secrets(text, types = NULL)
 \item{text}{Character(1). The text to scan.}
 
 \item{types}{Character vector of secret types to check. Defaults to all
-available types from \code{\link[=secret_patterns]{secret_patterns()}}. Valid values: \code{"api_key"},
-\code{"aws_key"}, \code{"password"}, \code{"token"}, \code{"private_key"}, \code{"github_token"}.}
+available types from \code{\link[=secret_patterns]{secret_patterns()}}. See \code{\link[=secret_patterns]{secret_patterns()}} for the
+full list of ~40 supported types.}
 }
 \value{
 A named list where each element is a character vector of matches

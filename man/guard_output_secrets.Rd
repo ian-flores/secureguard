@@ -9,7 +9,22 @@ guard_output_secrets(detect = NULL, action = c("block", "redact", "warn"))
 \arguments{
 \item{detect}{Character vector of secret types to detect. Defaults to all
 types from \code{\link[=secret_patterns]{secret_patterns()}}: \code{"api_key"}, \code{"aws_key"}, \code{"password"},
-\code{"token"}, \code{"private_key"}, \code{"github_token"}.}
+\code{"token"}, \code{"private_key"}, \code{"github_token"}, \code{"aws_secret_key"},
+\code{"gcp_api_key"}, \code{"gcp_service_account"}, \code{"google_oauth_token"},
+\code{"azure_client_secret"}, \code{"alibaba_access_key"}, \code{"digitalocean_token"},
+\code{"heroku_api_key"}, \code{"slack_bot_token"}, \code{"slack_user_token"},
+\code{"slack_webhook"}, \code{"discord_token"}, \code{"twilio_api_key"},
+\code{"sendgrid_api_key"}, \code{"mailgun_api_key"}, \code{"mailchimp_api_key"},
+\code{"stripe_api_key"}, \code{"square_access_token"}, \code{"square_oauth_secret"},
+\code{"paypal_braintree_token"}, \code{"plaid_api_token"}, \code{"npm_token"},
+\code{"pypi_token"}, \code{"nuget_api_key"}, \code{"rubygems_api_key"},
+\code{"github_fine_grained_pat"}, \code{"gitlab_pat"}, \code{"gitlab_deploy_token"},
+\code{"bitbucket_app_password"}, \code{"openai_api_key"}, \code{"anthropic_api_key"},
+\code{"anthropic_admin_key"}, \code{"shopify_access_token"}, \code{"shopify_secret"},
+\code{"shopify_custom_app"}, \code{"shopify_private_app"}, \code{"jwt"},
+\code{"cloudinary_url"}, \code{"firebase_url"}, \code{"postgres_conn"},
+\code{"mysql_conn"}, \code{"mongodb_conn"}, \code{"redis_conn"},
+\code{"facebook_access_token"}, \code{"amazon_mws_token"}.}
 
 \item{action}{Character(1). What to do when secrets are found:
 \itemize{

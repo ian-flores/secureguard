@@ -7,12 +7,13 @@
 secret_patterns()
 }
 \value{
-A named list of character(1) regex patterns. Names: \code{api_key},
-\code{aws_key}, \code{password}, \code{token}, \code{private_key}, \code{github_token}.
+A named list of character(1) regex patterns.
 }
 \description{
 Returns a named list of regex patterns for detecting secrets and credentials
-in text.
+in text. Covers ~40 secret types across cloud providers, SaaS platforms,
+payment processors, package registries, version control, AI/ML services,
+e-commerce, infrastructure, databases, and social platforms.
 }
 \examples{
 pats <- secret_patterns()
