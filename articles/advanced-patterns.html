@@ -70,23 +70,18 @@
 <div class="section level2">
 <h2 id="what-this-vignette-covers">What This Vignette Covers<a class="anchor" aria-label="anchor" href="#what-this-vignette-covers"></a>
 </h2>
-<p>The getting-started vignette (<code><a href="../articles/secureguard.html">vignette("secureguard")</a></code>)
-introduces the three defense layers and the built-in guardrails. This
-vignette goes deeper. It covers building your own guardrails for
-domain-specific threats, composing guardrails into layered defenses with
-fine-grained control over pass/fail logic, assembling full pipelines
-that protect every stage of an agent turn, and integrating with securer
-for sandboxed execution.</p>
-<p>If you are new to secureguard, start with
-<code><a href="../articles/secureguard.html">vignette("secureguard")</a></code> first.</p>
+<p><code><a href="../articles/secureguard.html">vignette("secureguard")</a></code> introduces the defense layers
+and built-in guardrails. This vignette covers building custom guardrails
+for domain-specific threats, composing guardrails with pass/fail logic,
+assembling pipelines, and wiring everything into securer for sandboxed
+execution.</p>
 </div>
 <div class="section level2">
 <h2 id="how-a-guardrail-pipeline-works">How a Guardrail Pipeline Works<a class="anchor" aria-label="anchor" href="#how-a-guardrail-pipeline-works"></a>
 </h2>
-<p>Before diving into custom guardrails, it helps to see how the pieces
-fit together in a complete agent workflow. The following diagram shows
-the flow of data through a <code><a href="../reference/secure_pipeline.html">secure_pipeline()</a></code> – the
-recommended way to wire guardrails into an agent loop:</p>
+<p>The following diagram shows the flow of data through a
+<code><a href="../reference/secure_pipeline.html">secure_pipeline()</a></code>, the recommended way to wire guardrails
+into an agent loop:</p>
 <pre><code>         User prompt
               |
               v
@@ -144,29 +139,27 @@ computation.</p>
 <div class="section level2">
 <h2 id="creating-custom-guardrails">Creating Custom Guardrails<a class="anchor" aria-label="anchor" href="#creating-custom-guardrails"></a>
 </h2>
-<p>The built-in guardrails cover the most common threats: prompt
-injection, dangerous function calls, PII leakage, and secret exposure.
-But every application has domain-specific risks that generic guardrails
-cannot anticipate. An agent that generates SQL needs SQL injection
-detection. A healthcare application needs HIPAA-specific PII patterns. A
-financial tool needs checks for account numbers and routing numbers.</p>
-<p>secureguard is designed for extensibility. Every guardrail – built-in
-or custom – is an S3 object of class <code>secureguard</code> with four
-properties: <code>name</code>, <code>type</code>, <code>check_fn</code>,
-and <code>description</code>. The <code><a href="../reference/new_guardrail.html">new_guardrail()</a></code>
-constructor validates these and returns a guardrail you can use with
-<code><a href="../reference/run_guardrail.html">run_guardrail()</a></code>, <code><a href="../reference/compose_guardrails.html">compose_guardrails()</a></code>, and
-<code><a href="../reference/secure_pipeline.html">secure_pipeline()</a></code>. Custom guardrails compose seamlessly
-with built-in ones because they share the same interface.</p>
+<p>The built-in guardrails cover common threats: prompt injection,
+dangerous function calls, PII leakage, and secret exposure. But every
+application has domain-specific risks that generic guardrails will not
+catch. An agent that generates SQL needs SQL injection detection. A
+healthcare application needs HIPAA-specific PII patterns. A financial
+tool needs checks for account numbers and routing numbers.</p>
+<p>Every guardrail, built-in or custom, is an S3 object of class
+<code>secureguard</code> with four properties: <code>name</code>,
+<code>type</code>, <code>check_fn</code>, and <code>description</code>.
+The <code><a href="../reference/new_guardrail.html">new_guardrail()</a></code> constructor validates these and returns
+a guardrail you can use with <code><a href="../reference/run_guardrail.html">run_guardrail()</a></code>,
+<code><a href="../reference/compose_guardrails.html">compose_guardrails()</a></code>, and <code><a href="../reference/secure_pipeline.html">secure_pipeline()</a></code>.
+Custom guardrails work with built-in ones because they share the same
+interface.</p>
 <div class="section level3">
 <h3 id="a-sql-injection-detector">A SQL Injection Detector<a class="anchor" aria-label="anchor" href="#a-sql-injection-detector"></a>
 </h3>
-<p>SQL injection is one of the oldest and most well-understood attack
-vectors in software. When an LLM generates SQL queries, the risk is
-amplified: the model may produce syntactically valid but semantically
-dangerous queries, especially if the user’s prompt contains adversarial
-patterns. A purpose-built guardrail can catch these patterns before any
-query reaches a database.</p>
+<p>When an LLM generates SQL queries, it may produce syntactically valid
+but semantically dangerous output, especially if the user’s prompt
+contains adversarial patterns. A guardrail can catch these patterns
+before any query reaches a database.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ian-flores.github.io/secureguard/">secureguard</a></span><span class="op">)</span></span>
 <span></span>
@@ -284,21 +277,19 @@ named list of metadata).</li>
 <div class="section level2">
 <h2 id="composing-guardrails">Composing Guardrails<a class="anchor" aria-label="anchor" href="#composing-guardrails"></a>
 </h2>
-<p>Individual guardrails are building blocks. In practice, you almost
-always want to run multiple guardrails together – checking both for
-dangerous functions and excessive complexity, or detecting both prompt
-injection and off-topic prompts. secureguard provides two composition
-mechanisms that make this natural.</p>
+<p>In practice, you almost always want to run multiple guardrails
+together: checking for dangerous functions and excessive complexity, or
+detecting both prompt injection and off-topic prompts. secureguard
+provides two ways to combine them.</p>
 <div class="section level3">
 <h3 id="compose_guardrails-same-type-composition">compose_guardrails(): Same-Type Composition<a class="anchor" aria-label="anchor" href="#compose_guardrails-same-type-composition"></a>
 </h3>
 <p><code><a href="../reference/compose_guardrails.html">compose_guardrails()</a></code> merges multiple guardrails of the
 <strong>same type</strong> into a single composite guardrail. The result
-is itself a guardrail, which means you can pass it to
+is itself a guardrail, so you can pass it to
 <code><a href="../reference/run_guardrail.html">run_guardrail()</a></code>, nest it inside another composition, or use
-it in a pipeline. This is useful when you want to treat a group of
-checks as one unit – for example, bundling all your code checks into a
-single “strict code” guardrail.</p>
+it in a pipeline. Bundle all your code checks into a single “strict
+code” guardrail to treat them as one unit.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Compose three code guardrails -- ALL must pass (default)</span></span>
 <span><span class="va">strict_code</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compose_guardrails.html">compose_guardrails</a></span><span class="op">(</span></span>
@@ -333,8 +324,8 @@ single “strict code” guardrail.</p>
 </h3>
 <p>The default <code>mode = "all"</code> is the right choice for
 security checks: all guards must pass. But sometimes you need the
-opposite logic – an allowlist where the input is acceptable if it
-matches <strong>any</strong> of several categories. With
+opposite logic: an allowlist where the input is acceptable if it matches
+<strong>any</strong> of several categories. With
 <code>mode = "any"</code>, the composite passes if at least one child
 guardrail passes:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
@@ -417,9 +408,8 @@ diagnostics.</p>
 <p>Individual guardrails and compositions are useful for targeted
 checks, but a production agent needs all three defense layers working
 together. A pipeline bundles guardrails for input, code, and output into
-a single object with dedicated methods for each stage. This ensures
-consistent configuration – you define your security policy once and
-apply it uniformly across every agent turn.</p>
+one object with methods for each stage. You define your security policy
+once and apply it to every agent turn.</p>
 <div class="section level3">
 <h3 id="defining-a-pipeline">Defining a Pipeline<a class="anchor" aria-label="anchor" href="#defining-a-pipeline"></a>
 </h3>
@@ -471,12 +461,11 @@ apply it uniformly across every agent turn.</p>
 <div class="section level3">
 <h3 id="pipeline-in-an-agent-loop">Pipeline in an Agent Loop<a class="anchor" aria-label="anchor" href="#pipeline-in-an-agent-loop"></a>
 </h3>
-<p>The three <code>check_*</code> methods are designed to be called
-sequentially in an agent loop. Each stage short-circuits on failure: if
+<p>Call the three <code>check_*</code> methods in sequence inside your
+agent loop. Each stage short-circuits on failure: if
 <code>check_input()</code> rejects the prompt, you skip the LLM call
-entirely, saving both time and cost. If <code>check_code()</code>
-rejects the generated code, you skip execution, preventing any side
-effects. Here is the complete pattern:</p>
+entirely. If <code>check_code()</code> rejects the generated code, you
+skip execution. Here is the complete pattern:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">process_turn</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">pipeline</span>, <span class="va">user_prompt</span>, <span class="va">llm_fn</span>, <span class="va">execute_fn</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="co"># 1. Input guardrails</span></span>
@@ -523,13 +512,10 @@ effects. Here is the complete pattern:</p>
 <div class="section level2">
 <h2 id="mixing-custom-and-built-in-guardrails">Mixing Custom and Built-In Guardrails<a class="anchor" aria-label="anchor" href="#mixing-custom-and-built-in-guardrails"></a>
 </h2>
-<p>One of the key design principles in secureguard is that custom and
-built-in guardrails share the same interface. This means custom
-guardrails compose seamlessly with built-in ones – you can mix them
-freely in <code><a href="../reference/compose_guardrails.html">compose_guardrails()</a></code>, <code><a href="../reference/check_all.html">check_all()</a></code>,
-and <code><a href="../reference/secure_pipeline.html">secure_pipeline()</a></code>. There is no special registration
-step or plugin system; if it is a <code>secureguard</code> object, it
-works everywhere:</p>
+<p>Custom and built-in guardrails share the same interface. You can mix
+them in <code><a href="../reference/compose_guardrails.html">compose_guardrails()</a></code>, <code><a href="../reference/check_all.html">check_all()</a></code>, and
+<code><a href="../reference/secure_pipeline.html">secure_pipeline()</a></code>. There is no registration step or plugin
+system; any <code>secureguard</code> object works everywhere:</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># The SQL injection guard from earlier alongside built-in input guards</span></span>
 <span><span class="va">input_guards</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compose_guardrails.html">compose_guardrails</a></span><span class="op">(</span></span>
@@ -558,15 +544,15 @@ works everywhere:</p>
 <div class="section level2">
 <h2 id="integration-with-securer">Integration with securer<a class="anchor" aria-label="anchor" href="#integration-with-securer"></a>
 </h2>
-<p>secureguard provides semantic analysis of code and outputs – it
-understands what the code does. <a href="https://github.com/ian-flores/securer" class="external-link">securer</a> provides
-OS-level sandboxing – it limits what the code <strong>can</strong> do,
-regardless of what it tries. Together they form two independent defense
-layers: secureguard catches known-dangerous patterns before execution,
-and securer contains unknown threats at the operating system level.</p>
-<p>securer is a suggested dependency – all of the patterns above work
-without it. The integration layer adds two capabilities: pre-execution
-hooks and output guarding after execution.</p>
+<p>secureguard analyzes code and outputs to decide whether they are
+safe. <a href="https://github.com/ian-flores/securer" class="external-link">securer</a>
+provides OS-level sandboxing that limits what the code
+<strong>can</strong> do, regardless of what it tries. secureguard
+catches known-dangerous patterns before execution; securer contains
+unknown threats at the operating system level.</p>
+<p>securer is a suggested dependency; all of the patterns above work
+without it. The integration adds two things: pre-execution hooks and
+output guarding after execution.</p>
 <div class="section level3">
 <h3 id="pre-execute-hooks">Pre-Execute Hooks<a class="anchor" aria-label="anchor" href="#pre-execute-hooks"></a>
 </h3>
@@ -645,18 +631,16 @@ guardrails:</p>
 <div class="section level2">
 <h2 id="advanced-composition-patterns">Advanced Composition Patterns<a class="anchor" aria-label="anchor" href="#advanced-composition-patterns"></a>
 </h2>
-<p>The patterns above cover the common case: apply the same guardrails
-uniformly to every request. In practice, you often need to vary
-guardrail strictness based on context – who the user is, where the
-request came from, and what level of trust is appropriate. The following
-patterns show how to build adaptive guardrail configurations.</p>
+<p>The patterns above apply the same guardrails to every request. In
+practice, you often need to vary strictness based on context: who the
+user is, where the request came from, and what level of trust is
+appropriate.</p>
 <div class="section level3">
 <h3 id="layered-sensitivity">Layered Sensitivity<a class="anchor" aria-label="anchor" href="#layered-sensitivity"></a>
 </h3>
-<p>Not all contexts require the same level of strictness. A
-public-facing chatbot is exposed to adversarial users and needs
+<p>A public-facing chatbot is exposed to adversarial users and needs
 high-sensitivity injection detection and tight topic scoping. An
-internal analytics tool used by trusted data scientists can afford lower
+internal analytics tool used by trusted data scientists can use lower
 sensitivity to avoid false positives on legitimate analytical
 prompts:</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
@@ -690,11 +674,9 @@ prompts:</p>
 <div class="section level3">
 <h3 id="graduated-code-restrictions">Graduated Code Restrictions<a class="anchor" aria-label="anchor" href="#graduated-code-restrictions"></a>
 </h3>
-<p>The same principle applies to code guardrails. A trusted internal
-user running vetted analysis scripts needs fewer restrictions than an
-untrusted external user whose prompts generate arbitrary code. By
-defining multiple guardrail configurations and selecting one based on
-context, you can balance security with usability:</p>
+<p>You can do the same with code guardrails. A trusted internal user
+running vetted analysis scripts needs fewer restrictions than an
+untrusted external user whose prompts generate arbitrary code:</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Trusted context: only block the most dangerous operations</span></span>
 <span><span class="va">trusted_code</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compose_guardrails.html">compose_guardrails</a></span><span class="op">(</span></span>
@@ -730,13 +712,12 @@ context, you can balance security with usability:</p>
 <div class="section level3">
 <h3 id="redact-vs-block-decision">Redact vs Block Decision<a class="anchor" aria-label="anchor" href="#redact-vs-block-decision"></a>
 </h3>
-<p>Not all sensitive data in output requires the same response. PII like
-social security numbers or patient records should block the entire
-response – partial disclosure is still a privacy violation. But API keys
-and tokens can often be redacted in place, preserving the useful parts
-of the response while removing the sensitive value. Output guardrails
+<p>PII like social security numbers or patient records should block the
+entire response; partial disclosure is still a privacy violation. API
+keys and tokens can often be redacted in place, keeping the useful parts
+of the response while replacing the sensitive value. Output guardrails
 support three actions (<code>"block"</code>, <code>"redact"</code>,
-<code>"warn"</code>) that let you make this distinction explicitly:</p>
+<code>"warn"</code>) for this:</p>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># PII blocks the output entirely</span></span>
 <span><span class="co"># Secrets get redacted so the response is still useful</span></span>
@@ -810,14 +791,12 @@ support three actions (<code>"block"</code>, <code>"redact"</code>,
 </tr>
 </tbody>
 </table>
-<p>The key design principle is that guardrails are composable values.
-Build small, focused guards that each address one threat. Compose them
-for your context using <code><a href="../reference/compose_guardrails.html">compose_guardrails()</a></code> or
-<code><a href="../reference/check_all.html">check_all()</a></code>. Assemble them into pipelines that protect
-every stage of an agent workflow. And when the built-in guardrails do
-not cover your domain, extend the system with
-<code><a href="../reference/new_guardrail.html">new_guardrail()</a></code> – custom guards compose identically to
-built-in ones.</p>
+<p>Build small guards that each target one threat. Combine them with
+<code><a href="../reference/compose_guardrails.html">compose_guardrails()</a></code> or <code><a href="../reference/check_all.html">check_all()</a></code>, and wire
+them into pipelines that check every stage of an agent workflow. When
+the built-in guardrails do not cover your domain, write your own with
+<code><a href="../reference/new_guardrail.html">new_guardrail()</a></code>. Custom guards and built-in guards have the
+same interface and compose the same way.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
