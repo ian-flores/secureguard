@@ -57,6 +57,7 @@ reference:
       - detect_pii
       - secret_patterns
       - detect_secrets
+      - detect_secrets_decoded
       - injection_patterns
       - detect_injection
       - shannon_entropy
