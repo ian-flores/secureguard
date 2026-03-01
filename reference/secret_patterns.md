@@ -46,7 +46,11 @@ names(pats)
 #> [45] "firebase_url"            "postgres_conn"          
 #> [47] "mysql_conn"              "mongodb_conn"           
 #> [49] "redis_conn"              "facebook_access_token"  
-#> [51] "amazon_mws_token"       
+#> [51] "amazon_mws_token"        "vault_token"            
+#> [53] "doppler_token"           "supabase_key"           
+#> [55] "vercel_token"            "datadog_api_key"        
+#> [57] "linear_api_key"          "railway_token"          
+#> [59] "planetscale_token"      
 grepl(pats$aws_key, "AKIAIOSFODNN7EXAMPLE")
 #> [1] TRUE
 ```

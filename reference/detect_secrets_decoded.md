@@ -1,11 +1,13 @@
-# Detect secrets in text
+# Detect secrets in text with decode-then-scan
 
-Scans text for secrets and credentials using regex patterns.
+Scans the original text plus base64-decoded and URL-decoded variants for
+secrets. This catches credentials that have been obfuscated via
+encoding.
 
 ## Usage
 
 ``` r
-detect_secrets(text, types = NULL)
+detect_secrets_decoded(text, types = NULL)
 ```
 
 ## Arguments
@@ -19,24 +21,23 @@ detect_secrets(text, types = NULL)
   Character vector of secret types to check. Defaults to all available
   types from
   [`secret_patterns()`](https://ian-flores.github.io/secureguard/reference/secret_patterns.md).
-  See
-  [`secret_patterns()`](https://ian-flores.github.io/secureguard/reference/secret_patterns.md)
-  for the full list of ~40 supported types.
 
 ## Value
 
 A named list where each element is a character vector of matches found
-for that secret type. Empty character vectors indicate no matches.
+for that secret type, de-duplicated across all decoded variants.
 
 ## Examples
 
 ``` r
-detect_secrets("API_KEY = 'sk_live_abc123def456ghi789jkl0'")
+# Detect a base64-encoded AWS key
+encoded <- base64enc::base64encode(charToRaw("AKIAIOSFODNN7EXAMPLE"))
+detect_secrets_decoded(encoded)
 #> $api_key
-#> [1] "API_KEY = 'sk_live_abc123def456ghi789jkl0"
+#> character(0)
 #> 
 #> $aws_key
-#> character(0)
+#> [1] "AKIAIOSFODNN7EXAMPLE"
 #> 
 #> $password
 #> character(0)
@@ -208,9 +209,5 @@ detect_secrets("API_KEY = 'sk_live_abc123def456ghi789jkl0'")
 #> 
 #> $planetscale_token
 #> character(0)
-#> 
-detect_secrets("AKIAIOSFODNN7EXAMPLE", types = "aws_key")
-#> $aws_key
-#> [1] "AKIAIOSFODNN7EXAMPLE"
 #> 
 ```

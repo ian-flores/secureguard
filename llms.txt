@@ -260,6 +260,8 @@ Regex pattern collections for detection
   : Secret detection patterns
 - [`detect_secrets()`](https://ian-flores.github.io/secureguard/reference/detect_secrets.md)
   : Detect secrets in text
+- [`detect_secrets_decoded()`](https://ian-flores.github.io/secureguard/reference/detect_secrets_decoded.md)
+  : Detect secrets in text with decode-then-scan
 - [`injection_patterns()`](https://ian-flores.github.io/secureguard/reference/injection_patterns.md)
   : Prompt injection detection patterns
 - [`detect_injection()`](https://ian-flores.github.io/secureguard/reference/detect_injection.md)

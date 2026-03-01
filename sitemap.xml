@@ -19,6 +19,7 @@
 <url><loc>https://ian-flores.github.io/secureguard/reference/detect_injection.html</loc></url>
 <url><loc>https://ian-flores.github.io/secureguard/reference/detect_pii.html</loc></url>
 <url><loc>https://ian-flores.github.io/secureguard/reference/detect_secrets.html</loc></url>
+<url><loc>https://ian-flores.github.io/secureguard/reference/detect_secrets_decoded.html</loc></url>
 <url><loc>https://ian-flores.github.io/secureguard/reference/guard_code_analysis.html</loc></url>
 <url><loc>https://ian-flores.github.io/secureguard/reference/guard_code_complexity.html</loc></url>
 <url><loc>https://ian-flores.github.io/secureguard/reference/guard_code_dataflow.html</loc></url>
@@ -36,6 +37,7 @@
 <url><loc>https://ian-flores.github.io/secureguard/reference/index.html</loc></url>
 <url><loc>https://ian-flores.github.io/secureguard/reference/injection_patterns.html</loc></url>
 <url><loc>https://ian-flores.github.io/secureguard/reference/is_high_entropy.html</loc></url>
+<url><loc>https://ian-flores.github.io/secureguard/reference/merge_secret_results.html</loc></url>
 <url><loc>https://ian-flores.github.io/secureguard/reference/new_guardrail.html</loc></url>
 <url><loc>https://ian-flores.github.io/secureguard/reference/output_to_text.html</loc></url>
 <url><loc>https://ian-flores.github.io/secureguard/reference/parse_code.html</loc></url>
