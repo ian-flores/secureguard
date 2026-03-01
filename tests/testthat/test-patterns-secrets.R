@@ -12,7 +12,9 @@ all_secret_types <- c(
   "anthropic_admin_key", "shopify_access_token", "shopify_secret",
   "shopify_custom_app", "shopify_private_app", "jwt", "cloudinary_url",
   "firebase_url", "postgres_conn", "mysql_conn", "mongodb_conn",
-  "redis_conn", "facebook_access_token", "amazon_mws_token"
+  "redis_conn", "facebook_access_token", "amazon_mws_token",
+  "vault_token", "doppler_token", "supabase_key", "vercel_token",
+  "datadog_api_key", "linear_api_key", "railway_token", "planetscale_token"
 )
 
 test_that("secret_patterns returns named list with expected types", {
@@ -561,8 +563,8 @@ test_that("detect_secrets rejects non-Bitbucket-app-passwords", {
 
 # -- OpenAI API Key --
 test_that("detect_secrets finds OpenAI API keys", {
-  fake20 <- paste0(rep("A", 20), collapse = "")
-  expect_length(detect_secrets(paste0("sk-", fake20))$openai_api_key, 1L)
+  fake32 <- paste0(rep("A", 32), collapse = "")
+  expect_length(detect_secrets(paste0("sk-", fake32))$openai_api_key, 1L)
   fake40 <- paste0(rep("x", 40), collapse = "")
   expect_length(detect_secrets(paste0("sk-proj-", fake40))$openai_api_key, 1L)
   expect_length(detect_secrets(paste0("sk-", paste0(rep("0", 48), collapse = "")))$openai_api_key, 1L)
@@ -570,6 +572,9 @@ test_that("detect_secrets finds OpenAI API keys", {
 
 test_that("detect_secrets rejects non-OpenAI-API-keys", {
   expect_length(detect_secrets("sk-short")$openai_api_key, 0L)
+  # 20-char suffix is now too short (minimum is 32)
+  fake20 <- paste0(rep("A", 20), collapse = "")
+  expect_length(detect_secrets(paste0("sk-", fake20))$openai_api_key, 0L)
   expect_length(detect_secrets("no openai key")$openai_api_key, 0L)
 })
 
@@ -818,4 +823,179 @@ test_that("detect_secrets returns empty for clean text", {
   for (nm in names(result)) {
     expect_length(result[[nm]], 0L)
   }
+})
+
+# ============================================================================
+# DEVOPS/PLATFORM PATTERNS (Phase 2C)
+# ============================================================================
+
+# -- Vault Token --
+test_that("detect_secrets finds Vault tokens", {
+  fake24 <- paste0(rep("A", 24), collapse = "")
+  expect_length(detect_secrets(paste0("hvs.", fake24))$vault_token, 1L)
+  fake40 <- paste0(rep("x", 40), collapse = "")
+  expect_length(detect_secrets(paste0("hvs.", fake40))$vault_token, 1L)
+  expect_length(detect_secrets(paste0("token: hvs.", fake24))$vault_token, 1L)
+})
+
+test_that("detect_secrets rejects non-Vault-tokens", {
+  expect_length(detect_secrets("hvs.short")$vault_token, 0L)
+  expect_length(detect_secrets("no vault here")$vault_token, 0L)
+  expect_length(detect_secrets("hvx.AAAAAAAAAAAAAAAAAAAAAAAA")$vault_token, 0L)
+})
+
+# -- Doppler Token --
+test_that("detect_secrets finds Doppler tokens", {
+  fake40 <- paste0(rep("A", 40), collapse = "")
+  expect_length(detect_secrets(paste0("dp.st.", fake40))$doppler_token, 1L)
+  expect_length(detect_secrets(paste0("dp.sa.", fake40))$doppler_token, 1L)
+  expect_length(detect_secrets(paste0("dp.ct.", fake40))$doppler_token, 1L)
+  expect_length(detect_secrets(paste0("dp.scrt.", fake40))$doppler_token, 1L)
+  expect_length(detect_secrets(paste0("dp.audit.", fake40))$doppler_token, 1L)
+})
+
+test_that("detect_secrets rejects non-Doppler-tokens", {
+  expect_length(detect_secrets("dp.st.short")$doppler_token, 0L)
+  expect_length(detect_secrets("no doppler here")$doppler_token, 0L)
+  expect_length(detect_secrets("dp.xx.AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")$doppler_token, 0L)
+})
+
+# -- Supabase Key --
+test_that("detect_secrets finds Supabase keys", {
+  fake40 <- paste0(rep("a", 40), collapse = "")
+  expect_length(detect_secrets(paste0("sbp_", fake40))$supabase_key, 1L)
+  fake50 <- paste0(rep("0", 50), collapse = "")
+  expect_length(detect_secrets(paste0("sbp_", fake50))$supabase_key, 1L)
+})
+
+test_that("detect_secrets rejects non-Supabase-keys", {
+  expect_length(detect_secrets("sbp_short")$supabase_key, 0L)
+  expect_length(detect_secrets("no supabase here")$supabase_key, 0L)
+  expect_length(detect_secrets("sbx_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")$supabase_key, 0L)
+})
+
+# -- Vercel Token --
+test_that("detect_secrets finds Vercel tokens", {
+  fake24 <- paste0(rep("A", 24), collapse = "")
+  expect_length(detect_secrets(paste0("vercel_", fake24))$vercel_token, 1L)
+  fake40 <- paste0(rep("x", 40), collapse = "")
+  expect_length(detect_secrets(paste0("vercel_", fake40))$vercel_token, 1L)
+})
+
+test_that("detect_secrets rejects non-Vercel-tokens", {
+  expect_length(detect_secrets("vercel_short")$vercel_token, 0L)
+  expect_length(detect_secrets("no vercel here")$vercel_token, 0L)
+})
+
+# -- Datadog API Key --
+test_that("detect_secrets finds Datadog API keys", {
+  hex32 <- paste0(rep("a", 32), collapse = "")
+  expect_length(detect_secrets(paste0("datadog_api_key=", hex32))$datadog_api_key, 1L)
+  expect_length(detect_secrets(paste0("DD_API_KEY: ", hex32))$datadog_api_key, 1L)
+  expect_length(detect_secrets(paste0("DATADOG_KEY = '", hex32, "'"))$datadog_api_key, 1L)
+})
+
+test_that("detect_secrets rejects non-Datadog-API-keys", {
+  expect_length(detect_secrets("datadog_api_key=short")$datadog_api_key, 0L)
+  expect_length(detect_secrets("no datadog here")$datadog_api_key, 0L)
+})
+
+# -- Linear API Key --
+test_that("detect_secrets finds Linear API keys", {
+  fake40 <- paste0(rep("A", 40), collapse = "")
+  expect_length(detect_secrets(paste0("lin_api_", fake40))$linear_api_key, 1L)
+  fake50 <- paste0(rep("x", 50), collapse = "")
+  expect_length(detect_secrets(paste0("lin_api_", fake50))$linear_api_key, 1L)
+})
+
+test_that("detect_secrets rejects non-Linear-API-keys", {
+  expect_length(detect_secrets("lin_api_short")$linear_api_key, 0L)
+  expect_length(detect_secrets("no linear here")$linear_api_key, 0L)
+})
+
+# -- Railway Token --
+test_that("detect_secrets finds Railway tokens", {
+  fake36 <- paste0(rep("A", 36), collapse = "")
+  expect_length(detect_secrets(paste0("railway_", fake36))$railway_token, 1L)
+  fake50 <- paste0(rep("x", 50), collapse = "")
+  expect_length(detect_secrets(paste0("railway_", fake50))$railway_token, 1L)
+})
+
+test_that("detect_secrets rejects non-Railway-tokens", {
+  expect_length(detect_secrets("railway_short")$railway_token, 0L)
+  expect_length(detect_secrets("no railway here")$railway_token, 0L)
+})
+
+# -- PlanetScale Token --
+test_that("detect_secrets finds PlanetScale tokens", {
+  fake32 <- paste0(rep("A", 32), collapse = "")
+  expect_length(detect_secrets(paste0("pscale_tkn_", fake32))$planetscale_token, 1L)
+  fake40 <- paste0(rep("x", 40), collapse = "")
+  expect_length(detect_secrets(paste0("pscale_tkn_", fake40))$planetscale_token, 1L)
+})
+
+test_that("detect_secrets rejects non-PlanetScale-tokens", {
+  expect_length(detect_secrets("pscale_tkn_short")$planetscale_token, 0L)
+  expect_length(detect_secrets("no planetscale here")$planetscale_token, 0L)
+})
+
+# ============================================================================
+# detect_secrets_decoded() (Phase 2C)
+# ============================================================================
+
+test_that("detect_secrets_decoded finds secrets in plain text", {
+  result <- detect_secrets_decoded("AKIAIOSFODNN7EXAMPLE")
+  expect_length(result$aws_key, 1L)
+})
+
+test_that("detect_secrets_decoded finds base64-encoded secrets", {
+  skip_if_not_installed("base64enc")
+  secret <- "AKIAIOSFODNN7EXAMPLE"
+  encoded <- base64enc::base64encode(charToRaw(secret))
+  result <- detect_secrets_decoded(encoded)
+  expect_length(result$aws_key, 1L)
+  expect_equal(result$aws_key, secret)
+})
+
+test_that("detect_secrets_decoded finds URL-encoded secrets", {
+  secret <- "AKIAIOSFODNN7EXAMPLE"
+  encoded <- paste0("AK%49AIOSFODNN7EXAMPLE")
+  result <- detect_secrets_decoded(encoded)
+  expect_length(result$aws_key, 1L)
+})
+
+test_that("detect_secrets_decoded deduplicates across variants", {
+  # Plain text that is also valid (no-op) URL decode
+  result <- detect_secrets_decoded("AKIAIOSFODNN7EXAMPLE")
+  expect_length(result$aws_key, 1L)
+})
+
+test_that("detect_secrets_decoded handles invalid base64 gracefully", {
+  result <- detect_secrets_decoded("!!!not-base64-at-all!!!")
+  expect_type(result, "list")
+})
+
+test_that("detect_secrets_decoded handles types filter", {
+  skip_if_not_installed("base64enc")
+  secret <- "AKIAIOSFODNN7EXAMPLE"
+  encoded <- base64enc::base64encode(charToRaw(secret))
+  result <- detect_secrets_decoded(encoded, types = "aws_key")
+  expect_named(result, "aws_key")
+  expect_length(result$aws_key, 1L)
+})
+
+test_that("detect_secrets_decoded validates text argument", {
+  expect_error(detect_secrets_decoded(42), "single character string")
+  expect_error(detect_secrets_decoded(c("a", "b")), "single character string")
+})
+
+test_that("detect_secrets_decoded finds URL-encoded Stripe key", {
+  # Build the test key dynamically to avoid GitHub push protection
+  secret <- paste0("sk", "_", "live", "_", paste0(rep("a", 8), collapse = ""),
+                   paste0(rep("b", 8), collapse = ""),
+                   paste0(rep("c", 8), collapse = ""))
+  # URL-encode some characters
+  encoded <- gsub("_", "%5F", secret)
+  result <- detect_secrets_decoded(encoded)
+  expect_length(result$stripe_api_key, 1L)
 })

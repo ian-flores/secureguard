@@ -62,7 +62,7 @@ secret_patterns <- function() {
     bitbucket_app_password = "(?i)bitbucket[\\s_]*(?:app[\\s_]*)?password[\\s]*[:=][\\s]*['\"]?[A-Za-z0-9]{18,}",
 
     # -- AI/ML (3) --
-    openai_api_key = "sk-(?:proj-)?[A-Za-z0-9]{20,}",
+    openai_api_key = "sk-(?:proj-)?[A-Za-z0-9]{32,}",
     anthropic_api_key = "sk-ant-(?:api03-)?[A-Za-z0-9\\-_]{90,}",
     anthropic_admin_key = "sk-ant-admin01-[A-Za-z0-9\\-_]{90,}",
 
@@ -85,7 +85,17 @@ secret_patterns <- function() {
 
     # -- Social (2) --
     facebook_access_token = "EAA[A-Za-z0-9]{100,}",
-    amazon_mws_token = "amzn\\.mws\\.[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+    amazon_mws_token = "amzn\\.mws\\.[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}",
+
+    # -- DevOps/Platform (8) --
+    vault_token = "\\bhvs\\.[A-Za-z0-9_\\-]{24,}\\b",
+    doppler_token = "\\bdp\\.(?:st|sa|ct|scrt|audit)\\.[A-Za-z0-9_\\-]{40,}\\b",
+    supabase_key = "\\bsbp_[0-9a-f]{40,}\\b",
+    vercel_token = "\\bvercel_[A-Za-z0-9_\\-]{24,}\\b",
+    datadog_api_key = "(?i)(?:datadog|dd)[_\\s]?(?:api[_\\s]?)?key[\\s]*[:=][\\s]*['\"]?[0-9a-f]{32}",
+    linear_api_key = "\\blin_api_[A-Za-z0-9]{40,}\\b",
+    railway_token = "\\brailway_[A-Za-z0-9_\\-]{36,}\\b",
+    planetscale_token = "\\bpscale_tkn_[A-Za-z0-9_\\-]{32,}\\b"
   )
 }
 
@@ -129,4 +139,75 @@ detect_secrets <- function(text, types = NULL) {
   })
 
   results
+}
+
+#' Detect secrets in text with decode-then-scan
+#'
+#' Scans the original text plus base64-decoded and URL-decoded variants for
+#' secrets. This catches credentials that have been obfuscated via encoding.
+#'
+#' @param text Character(1). The text to scan.
+#' @param types Character vector of secret types to check. Defaults to all
+#'   available types from [secret_patterns()].
+#' @return A named list where each element is a character vector of matches
+#'   found for that secret type, de-duplicated across all decoded variants.
+#' @export
+#' @examples
+#' # Detect a base64-encoded AWS key
+#' encoded <- base64enc::base64encode(charToRaw("AKIAIOSFODNN7EXAMPLE"))
+#' detect_secrets_decoded(encoded)
+detect_secrets_decoded <- function(text, types = NULL) {
+  if (!is_string(text)) {
+    cli_abort("{.arg text} must be a single character string.")
+  }
+
+  # Scan original
+  results <- detect_secrets(text, types = types)
+
+
+  # Try base64 decode
+  b64_text <- tryCatch(
+    {
+      raw_bytes <- base64enc::base64decode(text)
+      decoded <- rawToChar(raw_bytes)
+      # Verify valid UTF-8; discard garbage decodes
+      if (!validUTF8(decoded)) NULL else decoded
+    },
+    error = function(e) NULL
+  )
+
+  if (!is.null(b64_text) && nzchar(b64_text) && b64_text != text) {
+    b64_results <- detect_secrets(b64_text, types = types)
+    results <- merge_secret_results(results, b64_results)
+  }
+
+  # Try URL decode
+  url_text <- tryCatch(
+    utils::URLdecode(text),
+    error = function(e) NULL
+  )
+
+  if (!is.null(url_text) && url_text != text) {
+    url_results <- detect_secrets(url_text, types = types)
+    results <- merge_secret_results(results, url_results)
+  }
+
+  results
+}
+
+#' Merge two secret detection result lists
+#'
+#' Combines and deduplicates matches from two result lists.
+#'
+#' @param a Named list of character vectors (from [detect_secrets()]).
+#' @param b Named list of character vectors (from [detect_secrets()]).
+#' @return Merged named list with unique matches per type.
+#' @keywords internal
+merge_secret_results <- function(a, b) {
+  all_names <- union(names(a), names(b))
+  out <- lapply(all_names, function(nm) {
+    unique(c(a[[nm]], b[[nm]]))
+  })
+  names(out) <- all_names
+  out
 }
