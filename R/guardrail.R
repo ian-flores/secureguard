@@ -252,7 +252,26 @@ run_guardrail <- function(guardrail, x) {
   if (!S7_inherits(guardrail, secureguard_class)) {
     cli_abort("{.arg guardrail} must be a {.cls secureguard} object.")
   }
-  guardrail@check_fn(x)
+  if (.trace_active()) {
+    securetrace::with_span(
+      paste0("guardrail.", guardrail@name),
+      type = "guardrail",
+      {
+        result <- guardrail@check_fn(x)
+        span <- securetrace::current_span()
+        if (!is.null(span)) {
+          span$add_event(securetrace::trace_event("result", list(
+            pass = result@pass,
+            reason = result@reason,
+            guardrail_type = guardrail@type
+          )))
+        }
+        result
+      }
+    )
+  } else {
+    guardrail@check_fn(x)
+  }
 }
 
 #' Run all guardrails and collect results
@@ -278,25 +297,55 @@ check_all <- function(guardrails, x) {
   if (!is.list(guardrails)) {
     cli_abort("{.arg guardrails} must be a list of guardrail objects.")
   }
-  results <- lapply(guardrails, function(g) run_guardrail(g, x))
-  passes <- vapply(results, function(r) r@pass, logical(1))
-  all_warnings <- unlist(
-    lapply(results, function(r) r@warnings),
-    use.names = FALSE
-  )
-  if (is.null(all_warnings)) all_warnings <- character(0)
-  reasons <- vapply(
-    results[!passes],
-    function(r) r@reason %||% "check failed",
-    character(1)
-  )
+  if (.trace_active()) {
+    securetrace::with_span("guardrails.check_all", type = "guardrail", {
+      results <- lapply(guardrails, function(g) run_guardrail(g, x))
+      passes <- vapply(results, function(r) r@pass, logical(1))
+      all_warnings <- unlist(
+        lapply(results, function(r) r@warnings),
+        use.names = FALSE
+      )
+      if (is.null(all_warnings)) all_warnings <- character(0)
+      reasons <- vapply(
+        results[!passes],
+        function(r) r@reason %||% "check failed",
+        character(1)
+      )
 
-  list(
-    pass = all(passes),
-    results = results,
-    warnings = all_warnings,
-    reasons = reasons
-  )
+      .span_event("check_all.summary", list(
+        total = length(guardrails),
+        passed = sum(passes),
+        failed = sum(!passes)
+      ))
+
+      list(
+        pass = all(passes),
+        results = results,
+        warnings = all_warnings,
+        reasons = reasons
+      )
+    })
+  } else {
+    results <- lapply(guardrails, function(g) run_guardrail(g, x))
+    passes <- vapply(results, function(r) r@pass, logical(1))
+    all_warnings <- unlist(
+      lapply(results, function(r) r@warnings),
+      use.names = FALSE
+    )
+    if (is.null(all_warnings)) all_warnings <- character(0)
+    reasons <- vapply(
+      results[!passes],
+      function(r) r@reason %||% "check failed",
+      character(1)
+    )
+
+    list(
+      pass = all(passes),
+      results = results,
+      warnings = all_warnings,
+      reasons = reasons
+    )
+  }
 }
 
 method(print, secureguard_class) <- function(x, ...) {

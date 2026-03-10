@@ -92,36 +92,52 @@ guard_output <- function(result, ...) {
     }
   }
 
-  all_warnings <- character(0)
-  all_reasons <- character(0)
-  pass <- TRUE
-  current_result <- result
+  .guard_output_inner <- function() {
+    all_warnings <- character(0)
+    all_reasons <- character(0)
+    pass <- TRUE
+    current_result <- result
 
-  for (g in guardrails) {
-    res <- run_guardrail(g, current_result)
+    for (g in guardrails) {
+      res <- run_guardrail(g, current_result)
 
-    if (length(res@warnings) > 0L) {
-      all_warnings <- c(all_warnings, res@warnings)
+      if (length(res@warnings) > 0L) {
+        all_warnings <- c(all_warnings, res@warnings)
+      }
+
+      if (!res@pass) {
+        pass <- FALSE
+        reason <- res@reason %||% "check failed"
+        all_reasons <- c(all_reasons, reason)
+      }
+
+      # Apply redaction if present
+      if (!is.null(res@details$redacted_text)) {
+        current_result <- res@details$redacted_text
+      }
     }
 
-    if (!res@pass) {
-      pass <- FALSE
-      reason <- res@reason %||% "check failed"
-      all_reasons <- c(all_reasons, reason)
-    }
+    .span_event("guard_output.summary", list(
+      pass = pass,
+      warnings_count = length(all_warnings),
+      reasons_count = length(all_reasons)
+    ))
 
-    # Apply redaction if present
-    if (!is.null(res@details$redacted_text)) {
-      current_result <- res@details$redacted_text
-    }
+    list(
+      pass = pass,
+      result = current_result,
+      warnings = all_warnings,
+      reasons = all_reasons
+    )
   }
 
-  list(
-    pass = pass,
-    result = current_result,
-    warnings = all_warnings,
-    reasons = all_reasons
-  )
+  if (.trace_active()) {
+    securetrace::with_span("guardrails.guard_output", type = "guardrail", {
+      .guard_output_inner()
+    })
+  } else {
+    .guard_output_inner()
+  }
 }
 
 #' Create a complete guardrail pipeline
@@ -180,7 +196,13 @@ secure_pipeline <- function(input_guardrails = list(),
           warnings = character(0), reasons = character(0)
         ))
       }
-      check_all(input_guardrails, text)
+      if (.trace_active()) {
+        securetrace::with_span("pipeline.check_input", type = "guardrail", {
+          check_all(input_guardrails, text)
+        })
+      } else {
+        check_all(input_guardrails, text)
+      }
     },
 
     check_code = function(code) {
@@ -190,7 +212,13 @@ secure_pipeline <- function(input_guardrails = list(),
           warnings = character(0), reasons = character(0)
         ))
       }
-      check_all(code_guardrails, code)
+      if (.trace_active()) {
+        securetrace::with_span("pipeline.check_code", type = "guardrail", {
+          check_all(code_guardrails, code)
+        })
+      } else {
+        check_all(code_guardrails, code)
+      }
     },
 
     check_output = function(result) {
@@ -200,7 +228,13 @@ secure_pipeline <- function(input_guardrails = list(),
           warnings = character(0), reasons = character(0)
         ))
       }
-      do.call(guard_output, c(list(result), output_guardrails))
+      if (.trace_active()) {
+        securetrace::with_span("pipeline.check_output", type = "guardrail", {
+          do.call(guard_output, c(list(result), output_guardrails))
+        })
+      } else {
+        do.call(guard_output, c(list(result), output_guardrails))
+      }
     },
 
     as_pre_execute_hook = function() {
