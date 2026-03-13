@@ -88,7 +88,7 @@ guard_output_entropy <- function(min_length = 20L,
                                   base64_threshold = 4.5,
                                   hex_threshold = 3.0,
                                   action = c("block", "redact", "warn")) {
-  action <- match.arg(action)
+  action <- rlang::arg_match(action)
 
   check_fn <- function(x) {
     text <- output_to_text(x)

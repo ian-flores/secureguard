@@ -35,7 +35,7 @@
 #' result@details$redacted_text
 guard_output_secrets <- function(detect = NULL,
                                  action = c("block", "redact", "warn")) {
-  action <- match.arg(action)
+  action <- rlang::arg_match(action)
   all_types <- names(secret_patterns())
 
   if (is.null(detect)) {

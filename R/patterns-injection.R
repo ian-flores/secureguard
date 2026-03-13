@@ -16,7 +16,7 @@
 #' pats_high <- injection_patterns("high")
 #' length(pats_high) > length(pats)
 injection_patterns <- function(sensitivity = c("medium", "low", "high")) {
-  sensitivity <- match.arg(sensitivity)
+  sensitivity <- rlang::arg_match(sensitivity)
 
   # Low sensitivity: only the most obvious injection patterns
 
@@ -64,7 +64,7 @@ detect_injection <- function(text, sensitivity = c("medium", "low", "high")) {
     cli_abort("{.arg text} must be a single character string.")
   }
 
-  sensitivity <- match.arg(sensitivity)
+  sensitivity <- rlang::arg_match(sensitivity)
   patterns <- injection_patterns(sensitivity)
 
   results <- lapply(patterns, function(pat) {

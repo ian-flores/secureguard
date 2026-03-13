@@ -16,7 +16,7 @@
 #' run_guardrail(g, "Please help me with R code")
 guard_input_pii <- function(detect = c("ssn", "email", "phone", "credit_card"),
                             action = c("block", "warn")) {
-  action <- match.arg(action)
+  action <- rlang::arg_match(action)
 
   all_types <- names(pii_patterns())
   unknown <- setdiff(detect, all_types)

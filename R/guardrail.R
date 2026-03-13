@@ -55,13 +55,23 @@ secureguard_class <- new_class("secureguard", properties = list(
 #' g@name
 #' run_guardrail(g, "x <- 1")
 new_guardrail <- function(name, type, check_fn, description = "") {
-  stopifnot(
-    is_string(name),
-    is_string(type),
-    type %in% c("input", "code", "output"),
-    is_function(check_fn),
-    is_string(description)
-  )
+  if (!is_string(name) || !nzchar(name)) {
+    cli_abort("{.arg name} must be a non-empty string, not {.cls {class(name)}}.")
+  }
+  if (!is_string(type)) {
+    cli_abort("{.arg type} must be a string, not {.cls {class(type)}}.")
+  }
+  if (!type %in% c("input", "code", "output")) {
+    cli_abort(
+      "{.arg type} must be one of {.val {c('input', 'code', 'output')}}, not {.val {type}}."
+    )
+  }
+  if (!is_function(check_fn)) {
+    cli_abort("{.arg check_fn} must be a function, not {.cls {class(check_fn)}}.")
+  }
+  if (!is_string(description)) {
+    cli_abort("{.arg description} must be a string, not {.cls {class(description)}}.")
+  }
   secureguard_class(
     name = name,
     type = type,
@@ -125,12 +135,18 @@ guardrail_result_class <- new_class("guardrail_result", properties = list(
 #' r@details
 guardrail_result <- function(pass, reason = NULL, warnings = character(0),
                              details = list()) {
-  stopifnot(
-    is.logical(pass), length(pass) == 1L, !is.na(pass),
-    is.null(reason) || is_string(reason),
-    is.character(warnings),
-    is.list(details)
-  )
+  if (!is.logical(pass) || length(pass) != 1L || is.na(pass)) {
+    cli_abort("{.arg pass} must be a single non-NA logical value, not {.val {pass}}.")
+  }
+  if (!is.null(reason) && !is_string(reason)) {
+    cli_abort("{.arg reason} must be a single string or {.val NULL}, not {.cls {class(reason)}}.")
+  }
+  if (!is.character(warnings)) {
+    cli_abort("{.arg warnings} must be a character vector, not {.cls {class(warnings)}}.")
+  }
+  if (!is.list(details)) {
+    cli_abort("{.arg details} must be a list, not {.cls {class(details)}}.")
+  }
   guardrail_result_class(
     pass = pass,
     reason = reason,
@@ -166,7 +182,7 @@ guardrail_result <- function(pass, reason = NULL, warnings = character(0),
 compose_guardrails <- function(..., mode = c("all", "any")) {
 
   guardrails <- list(...)
-  mode <- match.arg(mode)
+  mode <- rlang::arg_match(mode)
 
   # Validate all are guardrails
 

@@ -19,7 +19,7 @@
 guard_prompt_injection <- function(sensitivity = c("medium", "low", "high"),
                                    custom_patterns = NULL,
                                    allow_patterns = NULL) {
-  sensitivity <- match.arg(sensitivity)
+  sensitivity <- rlang::arg_match(sensitivity)
 
   if (!is.null(custom_patterns)) {
     if (!is.character(custom_patterns) || is.null(names(custom_patterns))) {

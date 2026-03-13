@@ -21,7 +21,7 @@ test_that("new_guardrail validates type", {
 test_that("new_guardrail validates check_fn", {
   expect_error(
     new_guardrail("test", "code", "not a function"),
-    "is_function"
+    "must be a function"
   )
 })
 
