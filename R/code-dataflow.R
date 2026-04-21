@@ -16,7 +16,10 @@
 #'   `unlink`, `file.remove`). Default `TRUE`.
 #' @param block_file_read Logical(1). Block file read operations
 #'   (`readLines`, `read.csv`, `read.table`, `readRDS`, `load`, `scan`,
-#'   `source`, `file`). Default `FALSE`.
+#'   `source`, `file`). Default `TRUE` as of secureguard 0.3.0 — the
+#'   previous `FALSE` default left an asymmetric exfiltration path
+#'   relative to writes and network. Opt in to reads with
+#'   `block_file_read = FALSE` when your workflow genuinely needs them.
 #' @return A guardrail object of class `"secureguard"` with type `"code"`.
 #' @export
 #' @examples
@@ -26,7 +29,7 @@
 guard_code_dataflow <- function(block_env_access = TRUE,
                                 block_network = TRUE,
                                 block_file_write = TRUE,
-                                block_file_read = FALSE) {
+                                block_file_read = TRUE) {
   if (!is.logical(block_env_access) || length(block_env_access) != 1L) {
     cli_abort("{.arg block_env_access} must be TRUE or FALSE.")
   }

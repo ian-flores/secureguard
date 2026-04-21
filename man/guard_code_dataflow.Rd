@@ -8,7 +8,7 @@ guard_code_dataflow(
   block_env_access = TRUE,
   block_network = TRUE,
   block_file_write = TRUE,
-  block_file_read = FALSE
+  block_file_read = TRUE
 )
 }
 \arguments{
@@ -27,7 +27,10 @@ guard_code_dataflow(
 
 \item{block_file_read}{Logical(1). Block file read operations
 (\code{readLines}, \code{read.csv}, \code{read.table}, \code{readRDS}, \code{load}, \code{scan},
-\code{source}, \code{file}). Default \code{FALSE}.}
+\code{source}, \code{file}). Default \code{TRUE} as of secureguard 0.3.0 — the
+previous \code{FALSE} default left an asymmetric exfiltration path
+relative to writes and network. Opt in to reads with
+\code{block_file_read = FALSE} when your workflow genuinely needs them.}
 }
 \value{
 A guardrail object of class \code{"secureguard"} with type \code{"code"}.

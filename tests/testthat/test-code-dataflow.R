@@ -164,8 +164,15 @@ test_that("source is blocked when file_read blocked", {
   expect_false(result@pass)
 })
 
-test_that("file_read allowed by default", {
+test_that("file_read blocked by default (since 0.3.0)", {
   g <- guard_code_dataflow()
+  result <- run_guardrail(g, "readLines('input.txt')")
+  expect_false(result@pass)
+  expect_true("file_read" %in% result@details$categories)
+})
+
+test_that("file_read can be opted out explicitly", {
+  g <- guard_code_dataflow(block_file_read = FALSE)
   result <- run_guardrail(g, "readLines('input.txt')")
   expect_true(result@pass)
 })
