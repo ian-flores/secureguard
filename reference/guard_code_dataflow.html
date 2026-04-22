@@ -11,7 +11,7 @@ and file reads."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">secureguard</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -55,7 +55,7 @@ and file reads.</p>
 <span>  block_env_access <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  block_network <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  block_file_write <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  block_file_read <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  block_file_read <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -85,7 +85,10 @@ and file reads.</p>
 <dt id="arg-block-file-read">block_file_read<a class="anchor" aria-label="anchor" href="#arg-block-file-read"></a></dt>
 <dd><p>Logical(1). Block file read operations
 (<code>readLines</code>, <code>read.csv</code>, <code>read.table</code>, <code>readRDS</code>, <code>load</code>, <code>scan</code>,
-<code>source</code>, <code>file</code>). Default <code>FALSE</code>.</p></dd>
+<code>source</code>, <code>file</code>). Default <code>TRUE</code> as of secureguard 0.3.0 — the
+previous <code>FALSE</code> default left an asymmetric exfiltration path
+relative to writes and network. Opt in to reads with
+<code>block_file_read = FALSE</code> when your workflow genuinely needs them.</p></dd>
 
 </dl></div>
     <div class="section level2">

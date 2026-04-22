@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">secureguard</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -704,7 +704,8 @@ untrusted external user whose prompts generate arbitrary code:</p>
 <span><span class="co"># The same code may pass in trusted but fail in untrusted</span></span>
 <span><span class="va">code</span> <span class="op">&lt;-</span> <span class="st">"readLines('data.csv')"</span></span>
 <span><span class="fu"><a href="../reference/run_guardrail.html">run_guardrail</a></span><span class="op">(</span><span class="va">trusted_code</span>, <span class="va">code</span><span class="op">)</span></span>
-<span><span class="co">#&gt; &lt;guardrail_result&gt; PASS</span></span>
+<span><span class="co">#&gt; &lt;guardrail_result&gt; FAIL</span></span>
+<span><span class="co">#&gt; Reason: Data flow violation(s): readLines</span></span>
 <span><span class="fu"><a href="../reference/run_guardrail.html">run_guardrail</a></span><span class="op">(</span><span class="va">untrusted_code</span>, <span class="va">code</span><span class="op">)</span></span>
 <span><span class="co">#&gt; &lt;guardrail_result&gt; FAIL</span></span>
 <span><span class="co">#&gt; Reason: Data flow violation(s): readLines</span></span></code></pre></div>

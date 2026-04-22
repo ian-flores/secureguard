@@ -11,7 +11,7 @@ guard_code_dataflow(
   block_env_access = TRUE,
   block_network = TRUE,
   block_file_write = TRUE,
-  block_file_read = FALSE
+  block_file_read = TRUE
 )
 ```
 
@@ -42,7 +42,10 @@ guard_code_dataflow(
 
   Logical(1). Block file read operations (`readLines`, `read.csv`,
   `read.table`, `readRDS`, `load`, `scan`, `source`, `file`). Default
-  `FALSE`.
+  `TRUE` as of secureguard 0.3.0 — the previous `FALSE` default left an
+  asymmetric exfiltration path relative to writes and network. Opt in to
+  reads with `block_file_read = FALSE` when your workflow genuinely
+  needs them.
 
 ## Value
 

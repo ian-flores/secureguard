@@ -672,7 +672,8 @@ untrusted_code <- compose_guardrails(
 # The same code may pass in trusted but fail in untrusted
 code <- "readLines('data.csv')"
 run_guardrail(trusted_code, code)
-#> <guardrail_result> PASS
+#> <guardrail_result> FAIL
+#> Reason: Data flow violation(s): readLines
 run_guardrail(untrusted_code, code)
 #> <guardrail_result> FAIL
 #> Reason: Data flow violation(s): readLines

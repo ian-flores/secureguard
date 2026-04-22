@@ -1,5 +1,16 @@
 # Changelog
 
+## secureguard 0.3.0
+
+### Breaking changes
+
+- [`guard_code_dataflow()`](https://ian-flores.github.io/secureguard/reference/guard_code_dataflow.md)
+  now defaults `block_file_read = TRUE` (was `FALSE`). The previous
+  default was asymmetric: writes and network were blocked by default but
+  reads weren’t, leaving an exfiltration path open in typical agent
+  deployments. To restore the old behaviour for a read-only analysis
+  workflow, pass `block_file_read = FALSE` explicitly.
+
 ## secureguard 0.2.0
 
 ### PII detection

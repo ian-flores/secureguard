@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">secureguard</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -38,6 +38,14 @@
       <small>Source: <a href="https://github.com/ian-flores/secureguard/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.3.0" id="secureguard-030">secureguard 0.3.0<a class="anchor" aria-label="anchor" href="#secureguard-030"></a></h2>
+<div class="section level3">
+<h3 id="breaking-changes-0-3-0">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-0-3-0"></a></h3>
+<ul><li>
+<code><a href="../reference/guard_code_dataflow.html">guard_code_dataflow()</a></code> now defaults <code>block_file_read = TRUE</code> (was <code>FALSE</code>). The previous default was asymmetric: writes and network were blocked by default but reads weren’t, leaving an exfiltration path open in typical agent deployments. To restore the old behaviour for a read-only analysis workflow, pass <code>block_file_read = FALSE</code> explicitly.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.2.0" id="secureguard-020">secureguard 0.2.0<a class="anchor" aria-label="anchor" href="#secureguard-020"></a></h2>
 <div class="section level3">
