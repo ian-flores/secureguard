@@ -7,8 +7,8 @@
 [![pkgdown](https://github.com/ian-flores/secureguard/actions/workflows/pkgdown.yaml/badge.svg)](https://ian-flores.github.io/secureguard/)
 <!-- badges: end -->
 
-> [!CAUTION]
-> **Alpha software.** This package is part of a broader effort by [Ian Flores Siaca](https://github.com/ian-flores) to develop proper AI infrastructure for the R ecosystem. It is under active development and should **not** be used in production until an official release is published. APIs may change without notice.
+> [!NOTE]
+> Experimental release. APIs may change before the 1.0 stabilization; track the lifecycle badge above for the current tier.
 
 Composable guardrails for LLM agent workflows in R. Three defense layers -- input validation, code analysis, and output filtering -- all running locally with zero external API calls.
 
