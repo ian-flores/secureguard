@@ -59,6 +59,7 @@ might miss.
 ## Installation
 
 ``` r
+
 # install.packages("pak")
 pak::pak("ian-flores/secureguard")
 ```
@@ -79,6 +80,7 @@ may comply. secureguard’s input guardrails catch these patterns before
 the prompt ever reaches the LLM.
 
 ``` r
+
 library(secureguard)
 
 # Detect prompt injection attempts
@@ -127,6 +129,7 @@ dangerous patterns that simple text matching would miss.
 grep but is visible in the AST.
 
 ``` r
+
 # Block dangerous function calls via AST analysis
 g_code <- guard_code_analysis()
 run_guardrail(g_code, "x <- mean(1:10)")
@@ -169,6 +172,7 @@ either block or redact them before the data reaches the user or another
 LLM call.
 
 ``` r
+
 # Block PII in output
 g_out_pii <- guard_output_pii()
 run_guardrail(g_out_pii, "SSN: 123-45-6789")
@@ -216,6 +220,7 @@ secureguard provides two composition mechanisms:
   whether something failed.
 
 ``` r
+
 combined <- compose_guardrails(
   guard_code_analysis(),
   guard_code_complexity(max_ast_depth = 10),
@@ -227,6 +232,7 @@ run_guardrail(combined, "dplyr::filter(mtcars, cyl == 4)")
 Or run a list of guardrails and collect all results:
 
 ``` r
+
 guards <- list(
   guard_code_analysis(),
   guard_code_complexity(max_ast_depth = 10)
@@ -251,6 +257,7 @@ Convert code guardrails into a hook that blocks dangerous code before
 securer executes it:
 
 ``` r
+
 library(securer)
 library(secureguard)
 
@@ -270,6 +277,7 @@ sess$close()
 Check execution results before returning them:
 
 ``` r
+
 result <- sess$execute("paste('SSN:', '123-45-6789')")
 out <- guard_output(result, guard_output_pii(), guard_output_secrets())
 if (!out$pass) {
@@ -284,6 +292,7 @@ sequence. This keeps your guardrail configuration in one place and makes
 it easy to apply the same policy across every agent turn:
 
 ``` r
+
 pipeline <- secure_pipeline(
   input_guardrails = list(
     guard_prompt_injection(),

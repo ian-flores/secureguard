@@ -60,7 +60,7 @@
 <!-- badges: start -->
 
 <blockquote>
-<p>[!NOTE] Experimental release. APIs may change before the 1.0 stabilization; track the lifecycle badge above for the current tier.</p>
+<p><strong>Note:</strong> Experimental release. APIs may change before the 1.0 stabilization — track the lifecycle badge above for the current tier.</p>
 </blockquote>
 <p>Composable guardrails for LLM agent workflows in R. Three defense layers – input validation, code analysis, and output filtering – all running locally with zero external API calls.</p>
 <div class="section level2">
@@ -95,36 +95,36 @@
 <col width="60%">
 <col width="40%">
 </colgroup>
-<thead><tr class="header">
+<thead><tr>
 <th>Package</th>
 <th>Role</th>
 </tr></thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><a href="https://github.com/ian-flores/securer" class="external-link">securer</a></td>
 <td>Sandboxed R execution with tool-call IPC</td>
 </tr>
-<tr class="even">
+<tr>
 <td><a href="https://github.com/ian-flores/securetools" class="external-link">securetools</a></td>
 <td>Pre-built security-hardened tool definitions</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><a href="https://github.com/ian-flores/secureguard" class="external-link">secureguard</a></td>
 <td>Input/code/output guardrails (injection, PII, secrets)</td>
 </tr>
-<tr class="even">
+<tr>
 <td><a href="https://github.com/ian-flores/orchestr" class="external-link">orchestr</a></td>
 <td>Graph-based agent orchestration</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><a href="https://github.com/ian-flores/securecontext" class="external-link">securecontext</a></td>
 <td>Document chunking, embeddings, RAG retrieval</td>
 </tr>
-<tr class="even">
+<tr>
 <td><a href="https://github.com/ian-flores/securetrace" class="external-link">securetrace</a></td>
 <td>Structured tracing, token/cost accounting, JSONL export</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><a href="https://github.com/ian-flores/securebench" class="external-link">securebench</a></td>
 <td>Guardrail benchmarking with precision/recall/F1 metrics</td>
 </tr>
@@ -168,20 +168,20 @@
 <h3 id="input-guardrails">Input Guardrails<a class="anchor" aria-label="anchor" href="#input-guardrails"></a>
 </h3>
 <table class="table">
-<thead><tr class="header">
+<thead><tr>
 <th>Function</th>
 <th>Description</th>
 </tr></thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code><a href="reference/guard_prompt_injection.html">guard_prompt_injection()</a></code></td>
 <td>Detect prompt injection attempts</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code><a href="reference/guard_topic_scope.html">guard_topic_scope()</a></code></td>
 <td>Enforce allowed/blocked topic lists</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code><a href="reference/guard_input_pii.html">guard_input_pii()</a></code></td>
 <td>Filter PII from user prompts</td>
 </tr>
@@ -196,26 +196,26 @@
 <col width="50%">
 <col width="50%">
 </colgroup>
-<thead><tr class="header">
+<thead><tr>
 <th>Function</th>
 <th>Description</th>
 </tr></thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code><a href="reference/guard_code_analysis.html">guard_code_analysis()</a></code></td>
 <td>AST-based blocked function detection</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code><a href="reference/guard_code_complexity.html">guard_code_complexity()</a></code></td>
 <td>Depth, call count, expression limits</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code><a href="reference/guard_code_dependencies.html">guard_code_dependencies()</a></code></td>
 <td>Namespace allow/block lists</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code><a href="reference/guard_code_dataflow.html">guard_code_dataflow()</a></code></td>
-<td>Assignment and global variable restrictions</td>
+<td>Block env access, network, file read/write (file_read defaults to TRUE since 0.3.0)</td>
 </tr>
 </tbody>
 </table>
@@ -228,20 +228,24 @@
 <col width="50%">
 <col width="50%">
 </colgroup>
-<thead><tr class="header">
+<thead><tr>
 <th>Function</th>
 <th>Description</th>
 </tr></thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code><a href="reference/guard_output_pii.html">guard_output_pii()</a></code></td>
 <td>PII detection with block/redact/warn actions</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code><a href="reference/guard_output_secrets.html">guard_output_secrets()</a></code></td>
 <td>Secret detection with block/redact/warn actions</td>
 </tr>
-<tr class="odd">
+<tr>
+<td><code><a href="reference/guard_output_entropy.html">guard_output_entropy()</a></code></td>
+<td>Detect high-entropy tokens (likely keys/secrets)</td>
+</tr>
+<tr>
 <td><code><a href="reference/guard_output_size.html">guard_output_size()</a></code></td>
 <td>Character, line, and element limits</td>
 </tr>
@@ -252,20 +256,20 @@
 <h3 id="integration">Integration<a class="anchor" aria-label="anchor" href="#integration"></a>
 </h3>
 <table class="table">
-<thead><tr class="header">
+<thead><tr>
 <th>Function</th>
 <th>Description</th>
 </tr></thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code><a href="reference/as_pre_execute_hook.html">as_pre_execute_hook()</a></code></td>
 <td>Convert code guardrails to a securer hook</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code><a href="reference/guard_output.html">guard_output()</a></code></td>
 <td>Run output guardrails with redaction support</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code><a href="reference/secure_pipeline.html">secure_pipeline()</a></code></td>
 <td>Bundle input + code + output guardrails</td>
 </tr>

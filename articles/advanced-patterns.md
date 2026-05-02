@@ -98,6 +98,7 @@ contains adversarial patterns. A guardrail can catch these patterns
 before any query reaches a database.
 
 ``` r
+
 library(secureguard)
 
 guard_sql_injection <- function() {
@@ -138,6 +139,7 @@ guard_sql_injection <- function() {
 Now use it like any built-in guardrail:
 
 ``` r
+
 g <- guard_sql_injection()
 g
 #> <secureguard> sql_injection (input)
@@ -159,6 +161,7 @@ Custom guardrails of type `"code"` work exactly the same way. Here is
 one that limits the number of lines in LLM-generated code:
 
 ``` r
+
 guard_code_length <- function(max_lines = 100L) {
   check_fn <- function(code) {
     n_lines <- length(strsplit(code, "\n", fixed = TRUE)[[1L]])
@@ -205,6 +208,7 @@ Every `check_fn` must:
 The `@` operator accesses properties on the result:
 
 ``` r
+
 result <- run_guardrail(guard_code_analysis(), "system('ls')")
 result@pass
 #> [1] FALSE
@@ -233,6 +237,7 @@ your code checks into a single “strict code” guardrail to treat them as
 one unit.
 
 ``` r
+
 # Compose three code guardrails -- ALL must pass (default)
 strict_code <- compose_guardrails(
   guard_code_analysis(),
@@ -271,6 +276,7 @@ categories. With `mode = "any"`, the composite passes if at least one
 child guardrail passes:
 
 ``` r
+
 # Accept prompts about either statistics OR machine learning
 topic_guard <- compose_guardrails(
   guard_topic_scope(allowed_topics = c("statistics", "regression", "t-test")),
@@ -296,6 +302,7 @@ single composite result.
 runs a list of guardrails and returns a summary:
 
 ``` r
+
 guards <- list(
   guard_code_analysis(),
   guard_code_complexity(max_ast_depth = 10),
@@ -318,6 +325,7 @@ When a check fails,
 collects all failure reasons:
 
 ``` r
+
 result <- check_all(guards, "Sys.getenv('SECRET_KEY')")
 result$pass
 #> [1] FALSE
@@ -369,6 +377,7 @@ and apply it to every agent turn.
 ### Defining a Pipeline
 
 ``` r
+
 pipeline <- secure_pipeline(
   input_guardrails = list(
     guard_prompt_injection(sensitivity = "high"),
@@ -392,6 +401,7 @@ pipeline <- secure_pipeline(
 ### Running Each Stage
 
 ``` r
+
 # Stage 1: validate user input
 input_result <- pipeline$check_input("Calculate the mean and sd of mtcars$mpg")
 input_result$pass
@@ -399,6 +409,7 @@ input_result$pass
 ```
 
 ``` r
+
 # Stage 2: validate LLM-generated code
 code_result <- pipeline$check_code("
   library(dplyr)
@@ -410,6 +421,7 @@ code_result$pass
 ```
 
 ``` r
+
 # Stage 3: filter execution output
 output_result <- pipeline$check_output("mean_mpg = 20.09, sd_mpg = 6.03")
 output_result$pass
@@ -426,6 +438,7 @@ prompt, you skip the LLM call entirely. If `check_code()` rejects the
 generated code, you skip execution. Here is the complete pattern:
 
 ``` r
+
 process_turn <- function(pipeline, user_prompt, llm_fn, execute_fn) {
   # 1. Input guardrails
 
@@ -480,6 +493,7 @@ There is no registration step or plugin system; any `secureguard` object
 works everywhere:
 
 ``` r
+
 # The SQL injection guard from earlier alongside built-in input guards
 input_guards <- compose_guardrails(
   guard_prompt_injection(),
@@ -497,6 +511,7 @@ run_guardrail(input_guards, "' OR 1=1 --")
 Similarly for code guardrails:
 
 ``` r
+
 # Custom length guard composed with built-in code guards
 code_guards <- compose_guardrails(
   guard_code_analysis(),
@@ -528,6 +543,7 @@ executing each code snippet. It returns `TRUE` to allow execution or
 `FALSE` to block it.
 
 ``` r
+
 library(securer)
 library(secureguard)
 
@@ -551,6 +567,7 @@ runs output guardrails on execution results. Guardrails with
 `action = "redact"` transform the output rather than blocking it:
 
 ``` r
+
 result <- sess$execute("paste('My API key is', 'AKIAIOSFODNN7EXAMPLE')")
 
 checked <- guard_output(
@@ -572,6 +589,7 @@ if (checked$pass) {
 A pipeline can produce a pre-execute hook from its code guardrails:
 
 ``` r
+
 pipeline <- secure_pipeline(
   input_guardrails = list(guard_prompt_injection()),
   code_guardrails = list(
@@ -611,6 +629,7 @@ internal analytics tool used by trusted data scientists can use lower
 sensitivity to avoid false positives on legitimate analytical prompts:
 
 ``` r
+
 # Public-facing: high sensitivity, strict topic scoping
 public_guards <- compose_guardrails(
   guard_prompt_injection(sensitivity = "high"),
@@ -646,6 +665,7 @@ running vetted analysis scripts needs fewer restrictions than an
 untrusted external user whose prompts generate arbitrary code:
 
 ``` r
+
 # Trusted context: only block the most dangerous operations
 trusted_code <- compose_guardrails(
   guard_code_analysis(blocked_functions = c("system", "system2", "shell")),
@@ -688,6 +708,7 @@ of the response while replacing the sensitive value. Output guardrails
 support three actions (`"block"`, `"redact"`, `"warn"`) for this:
 
 ``` r
+
 # PII blocks the output entirely
 # Secrets get redacted so the response is still useful
 pipeline <- secure_pipeline(
@@ -715,14 +736,14 @@ result$reasons
 
 ## Summary
 
-| Pattern               | Function                                                                                             | Use Case                                   |
-|-----------------------|------------------------------------------------------------------------------------------------------|--------------------------------------------|
-| Custom guardrail      | [`new_guardrail()`](https://ian-flores.github.io/secureguard/reference/new_guardrail.md)             | Domain-specific checks                     |
-| Same-type composition | [`compose_guardrails()`](https://ian-flores.github.io/secureguard/reference/compose_guardrails.md)   | Merge guards into one reusable unit        |
-| Batch check           | [`check_all()`](https://ian-flores.github.io/secureguard/reference/check_all.md)                     | Individual results per guard (diagnostics) |
-| Full pipeline         | [`secure_pipeline()`](https://ian-flores.github.io/secureguard/reference/secure_pipeline.md)         | Three-layer defense for production         |
-| Pre-execute hook      | [`as_pre_execute_hook()`](https://ian-flores.github.io/secureguard/reference/as_pre_execute_hook.md) | securer integration                        |
-| Output guard          | [`guard_output()`](https://ian-flores.github.io/secureguard/reference/guard_output.md)               | Post-execution filtering                   |
+| Pattern | Function | Use Case |
+|----|----|----|
+| Custom guardrail | [`new_guardrail()`](https://ian-flores.github.io/secureguard/reference/new_guardrail.md) | Domain-specific checks |
+| Same-type composition | [`compose_guardrails()`](https://ian-flores.github.io/secureguard/reference/compose_guardrails.md) | Merge guards into one reusable unit |
+| Batch check | [`check_all()`](https://ian-flores.github.io/secureguard/reference/check_all.md) | Individual results per guard (diagnostics) |
+| Full pipeline | [`secure_pipeline()`](https://ian-flores.github.io/secureguard/reference/secure_pipeline.md) | Three-layer defense for production |
+| Pre-execute hook | [`as_pre_execute_hook()`](https://ian-flores.github.io/secureguard/reference/as_pre_execute_hook.md) | securer integration |
+| Output guard | [`guard_output()`](https://ian-flores.github.io/secureguard/reference/guard_output.md) | Post-execution filtering |
 
 Build small guards that each target one threat. Combine them with
 [`compose_guardrails()`](https://ian-flores.github.io/secureguard/reference/compose_guardrails.md)
