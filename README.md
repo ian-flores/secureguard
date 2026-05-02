@@ -7,8 +7,7 @@
 [![pkgdown](https://github.com/ian-flores/secureguard/actions/workflows/pkgdown.yaml/badge.svg)](https://ian-flores.github.io/secureguard/)
 <!-- badges: end -->
 
-> [!NOTE]
-> Experimental release. APIs may change before the 1.0 stabilization; track the lifecycle badge above for the current tier.
+> **Note:** Experimental release. APIs may change before the 1.0 stabilization — track the lifecycle badge above for the current tier.
 
 Composable guardrails for LLM agent workflows in R. Three defense layers -- input validation, code analysis, and output filtering -- all running locally with zero external API calls.
 
@@ -99,7 +98,7 @@ out$reasons  # "PII detected in output: ssn"
 | `guard_code_analysis()` | AST-based blocked function detection |
 | `guard_code_complexity()` | Depth, call count, expression limits |
 | `guard_code_dependencies()` | Namespace allow/block lists |
-| `guard_code_dataflow()` | Assignment and global variable restrictions |
+| `guard_code_dataflow()` | Block env access, network, file read/write (file_read defaults to TRUE since 0.3.0) |
 
 ### Output Guardrails
 
@@ -107,6 +106,7 @@ out$reasons  # "PII detected in output: ssn"
 |---|---|
 | `guard_output_pii()` | PII detection with block/redact/warn actions |
 | `guard_output_secrets()` | Secret detection with block/redact/warn actions |
+| `guard_output_entropy()` | Detect high-entropy tokens (likely keys/secrets) |
 | `guard_output_size()` | Character, line, and element limits |
 
 ### Integration
