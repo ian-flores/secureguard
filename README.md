@@ -15,41 +15,37 @@ Composable guardrails for LLM agent workflows in R. Three defense layers -- inpu
 
 Most guardrail solutions require external API calls or cloud services. secureguard runs entirely locally -- regex-based prompt injection detection, R AST analysis for dangerous code patterns, and PII/secret scanning -- all without sending your data anywhere.
 
-## Part of the secure-r-dev Ecosystem
+## Companion Packages
 
-secureguard is part of a 7-package ecosystem for building governed AI agents in R:
+secureguard is one of four packages for building governed AI agents in R:
 
 ```
                     ┌─────────────┐
                     │   securer    │
                     └──────┬──────┘
-          ┌────────────────┼──────────────────┐
-          │                │                   │
-   ┌──────▼──────┐  ┌─────▼───────────┐  ┌───▼──────────────┐
-   │ securetools  │  │>>> secureguard<<<│  │  securecontext   │
-   └──────┬───────┘  └─────┬───────────┘  └───┬──────────────┘
-          └────────────────┼──────────────────┘
-                    ┌──────▼───────┐
-                    │   orchestr   │
-                    └──────┬───────┘
-          ┌────────────────┼─────────────────┐
-          │                                  │
-   ┌──────▼──────┐                    ┌──────▼──────┐
-   │ securetrace  │                   │ securebench  │
-   └─────────────┘                    └─────────────┘
+              ┌────────────┴─────────────┐
+              │                          │
+       ┌──────▼──────┐         ┌─────────▼────────┐
+       │ securetools  │         │>>> secureguard<<<│
+       └─────────────┘         └─────────┬────────┘
+                                ┌────────▼─────┐
+                                │ securebench   │
+                                └──────────────┘
 ```
 
-secureguard provides the guardrail layer -- input validation, code analysis, and output filtering that can run standalone or integrate with securer's pre-execute hooks. securebench at the bottom of the stack benchmarks guardrail accuracy with precision/recall/F1 metrics.
+secureguard provides the guardrail layer -- input validation, code analysis, and output filtering that can run standalone or integrate with securer's pre-execute hooks. securebench at the bottom of the stack benchmarks guardrail accuracy with precision/recall/F1 metrics. Each package is installed individually (see Installation below).
 
 | Package | Role |
 |---------|------|
 | [securer](https://github.com/ian-flores/securer) | Sandboxed R execution with tool-call IPC |
 | [securetools](https://github.com/ian-flores/securetools) | Pre-built security-hardened tool definitions |
 | [secureguard](https://github.com/ian-flores/secureguard) | Input/code/output guardrails (injection, PII, secrets) |
-| [orchestr](https://github.com/ian-flores/orchestr) | Graph-based agent orchestration |
-| [securecontext](https://github.com/ian-flores/securecontext) | Document chunking, embeddings, RAG retrieval |
-| [securetrace](https://github.com/ian-flores/securetrace) | Structured tracing, token/cost accounting, JSONL export |
-| [securebench](https://github.com/ian-flores/securebench) | Guardrail benchmarking with precision/recall/F1 metrics |
+| [securebench](https://github.com/ian-flores/securebench) | Security-focused guardrail benchmarks, complementary to [vitals](https://vitals.tidyverse.org/) |
+
+For adjacent capabilities, use the broader R LLM ecosystem:
+
+- **Tracing and observability**: [ellmer](https://ellmer.tidyverse.org/)'s native OpenTelemetry instrumentation via the [otel](https://otel.r-lib.org/) package (supersedes the archived securetrace).
+- **Document chunking, embeddings, and RAG retrieval**: [ragnar](https://github.com/tidyverse/ragnar) (supersedes the archived securecontext).
 
 ## Installation
 
