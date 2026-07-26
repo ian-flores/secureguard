@@ -269,19 +269,15 @@ run_guardrail <- function(guardrail, x) {
     cli_abort("{.arg guardrail} must be a {.cls secureguard} object.")
   }
   if (.trace_active()) {
-    securetrace::with_span(
+    .with_span(
       paste0("guardrail.", guardrail@name),
-      type = "guardrail",
       {
         result <- guardrail@check_fn(x)
-        span <- securetrace::current_span()
-        if (!is.null(span)) {
-          span$add_event(securetrace::trace_event("result", list(
-            pass = result@pass,
-            reason = result@reason,
-            guardrail_type = guardrail@type
-          )))
-        }
+        .span_event("result", list(
+          pass = result@pass,
+          reason = result@reason,
+          guardrail_type = guardrail@type
+        ))
         result
       }
     )
@@ -314,7 +310,7 @@ check_all <- function(guardrails, x) {
     cli_abort("{.arg guardrails} must be a list of guardrail objects.")
   }
   if (.trace_active()) {
-    securetrace::with_span("guardrails.check_all", type = "guardrail", {
+    .with_span("guardrails.check_all", {
       results <- lapply(guardrails, function(g) run_guardrail(g, x))
       passes <- vapply(results, function(r) r@pass, logical(1))
       all_warnings <- unlist(

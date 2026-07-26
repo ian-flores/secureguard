@@ -24,8 +24,9 @@ Imports:
     S7 (>= 0.2.0)
 Suggests:
     base64enc,
+    otel,
+    otelsdk,
     securer (>= 0.1.0),
-    securetrace (>= 0.1.0),
     testthat (>= 3.0.0),
     withr,
     knitr,
@@ -34,8 +35,7 @@ Suggests:
     processx,
     pak
 Remotes:
-    ian-flores/securer,
-    ian-flores/securetrace
+    ian-flores/securer
 Config/testthat/edition: 3
 Encoding: UTF-8
 Language: en-US

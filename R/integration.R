@@ -132,7 +132,7 @@ guard_output <- function(result, ...) {
   }
 
   if (.trace_active()) {
-    securetrace::with_span("guardrails.guard_output", type = "guardrail", {
+    .with_span("guardrails.guard_output", {
       .guard_output_inner()
     })
   } else {
@@ -197,7 +197,7 @@ secure_pipeline <- function(input_guardrails = list(),
         ))
       }
       if (.trace_active()) {
-        securetrace::with_span("pipeline.check_input", type = "guardrail", {
+        .with_span("pipeline.check_input", {
           check_all(input_guardrails, text)
         })
       } else {
@@ -213,7 +213,7 @@ secure_pipeline <- function(input_guardrails = list(),
         ))
       }
       if (.trace_active()) {
-        securetrace::with_span("pipeline.check_code", type = "guardrail", {
+        .with_span("pipeline.check_code", {
           check_all(code_guardrails, code)
         })
       } else {
@@ -229,7 +229,7 @@ secure_pipeline <- function(input_guardrails = list(),
         ))
       }
       if (.trace_active()) {
-        securetrace::with_span("pipeline.check_output", type = "guardrail", {
+        .with_span("pipeline.check_output", {
           do.call(guard_output, c(list(result), output_guardrails))
         })
       } else {
