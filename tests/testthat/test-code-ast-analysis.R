@@ -41,6 +41,22 @@ test_that("namespaced blocked function is detected", {
   expect_true("processx::run" %in% result@details$blocked_calls)
 })
 
+test_that("pkg:: and pkg::: prefixes don't bypass a bare blocked name", {
+  g <- guard_code_analysis()
+  for (code in c("base::system('ls')", "base:::system('ls')", "base::eval(quote(1))")) {
+    result <- run_guardrail(g, code)
+    expect_false(result@pass, label = code)
+  }
+  result <- run_guardrail(g, "base::system('ls')")
+  expect_true("base::system" %in% result@details$blocked_calls)
+})
+
+test_that("qualified calls to unblocked functions still pass", {
+  g <- guard_code_analysis()
+  expect_true(run_guardrail(g, "stats::median(1:10)")@pass)
+  expect_true(run_guardrail(g, "base::mean(1:10)")@pass)
+})
+
 test_that("multiple blocked functions are all reported", {
   g <- guard_code_analysis()
   result <- run_guardrail(g, "system('ls')\neval(quote(1))")

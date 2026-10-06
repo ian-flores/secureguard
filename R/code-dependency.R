@@ -55,7 +55,7 @@ guard_code_dependencies <- function(allowed_packages = NULL,
         if (is.na(fn_name)) return(NULL)
 
         # library(x), require(x)
-        if (fn_name %in% c("library", "require") && length(expr) >= 2L) {
+        if (sub("^[^:]+:::?", "", fn_name) %in% c("library", "require") && length(expr) >= 2L) {
           pkg_arg <- expr[[2L]]
           if (is.symbol(pkg_arg)) {
             detected_packages[length(detected_packages) + 1L] <<-

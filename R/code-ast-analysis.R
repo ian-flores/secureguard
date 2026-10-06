@@ -80,8 +80,10 @@ guard_code_analysis <- function(blocked_functions = default_blocked_functions(),
           }
         }
 
-        # Direct match
-        if (fn_name %in% blocked_functions) {
+        # Direct match, on the full name ("processx::run") or the bare name,
+        # so that `base::system()` can't slip past a block on "system".
+        bare_name <- sub("^[^:]+:::?", "", fn_name)
+        if (fn_name %in% blocked_functions || bare_name %in% blocked_functions) {
           return(fn_name)
         }
 

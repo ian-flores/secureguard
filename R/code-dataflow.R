@@ -75,10 +75,13 @@ guard_code_dataflow <- function(block_env_access = TRUE,
     visitor <- list(
       on_call = function(expr, fn_name, depth) {
         if (is.na(fn_name)) return(NULL)
+        # Match on the bare name too, so `base::readLines()` is caught.
+        bare_name <- sub("^[^:]+:::?", "", fn_name)
+        matches <- function(fns) fn_name %in% fns || bare_name %in% fns
 
         # Environment access
         if (block_env_access) {
-          if (fn_name %in% env_fns || fn_name %in% env_calls) {
+          if (matches(env_fns) || matches(env_calls)) {
             violations[[length(violations) + 1L]] <<- list(
               category = "env_access", fn = fn_name
             )
@@ -88,7 +91,7 @@ guard_code_dataflow <- function(block_env_access = TRUE,
 
         # Network access
         if (block_network) {
-          if (fn_name %in% network_fns) {
+          if (matches(network_fns)) {
             violations[[length(violations) + 1L]] <<- list(
               category = "network", fn = fn_name
             )
@@ -109,14 +112,14 @@ guard_code_dataflow <- function(block_env_access = TRUE,
 
         # File write
         if (block_file_write) {
-          if (fn_name %in% file_write_fns) {
+          if (matches(file_write_fns)) {
             violations[[length(violations) + 1L]] <<- list(
               category = "file_write", fn = fn_name
             )
             return(NULL)
           }
           # cat() with file= argument
-          if (fn_name == cat_fn && length(expr) >= 2L) {
+          if (bare_name == cat_fn && length(expr) >= 2L) {
             arg_names <- names(expr)
             if (!is.null(arg_names) && "file" %in% arg_names) {
               violations[[length(violations) + 1L]] <<- list(
@@ -129,7 +132,7 @@ guard_code_dataflow <- function(block_env_access = TRUE,
 
         # File read
         if (block_file_read) {
-          if (fn_name %in% file_read_fns) {
+          if (matches(file_read_fns)) {
             violations[[length(violations) + 1L]] <<- list(
               category = "file_read", fn = fn_name
             )

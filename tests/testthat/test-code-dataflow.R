@@ -196,3 +196,15 @@ test_that("invalid inputs are rejected", {
   expect_error(guard_code_dataflow(block_file_write = NULL))
   expect_error(guard_code_dataflow(block_file_read = c(TRUE, FALSE)))
 })
+
+test_that("pkg:: prefixes don't bypass dataflow checks", {
+  g <- guard_code_dataflow()
+  for (code in c(
+    "base::Sys.getenv('KEY')",
+    "base::readLines('/etc/passwd')",
+    "utils::download.file('http://x', 'y')",
+    "base:::readLines('/etc/passwd')"
+  )) {
+    expect_false(run_guardrail(g, code)@pass, label = code)
+  }
+})

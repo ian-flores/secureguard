@@ -2,6 +2,12 @@
 
 ## Bug fixes
 
+* Security: `guard_code_analysis()`, `guard_code_dataflow()`, and
+  `guard_code_dependencies()` now match namespace-qualified calls on their
+  bare name. Before, `base::system()`, `base::readLines()`,
+  `utils::download.file()`, and `base::library()` got past checks that
+  blocked the unqualified call.
+
 * `output_to_text()` now unwraps `ellmer::ContentToolResult` objects (such as
   the results of commons agent tools) to their value, or to their error
   message. Previously it fell back to `str()`, which truncated long values so

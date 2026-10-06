@@ -100,3 +100,9 @@ test_that("invalid inputs are rejected", {
   expect_error(guard_code_dependencies(denied_packages = 123))
   expect_error(guard_code_dependencies(allow_base = "yes"))
 })
+
+test_that("base::library() is checked like library()", {
+  g <- guard_code_dependencies(denied_packages = "processx")
+  expect_false(run_guardrail(g, "base::library(processx)")@pass)
+  expect_false(run_guardrail(g, "base::require('processx')")@pass)
+})
