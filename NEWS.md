@@ -1,3 +1,12 @@
+# secureguard (development version)
+
+## Bug fixes
+
+* `output_to_text()` now unwraps `ellmer::ContentToolResult` objects (such as
+  the results of commons agent tools) to their value, or to their error
+  message. Previously it fell back to `str()`, which truncated long values so
+  output guardrails could miss injected instructions, PII, or secrets.
+
 # secureguard 0.3.0
 
 ## Breaking changes

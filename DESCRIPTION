@@ -32,6 +32,7 @@ Suggests:
     knitr,
     rmarkdown,
     dplyr,
+    ellmer,
     processx,
     pak
 Remotes:

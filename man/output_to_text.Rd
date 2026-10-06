@@ -7,7 +7,8 @@
 output_to_text(x)
 }
 \arguments{
-\item{x}{An arbitrary R object.}
+\item{x}{An arbitrary R object. An \code{ellmer::ContentToolResult} is unwrapped
+to its value, or to its error message when the tool failed.}
 }
 \value{
 Character(1). A text representation of \code{x}.

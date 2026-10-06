@@ -3,7 +3,8 @@
 #' Converts arbitrary R objects to a single character string for pattern
 #' scanning by output guardrails.
 #'
-#' @param x An arbitrary R object.
+#' @param x An arbitrary R object. An `ellmer::ContentToolResult` is unwrapped
+#'   to its value, or to its error message when the tool failed.
 #' @return Character(1). A text representation of `x`.
 #' @keywords internal
 #' @export
@@ -12,6 +13,15 @@
 #' output_to_text(data.frame(a = 1:3, b = letters[1:3]))
 #' output_to_text(list(x = 1, y = "two"))
 output_to_text <- function(x) {
+  # ellmer tool results (e.g. from commons agents) wrap the real payload;
+  # str() on the wrapper truncates it, hiding content from the scanners.
+  if (inherits(x, "ellmer::ContentToolResult")) {
+    error <- S7::prop(x, "error")
+    if (!is.null(error)) {
+      return(if (inherits(error, "condition")) conditionMessage(error) else output_to_text(error))
+    }
+    return(output_to_text(S7::prop(x, "value")))
+  }
   if (is.character(x)) {
     return(paste(x, collapse = "\n"))
   }
