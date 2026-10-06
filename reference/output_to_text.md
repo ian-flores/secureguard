@@ -13,7 +13,10 @@ output_to_text(x)
 
 - x:
 
-  An arbitrary R object.
+  An arbitrary R object. An
+  [`ellmer::ContentToolResult`](https://ellmer.tidyverse.org/reference/Content.html)
+  is unwrapped to its value, or to its error message when the tool
+  failed.
 
 ## Value
 

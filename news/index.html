@@ -39,6 +39,14 @@
     </div>
 
     <div class="section level2">
+<h2 class="pkg-version" data-toc-text="development version" id="secureguard-development-version">secureguard (development version)<a class="anchor" aria-label="anchor" href="#secureguard-development-version"></a></h2>
+<div class="section level3">
+<h3 id="bug-fixes-development-version">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-development-version"></a></h3>
+<ul><li>
+<code><a href="../reference/output_to_text.html">output_to_text()</a></code> now unwraps <code><a href="https://ellmer.tidyverse.org/reference/Content.html" class="external-link">ellmer::ContentToolResult</a></code> objects (such as the results of commons agent tools) to their value, or to their error message. Previously it fell back to <code><a href="https://rdrr.io/r/utils/str.html" class="external-link">str()</a></code>, which truncated long values so output guardrails could miss injected instructions, PII, or secrets.</li>
+</ul></div>
+</div>
+    <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.3.0" id="secureguard-030">secureguard 0.3.0<a class="anchor" aria-label="anchor" href="#secureguard-030"></a></h2>
 <div class="section level3">
 <h3 id="breaking-changes-0-3-0">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-0-3-0"></a></h3>

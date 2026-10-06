@@ -1,5 +1,18 @@
 # Changelog
 
+## secureguard (development version)
+
+### Bug fixes
+
+- [`output_to_text()`](https://ian-flores.github.io/secureguard/reference/output_to_text.md)
+  now unwraps
+  [`ellmer::ContentToolResult`](https://ellmer.tidyverse.org/reference/Content.html)
+  objects (such as the results of commons agent tools) to their value,
+  or to their error message. Previously it fell back to
+  [`str()`](https://rdrr.io/r/utils/str.html), which truncated long
+  values so output guardrails could miss injected instructions, PII, or
+  secrets.
+
 ## secureguard 0.3.0
 
 ### Breaking changes
