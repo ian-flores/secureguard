@@ -25,7 +25,8 @@ redacted text).}
 An S7 object of class \code{guardrail_result}.
 }
 \description{
-Structured return value from guardrail checks.
+Every check function returns one of these. It says whether the check
+passed and, if it didn't, why.
 }
 \examples{
 # A passing result

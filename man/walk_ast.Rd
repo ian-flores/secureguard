@@ -11,27 +11,26 @@ walk_ast(expr, visitor, depth = 0L)
 
 \item{visitor}{A list with optional callback functions:
 \describe{
-\item{\code{on_call}}{\verb{function(expr, fn_name, depth)} -- called for
-function calls. \code{fn_name} is extracted via \code{\link[=call_fn_name]{call_fn_name()}}.}
-\item{\code{on_symbol}}{\verb{function(expr, name, depth)} -- called for
+\item{\code{on_call}}{\verb{function(expr, fn_name, depth)}, called for
+function calls. \code{fn_name} comes from \code{\link[=call_fn_name]{call_fn_name()}}.}
+\item{\code{on_symbol}}{\verb{function(expr, name, depth)}, called for
 symbols (names).}
-\item{\code{on_literal}}{\verb{function(expr, depth)} -- called for literal
-values (numeric, character, logical, NULL, etc.).}
+\item{\code{on_literal}}{\verb{function(expr, depth)}, called for literal
+values (numbers, strings, logicals, \code{NULL}, and so on).}
 }
-Each callback should return \code{NULL} to continue without accumulating,
-or any other value to add it to the findings list.}
+A callback returns \code{NULL} to record nothing, or any other value to add
+it to the results.}
 
 \item{depth}{Integer. Current nesting depth (used internally for
 recursion). Defaults to 0.}
 }
 \value{
-A list of findings accumulated from visitor callbacks
-(excluding \code{NULL} returns).
+A list of the non-\code{NULL} values the callbacks returned.
 }
 \description{
-Visits every node in a parsed R expression, calling visitor callbacks
-for calls, symbols, and literals. Findings from callbacks are accumulated
-and returned.
+Visits every node in a parsed R expression and calls your callbacks on
+function calls, symbols, and literals. Anything a callback returns, other
+than \code{NULL}, is collected and returned.
 }
 \examples{
 # Collect all function call names from an expression

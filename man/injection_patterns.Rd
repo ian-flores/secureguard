@@ -8,15 +8,15 @@ injection_patterns(sensitivity = c("medium", "low", "high"))
 }
 \arguments{
 \item{sensitivity}{Character(1). One of \code{"low"}, \code{"medium"} (default), or
-\code{"high"}. Higher sensitivity includes more patterns and is more likely to
-produce false positives.}
+\code{"high"}. Higher levels include more patterns and flag more harmless
+text by mistake.}
 }
 \value{
 A named list of character(1) regex patterns.
 }
 \description{
-Returns a named list of regex patterns for detecting prompt injection
-attacks, filtered by sensitivity level.
+The regular expressions \code{\link[=guard_prompt_injection]{guard_prompt_injection()}} uses. Higher
+sensitivity levels include more of them.
 }
 \examples{
 pats <- injection_patterns("low")

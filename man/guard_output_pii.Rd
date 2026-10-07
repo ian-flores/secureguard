@@ -16,15 +16,16 @@ from \code{\link[=pii_patterns]{pii_patterns()}}: \code{"ssn"}, \code{"email"}, 
 \itemize{
 \item \code{"block"} (default): fail the check.
 \item \code{"redact"}: pass but replace PII with \verb{[REDACTED_SSN]} etc.
-\item \code{"warn"}: pass with advisory warnings.
+\item \code{"warn"}: pass, but add a warning.
 }}
 }
 \value{
 A guardrail object of class \code{"secureguard"} with type \code{"output"}.
 }
 \description{
-Creates a guardrail that scans output for personally identifiable
-information (PII).
+Looks for personal data (PII), such as social security numbers, email
+addresses, and phone numbers, in output. It can block the output, redact
+the matches, or warn.
 }
 \examples{
 g <- guard_output_pii()

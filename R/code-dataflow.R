@@ -1,8 +1,8 @@
 #' Code data flow guardrail
 #'
-#' Creates a guardrail that detects data flow patterns in R code using AST
-#' analysis. Can block environment access, network operations, file writes,
-#' and file reads.
+#' Parses R code and fails if it reads environment variables, uses the
+#' network, or reads or writes files. You can turn each of these off
+#' separately. Namespaced calls such as `base::Sys.getenv()` are caught too.
 #'
 #' @param block_env_access Logical(1). Block environment variable access
 #'   (`Sys.getenv`, `Sys.setenv`, `Sys.unsetenv`, `.GlobalEnv`,
@@ -16,10 +16,10 @@
 #'   `unlink`, `file.remove`). Default `TRUE`.
 #' @param block_file_read Logical(1). Block file read operations
 #'   (`readLines`, `read.csv`, `read.table`, `readRDS`, `load`, `scan`,
-#'   `source`, `file`). Default `TRUE` as of secureguard 0.3.0 — the
-#'   previous `FALSE` default left an asymmetric exfiltration path
-#'   relative to writes and network. Opt in to reads with
-#'   `block_file_read = FALSE` when your workflow genuinely needs them.
+#'   `source`, `file`). Default `TRUE`. Before secureguard 0.3.0 the default
+#'   was `FALSE`, which meant code could still read a file and leak its
+#'   contents while writes and network calls were blocked. Set it to `FALSE`
+#'   if your code needs to read files.
 #' @return A guardrail object of class `"secureguard"` with type `"code"`.
 #' @export
 #' @examples

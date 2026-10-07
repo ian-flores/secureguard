@@ -1,11 +1,11 @@
 #' Prompt injection detection patterns
 #'
-#' Returns a named list of regex patterns for detecting prompt injection
-#' attacks, filtered by sensitivity level.
+#' The regular expressions [guard_prompt_injection()] uses. Higher
+#' sensitivity levels include more of them.
 #'
 #' @param sensitivity Character(1). One of `"low"`, `"medium"` (default), or
-#'   `"high"`. Higher sensitivity includes more patterns and is more likely to
-#'   produce false positives.
+#'   `"high"`. Higher levels include more patterns and flag more harmless
+#'   text by mistake.
 #' @return A named list of character(1) regex patterns.
 #' @keywords internal
 #' @export
@@ -47,7 +47,8 @@ injection_patterns <- function(sensitivity = c("medium", "low", "high")) {
 
 #' Detect prompt injection attempts
 #'
-#' Scans text for prompt injection patterns at the specified sensitivity level.
+#' Runs the patterns from [injection_patterns()] against a string and returns
+#' what matched.
 #'
 #' @param text Character(1). The text to scan.
 #' @param sensitivity Character(1). One of `"low"`, `"medium"` (default), or

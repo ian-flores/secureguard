@@ -1,7 +1,7 @@
 #' Topic scope guardrail
 #'
-#' Creates a guardrail that restricts input to specific topics using allowlist
-#' or denylist regex patterns.
+#' Keeps input to the topics you choose. Give it either a list of allowed
+#' topics or a list of denied ones, written as regular expressions.
 #'
 #' @param allowed_topics Character vector of regex patterns. If non-`NULL`,
 #'   input must match at least one pattern to pass. Cannot be used together

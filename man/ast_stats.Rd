@@ -2,7 +2,7 @@
 % Please edit documentation in R/ast-walk.R
 \name{ast_stats}
 \alias{ast_stats}
-\title{Compute summary statistics for R code AST}
+\title{Count calls, assignments, and nesting in R code}
 \usage{
 ast_stats(code)
 }

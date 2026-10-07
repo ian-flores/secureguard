@@ -12,21 +12,22 @@ guard_prompt_injection(
 }
 \arguments{
 \item{sensitivity}{Character(1). One of \code{"low"}, \code{"medium"} (default), or
-\code{"high"}. Controls the number of injection patterns checked. See
-\code{\link[=injection_patterns]{injection_patterns()}} for details.}
+\code{"high"}. Higher levels check more patterns, so they catch more but also
+flag more harmless text. See \code{\link[=injection_patterns]{injection_patterns()}}.}
 
-\item{custom_patterns}{Named character vector of additional regex patterns to
-check. Names are used as pattern identifiers in match results.}
+\item{custom_patterns}{Named character vector of extra regex patterns to
+check. The names identify each pattern in the results.}
 
-\item{allow_patterns}{Character vector of regex patterns. If a detected match
-also matches one of these patterns, it is excluded (whitelisted) to reduce
-false positives.}
+\item{allow_patterns}{Character vector of regex patterns. A match that also
+matches one of these is ignored. Use it to stop phrases you know are
+harmless from being flagged.}
 }
 \value{
 A guardrail object of class \code{"secureguard"} with type \code{"input"}.
 }
 \description{
-Creates a guardrail that detects prompt injection attempts in input text.
+Looks for text that tries to override the agent's instructions, such as
+"ignore all previous instructions". The checks are regular expressions.
 }
 \examples{
 g <- guard_prompt_injection()

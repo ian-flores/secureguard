@@ -15,14 +15,14 @@ guard_input_pii(
 valid types.}
 
 \item{action}{Character(1). What to do when PII is found: \code{"block"}
-(default) fails the check, \code{"warn"} passes with advisory warnings.}
+(default) fails the check, \code{"warn"} passes but adds a warning.}
 }
 \value{
 A guardrail object of class \code{"secureguard"} with type \code{"input"}.
 }
 \description{
-Creates a guardrail that detects personally identifiable information in
-input text and either blocks or warns.
+Looks for personal data, such as social security numbers and email
+addresses, in input text. It can fail the check or just warn.
 }
 \examples{
 g <- guard_input_pii()

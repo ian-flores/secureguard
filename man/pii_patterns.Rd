@@ -13,8 +13,7 @@ A named list of character(1) regex patterns. Names: \code{ssn}, \code{email},
 \code{vin}.
 }
 \description{
-Returns a named list of regex patterns for detecting personally identifiable
-information (PII) in text.
+The regular expressions used to find personal data (PII) in text.
 }
 \examples{
 pats <- pii_patterns()

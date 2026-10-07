@@ -1,7 +1,6 @@
 #' Convert an R object to scannable text
 #'
-#' Converts arbitrary R objects to a single character string for pattern
-#' scanning by output guardrails.
+#' Turns any R object into one string so output guardrails can scan it.
 #'
 #' @param x An arbitrary R object. An `ellmer::ContentToolResult` is unwrapped
 #'   to its value, or to its error message when the tool failed.
@@ -36,8 +35,9 @@ output_to_text <- function(x) {
 
 #' PII output guardrail
 #'
-#' Creates a guardrail that scans output for personally identifiable
-#' information (PII).
+#' Looks for personal data (PII), such as social security numbers, email
+#' addresses, and phone numbers, in output. It can block the output, redact
+#' the matches, or warn.
 #'
 #' @param detect Character vector of PII types to detect. Defaults to all types
 #'   from [pii_patterns()]: `"ssn"`, `"email"`, `"phone"`, `"credit_card"`,
@@ -46,7 +46,7 @@ output_to_text <- function(x) {
 #' @param action Character(1). What to do when PII is found:
 #'   - `"block"` (default): fail the check.
 #'   - `"redact"`: pass but replace PII with `[REDACTED_SSN]` etc.
-#'   - `"warn"`: pass with advisory warnings.
+#'   - `"warn"`: pass, but add a warning.
 #' @return A guardrail object of class `"secureguard"` with type `"output"`.
 #' @export
 #' @examples

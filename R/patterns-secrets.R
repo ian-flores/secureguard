@@ -1,9 +1,8 @@
 #' Secret detection patterns
 #'
-#' Returns a named list of regex patterns for detecting secrets and credentials
-#' in text. Covers ~40 secret types across cloud providers, SaaS platforms,
-#' payment processors, package registries, version control, AI/ML services,
-#' e-commerce, infrastructure, databases, and social platforms.
+#' The regular expressions used to find secrets in text. There are 59 of
+#' them, for cloud providers, payment services, package registries, source
+#' control hosts, AI services, database connection strings, and more.
 #'
 #' @return A named list of character(1) regex patterns.
 #' @keywords internal
@@ -101,12 +100,11 @@ secret_patterns <- function() {
 
 #' Detect secrets in text
 #'
-#' Scans text for secrets and credentials using regex patterns.
+#' Finds secrets in a string and returns the matches by type.
 #'
 #' @param text Character(1). The text to scan.
 #' @param types Character vector of secret types to check. Defaults to all
-#'   available types from [secret_patterns()]. See [secret_patterns()] for the
-#'   full list of ~40 supported types.
+#'   available types from [secret_patterns()].
 #' @return A named list where each element is a character vector of matches
 #'   found for that secret type. Empty character vectors indicate no matches.
 #' @export
@@ -143,14 +141,15 @@ detect_secrets <- function(text, types = NULL) {
 
 #' Detect secrets in text with decode-then-scan
 #'
-#' Scans the original text plus base64-decoded and URL-decoded variants for
-#' secrets. This catches credentials that have been obfuscated via encoding.
+#' Like [detect_secrets()], but also scans base64-decoded and URL-decoded
+#' versions of the text. This finds keys that were encoded to hide them.
 #'
 #' @param text Character(1). The text to scan.
 #' @param types Character vector of secret types to check. Defaults to all
 #'   available types from [secret_patterns()].
 #' @return A named list where each element is a character vector of matches
-#'   found for that secret type, de-duplicated across all decoded variants.
+#'   found for that secret type, with duplicates across the decoded versions
+#'   removed.
 #' @export
 #' @examples
 #' # Detect a base64-encoded AWS key

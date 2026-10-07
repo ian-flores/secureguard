@@ -27,11 +27,9 @@
 
 #' Evaluate an expression inside an active span (if tracing)
 #'
-#' When tracing is enabled, a span is started and stays active while
-#' `expr` is evaluated; it ends automatically when this function
-#' returns. When
-#' tracing is disabled (or otel is not installed), `expr` is simply
-#' evaluated.
+#' When tracing is on, starts a span that stays active while `expr` runs
+#' and ends when this function returns. When tracing is off, or otel isn't
+#' installed, it just evaluates `expr`.
 #'
 #' @param name Span name.
 #' @param expr Expression to evaluate.

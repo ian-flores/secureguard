@@ -26,8 +26,8 @@ case-sensitive. Default: \code{FALSE}.}
 A guardrail object of class \code{"secureguard"} with type \code{"input"}.
 }
 \description{
-Creates a guardrail that restricts input to specific topics using allowlist
-or denylist regex patterns.
+Keeps input to the topics you choose. Give it either a list of allowed
+topics or a list of denied ones, written as regular expressions.
 }
 \examples{
 g <- guard_topic_scope(allowed_topics = c("statistics", "data analysis"))

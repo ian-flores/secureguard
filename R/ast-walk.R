@@ -1,7 +1,7 @@
 #' Parse code string into expressions
 #'
-#' Parses an R code string into a list of expressions, with clear
-#' error messages on failure.
+#' Parses a string of R code. If the code doesn't parse, the error says
+#' why.
 #'
 #' @param code Character(1). R code to parse.
 #' @return A parsed expression object (from [base::parse()]).
@@ -29,26 +29,25 @@ parse_code <- function(code) {
 
 #' Walk an AST node recursively
 #'
-#' Visits every node in a parsed R expression, calling visitor callbacks
-#' for calls, symbols, and literals. Findings from callbacks are accumulated
-#' and returned.
+#' Visits every node in a parsed R expression and calls your callbacks on
+#' function calls, symbols, and literals. Anything a callback returns, other
+#' than `NULL`, is collected and returned.
 #'
 #' @param expr A language object (from [parse_code()] or [base::parse()]).
 #' @param visitor A list with optional callback functions:
 #'   \describe{
-#'     \item{`on_call`}{`function(expr, fn_name, depth)` -- called for
-#'       function calls. `fn_name` is extracted via [call_fn_name()].}
-#'     \item{`on_symbol`}{`function(expr, name, depth)` -- called for
+#'     \item{`on_call`}{`function(expr, fn_name, depth)`, called for
+#'       function calls. `fn_name` comes from [call_fn_name()].}
+#'     \item{`on_symbol`}{`function(expr, name, depth)`, called for
 #'       symbols (names).}
-#'     \item{`on_literal`}{`function(expr, depth)` -- called for literal
-#'       values (numeric, character, logical, NULL, etc.).}
+#'     \item{`on_literal`}{`function(expr, depth)`, called for literal
+#'       values (numbers, strings, logicals, `NULL`, and so on).}
 #'   }
-#'   Each callback should return `NULL` to continue without accumulating,
-#'   or any other value to add it to the findings list.
+#'   A callback returns `NULL` to record nothing, or any other value to add
+#'   it to the results.
 #' @param depth Integer. Current nesting depth (used internally for
 #'   recursion). Defaults to 0.
-#' @return A list of findings accumulated from visitor callbacks
-#'   (excluding `NULL` returns).
+#' @return A list of the non-`NULL` values the callbacks returned.
 #' @export
 #' @examples
 #' # Collect all function call names from an expression
@@ -119,7 +118,8 @@ walk_ast <- function(expr, visitor, depth = 0L) {
 #'
 #' @param code Character(1). R code to parse and walk.
 #' @param visitor A visitor list (see [walk_ast()]).
-#' @return A list of accumulated findings from all top-level expressions.
+#' @return A list of the non-`NULL` values the callbacks returned, across
+#'   all top-level expressions.
 #' @export
 #' @examples
 #' # Find all function calls in a code string
@@ -238,7 +238,7 @@ ast_depth <- function(expr, depth = 0L) {
   depth
 }
 
-#' Compute summary statistics for R code AST
+#' Count calls, assignments, and nesting in R code
 #'
 #' Parses the code and returns counts of calls, assignments, symbols,
 #' expressions, and maximum nesting depth.

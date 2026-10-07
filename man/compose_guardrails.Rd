@@ -16,7 +16,9 @@ compose_guardrails(..., mode = c("all", "any"))
 A composite guardrail of class \code{secureguard}.
 }
 \description{
-Combine multiple guardrails into a single composite guardrail.
+Combines several guardrails of the same type into one. The result is a
+guardrail too, so you can run it, compose it again, or put it in a
+pipeline.
 }
 \examples{
 # Compose two code guardrails (both must pass)

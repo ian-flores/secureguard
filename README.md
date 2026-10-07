@@ -7,45 +7,14 @@
 [![pkgdown](https://github.com/ian-flores/secureguard/actions/workflows/pkgdown.yaml/badge.svg)](https://ian-flores.github.io/secureguard/)
 <!-- badges: end -->
 
-> **Note:** Experimental release. APIs may change before the 1.0 stabilization — track the lifecycle badge above for the current tier.
+secureguard checks what goes into an LLM agent, the R code it writes, and
+what comes back out. It catches things like prompt injection, calls to
+`system()`, and API keys or social security numbers in the output.
 
-Composable guardrails for LLM agent workflows in R. Three defense layers -- input validation, code analysis, and output filtering -- all running locally with zero external API calls.
+Everything runs on your machine. The checks are regular expressions and
+R's own parser, so no text is sent to another service to be judged.
 
-## Why secureguard?
-
-Most guardrail solutions require external API calls or cloud services. secureguard runs entirely locally -- regex-based prompt injection detection, R AST analysis for dangerous code patterns, and PII/secret scanning -- all without sending your data anywhere.
-
-## Companion Packages
-
-secureguard is one of four packages for building governed AI agents in R:
-
-```
-                    ┌─────────────┐
-                    │   securer    │
-                    └──────┬──────┘
-              ┌────────────┴─────────────┐
-              │                          │
-       ┌──────▼──────┐         ┌─────────▼────────┐
-       │ securetools  │         │>>> secureguard<<<│
-       └─────────────┘         └─────────┬────────┘
-                                ┌────────▼─────┐
-                                │ securebench   │
-                                └──────────────┘
-```
-
-secureguard provides the guardrail layer -- input validation, code analysis, and output filtering that can run standalone or integrate with securer's pre-execute hooks. securebench at the bottom of the stack benchmarks guardrail accuracy with precision/recall/F1 metrics. Each package is installed individually (see Installation below).
-
-| Package | Role |
-|---------|------|
-| [securer](https://github.com/ian-flores/securer) | Sandboxed R execution with tool-call IPC |
-| [securetools](https://github.com/ian-flores/securetools) | Pre-built security-hardened tool definitions |
-| [secureguard](https://github.com/ian-flores/secureguard) | Input/code/output guardrails (injection, PII, secrets) |
-| [securebench](https://github.com/ian-flores/securebench) | Security-focused guardrail benchmarks, complementary to [vitals](https://vitals.tidyverse.org/) |
-
-For adjacent capabilities, use the broader R LLM ecosystem:
-
-- **Tracing and observability**: [ellmer](https://ellmer.tidyverse.org/)'s native OpenTelemetry instrumentation via the [otel](https://otel.r-lib.org/) package (supersedes the archived securetrace).
-- **Document chunking, embeddings, and RAG retrieval**: [ragnar](https://github.com/tidyverse/ragnar) (supersedes the archived securecontext).
+The package is experimental, and function names may still change.
 
 ## Installation
 
@@ -54,20 +23,25 @@ For adjacent capabilities, use the broader R LLM ecosystem:
 pak::pak("ian-flores/secureguard")
 ```
 
-## Quick Example
+## A quick look
+
+Stop dangerous code before it runs:
 
 ```r
 library(secureguard)
 
-# Block dangerous code before it runs
 hook <- as_pre_execute_hook(
   guard_code_analysis(),
   guard_code_complexity(max_ast_depth = 15)
 )
-hook("mean(1:10)")    # TRUE -- safe
-hook("system('ls')")  # FALSE -- blocked
 
-# Check output for sensitive data
+hook("mean(1:10)")    # TRUE: fine to run
+hook("system('ls')")  # FALSE, with a warning naming `system`
+```
+
+Catch sensitive data in a result:
+
+```r
 out <- guard_output(
   "User SSN: 123-45-6789",
   guard_output_pii(),
@@ -77,80 +51,99 @@ out$pass     # FALSE
 out$reasons  # "PII detected in output: ssn"
 ```
 
-## Features
+Or keep the result and hide the sensitive parts:
 
-### Input Guardrails
+```r
+out <- guard_output(
+  "Key: AKIAIOSFODNN7EXAMPLE, mail me at jo@example.com",
+  guard_output_pii(action = "redact"),
+  guard_output_secrets(action = "redact")
+)
+out$result  # "Key: [REDACTED_AWS_KEY], mail me at [REDACTED_EMAIL]"
+```
 
-| Function | Description |
+## What it checks
+
+There are three kinds of guardrail, one for each point where things can go
+wrong.
+
+**Input**, before the prompt reaches the model:
+
+| Function | What it does |
 |---|---|
-| `guard_prompt_injection()` | Detect prompt injection attempts |
-| `guard_topic_scope()` | Enforce allowed/blocked topic lists |
-| `guard_input_pii()` | Filter PII from user prompts |
+| `guard_prompt_injection()` | Flags text that tries to override the agent's instructions |
+| `guard_topic_scope()` | Keeps the conversation to topics you allow |
+| `guard_input_pii()` | Flags personal data in the prompt |
 
-### Code Guardrails
+**Code**, after the model writes R code and before it runs:
 
-| Function | Description |
+| Function | What it does |
 |---|---|
-| `guard_code_analysis()` | AST-based blocked function detection |
-| `guard_code_complexity()` | Depth, call count, expression limits |
-| `guard_code_dependencies()` | Namespace allow/block lists |
-| `guard_code_dataflow()` | Block env access, network, file read/write (file_read defaults to TRUE since 0.3.0) |
+| `guard_code_analysis()` | Blocks calls like `system()` or `eval()`, even when they're hidden behind `do.call()` |
+| `guard_code_complexity()` | Limits how deep, long, or busy the code can be |
+| `guard_code_dependencies()` | Allows or blocks specific packages |
+| `guard_code_dataflow()` | Blocks reading environment variables, files, or the network |
 
-### Output Guardrails
+**Output**, before the result goes back to the model or the user:
 
-| Function | Description |
+| Function | What it does |
 |---|---|
-| `guard_output_pii()` | PII detection with block/redact/warn actions |
-| `guard_output_secrets()` | Secret detection with block/redact/warn actions |
-| `guard_output_entropy()` | Detect high-entropy tokens (likely keys/secrets) |
-| `guard_output_size()` | Character, line, and element limits |
+| `guard_output_pii()` | Finds personal data, then blocks, redacts, or warns |
+| `guard_output_secrets()` | Finds API keys and passwords, then blocks, redacts, or warns |
+| `guard_output_entropy()` | Flags long random-looking strings, which are often keys |
+| `guard_output_size()` | Caps the number of characters, lines, or elements |
 
-### Integration
+To run several guardrails together, use `guard_output()` for outputs,
+`as_pre_execute_hook()` to turn code checks into a hook for
+[securer](https://github.com/ian-flores/securer), or `secure_pipeline()` to
+bundle all three kinds.
 
-| Function | Description |
-|---|---|
-| `as_pre_execute_hook()` | Convert code guardrails to a securer hook |
-| `guard_output()` | Run output guardrails with redaction support |
-| `secure_pipeline()` | Bundle input + code + output guardrails |
+## With securer
 
-## securer Integration
-
-secureguard integrates with [securer](https://github.com/ian-flores/securer) for sandboxed R execution:
+secureguard works on its own, but it pairs well with securer, which runs
+the agent's code in a sandbox. The guardrails reject bad code before it
+ever reaches the sandbox:
 
 ```r
 library(securer)
 library(secureguard)
 
 pipeline <- secure_pipeline(
-  input_guardrails = list(guard_prompt_injection()),
-  code_guardrails = list(guard_code_analysis()),
+  input_guardrails  = list(guard_prompt_injection()),
+  code_guardrails   = list(guard_code_analysis()),
   output_guardrails = list(guard_output_pii(), guard_output_secrets(action = "redact"))
 )
 
-sess <- SecureSession$new(
-  pre_execute_hook = pipeline$as_pre_execute_hook()
-)
+sess <- SecureSession$new(pre_execute_hook = pipeline$as_pre_execute_hook())
 
-# Safe code executes normally
-result <- sess$execute("mean(1:10)")
+result <- sess$execute("mean(1:10)")  # runs
+sess$execute("system('ls')")          # error: blocked by the guardrail
 
-# Dangerous code is blocked before reaching the sandbox
-sess$execute("system('ls')")  # Error: blocked by guardrail
-
-# Check output
-out <- pipeline$check_output(result)
+pipeline$check_output(result)
 sess$close()
 ```
 
-## Documentation
+## Related packages
 
-- [Getting Started with secureguard](https://ian-flores.github.io/secureguard/articles/secureguard.html)
-- [Advanced Guardrail Patterns](https://ian-flores.github.io/secureguard/articles/advanced-patterns.html)
-- [Full reference documentation](https://ian-flores.github.io/secureguard/)
+secureguard is part of a small set of packages for running LLM agents in R
+more safely:
 
-## Contributing
+- [securer](https://github.com/ian-flores/securer) runs agent code in a sandbox.
+- [securetools](https://github.com/ian-flores/securetools) has ready-made tools (file access, SQL, web requests) with limits built in.
+- [securebench](https://github.com/ian-flores/securebench) measures how well your guardrails work. It complements [vitals](https://vitals.tidyverse.org/).
 
-Contributions are welcome! Please file issues on GitHub and submit pull requests.
+They build on Posit's tools rather than replacing them. For tracing, use
+[ellmer](https://ellmer.tidyverse.org/)'s OpenTelemetry support through the
+[otel](https://otel.r-lib.org/) package. For retrieval (RAG), use
+[ragnar](https://github.com/tidyverse/ragnar).
+
+## Learn more
+
+- [Getting started](https://ian-flores.github.io/secureguard/articles/secureguard.html)
+- [Advanced patterns](https://ian-flores.github.io/secureguard/articles/advanced-patterns.html)
+- [Function reference](https://ian-flores.github.io/secureguard/reference/)
+
+Found a bug or have an idea? [Open an issue](https://github.com/ian-flores/secureguard/issues).
 
 ## License
 

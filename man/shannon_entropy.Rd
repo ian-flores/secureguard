@@ -14,8 +14,8 @@ Numeric(1). The Shannon entropy in bits. Returns 0 for empty strings
 or single-character strings.
 }
 \description{
-Calculates the Shannon entropy (in bits) of a character string based on
-character frequency.
+Measures how random a string looks, in bits, from how often each
+character appears.
 }
 \examples{
 shannon_entropy("aaaaaa")    # low entropy (0)

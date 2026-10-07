@@ -25,7 +25,8 @@ Default \code{10000}.}
 A guardrail object of class \code{"secureguard"} with type \code{"output"}.
 }
 \description{
-Creates a guardrail that checks whether output exceeds size limits.
+Fails output that is too big, by number of characters, lines, or
+elements.
 }
 \examples{
 g <- guard_output_size(max_chars = 100, max_lines = 5)

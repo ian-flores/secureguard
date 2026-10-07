@@ -1,13 +1,13 @@
 #' Input PII guardrail
 #'
-#' Creates a guardrail that detects personally identifiable information in
-#' input text and either blocks or warns.
+#' Looks for personal data, such as social security numbers and email
+#' addresses, in input text. It can fail the check or just warn.
 #'
 #' @param detect Character vector of PII types to look for. Default:
 #'   `c("ssn", "email", "phone", "credit_card")`. See [pii_patterns()] for
 #'   valid types.
 #' @param action Character(1). What to do when PII is found: `"block"`
-#'   (default) fails the check, `"warn"` passes with advisory warnings.
+#'   (default) fails the check, `"warn"` passes but adds a warning.
 #' @return A guardrail object of class `"secureguard"` with type `"input"`.
 #' @export
 #' @examples

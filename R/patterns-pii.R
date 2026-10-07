@@ -1,7 +1,6 @@
 #' PII detection patterns
 #'
-#' Returns a named list of regex patterns for detecting personally identifiable
-#' information (PII) in text.
+#' The regular expressions used to find personal data (PII) in text.
 #'
 #' @return A named list of character(1) regex patterns. Names: `ssn`, `email`,
 #'   `phone`, `credit_card`, `ip_address_v4`, `ip_address_v6`, `phone_intl`,
@@ -46,7 +45,7 @@ luhn_check <- function(number) {
 
 #' Detect PII in text
 #'
-#' Scans text for personally identifiable information using regex patterns.
+#' Finds personal data in a string and returns the matches by type.
 #'
 #' @param text Character(1). The text to scan.
 #' @param types Character vector of PII types to check. Defaults to all

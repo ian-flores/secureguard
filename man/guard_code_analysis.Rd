@@ -12,24 +12,26 @@ guard_code_analysis(
 }
 \arguments{
 \item{blocked_functions}{Character vector of function names to block.
-Defaults to \code{\link[=default_blocked_functions]{default_blocked_functions()}}. Names can include namespace
-prefixes (e.g. \code{"processx::run"}).}
+Defaults to \code{\link[=default_blocked_functions]{default_blocked_functions()}}. A bare name like \code{"system"}
+also blocks \code{base::system()}. A name with a package prefix, like
+\code{"processx::run"}, blocks only that package's function.}
 
-\item{allow_namespaces}{Character vector of package prefixes to allow even
-if a function from that package appears in \code{blocked_functions}. For
-example, \code{allow_namespaces = "dplyr"} would allow \code{dplyr::filter}.}
+\item{allow_namespaces}{Character vector of package names. Namespaced calls
+into these packages are allowed even if the function is in
+\code{blocked_functions}. For example, \code{allow_namespaces = "processx"} lets
+\code{processx::run()} through.}
 
-\item{detect_indirect}{Logical(1). If \code{TRUE} (default), also detect indirect
-calls via \code{do.call("system", ...)} where the first argument is a string
-literal matching a blocked function.}
+\item{detect_indirect}{Logical(1). If \code{TRUE} (default), also catch calls
+like \code{do.call("system", ...)}, where the first argument is a string
+naming a blocked function.}
 }
 \value{
 A guardrail object of class \code{"secureguard"} with type \code{"code"}.
 }
 \description{
-Creates a guardrail that inspects R code for calls to blocked functions.
-Uses AST walking to detect direct calls and optionally indirect invocation
-via \code{do.call()}.
+Parses R code and fails if it calls a blocked function. Because it reads
+the parsed code rather than the text, it also finds calls made through
+\code{do.call("system", ...)} and namespaced calls like \code{base::system()}.
 }
 \examples{
 g <- guard_code_analysis()

@@ -16,13 +16,14 @@ A list with components:
 \itemize{
 \item \code{pass}: logical, \code{TRUE} if all guardrails pass.
 \item \code{result}: the (possibly redacted) result.
-\item \code{warnings}: character vector of advisory warnings.
+\item \code{warnings}: character vector of warnings that didn't fail the check.
 \item \code{reasons}: character vector of failure reasons.
 }
 }
 \description{
-Checks an R object against one or more output guardrails. For guardrails
-with \code{action = "redact"}, the redacted text is applied to the result.
+Runs output guardrails on an R object. When a guardrail with
+\code{action = "redact"} finds something, the returned \code{result} is the redacted
+text instead of the original object.
 }
 \examples{
 out <- guard_output(

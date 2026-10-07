@@ -12,7 +12,8 @@ walk_code(code, visitor)
 \item{visitor}{A visitor list (see \code{\link[=walk_ast]{walk_ast()}}).}
 }
 \value{
-A list of accumulated findings from all top-level expressions.
+A list of the non-\code{NULL} values the callbacks returned, across
+all top-level expressions.
 }
 \description{
 Parses the code and walks each top-level expression with the visitor.

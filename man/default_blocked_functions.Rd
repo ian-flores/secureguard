@@ -10,9 +10,9 @@ default_blocked_functions()
 Character vector of blocked function names.
 }
 \description{
-Returns the default character vector of function names considered dangerous
-for LLM-generated code. These include system-level calls, dynamic evaluation,
-and file/network operations.
+The functions \code{\link[=guard_code_analysis]{guard_code_analysis()}} blocks unless you give it your own
+list. They run shell commands, evaluate code built at run time, call
+compiled code, delete files, or open network connections.
 }
 \examples{
 fns <- default_blocked_functions()

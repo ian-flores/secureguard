@@ -24,20 +24,24 @@ types from \code{\link[=secret_patterns]{secret_patterns()}}: \code{"api_key"}, 
 \code{"shopify_custom_app"}, \code{"shopify_private_app"}, \code{"jwt"},
 \code{"cloudinary_url"}, \code{"firebase_url"}, \code{"postgres_conn"},
 \code{"mysql_conn"}, \code{"mongodb_conn"}, \code{"redis_conn"},
-\code{"facebook_access_token"}, \code{"amazon_mws_token"}.}
+\code{"facebook_access_token"}, \code{"amazon_mws_token"}, \code{"vault_token"},
+\code{"doppler_token"}, \code{"supabase_key"}, \code{"vercel_token"},
+\code{"datadog_api_key"}, \code{"linear_api_key"}, \code{"railway_token"},
+\code{"planetscale_token"}.}
 
 \item{action}{Character(1). What to do when secrets are found:
 \itemize{
 \item \code{"block"} (default): fail the check.
 \item \code{"redact"}: pass but replace secrets with \verb{[REDACTED_API_KEY]} etc.
-\item \code{"warn"}: pass with advisory warnings.
+\item \code{"warn"}: pass, but add a warning.
 }}
 }
 \value{
 A guardrail object of class \code{"secureguard"} with type \code{"output"}.
 }
 \description{
-Creates a guardrail that scans output for secrets and credentials.
+Looks for API keys, tokens, passwords, and connection strings in output.
+It can block the output, redact the matches, or warn.
 }
 \examples{
 g <- guard_output_secrets()

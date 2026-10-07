@@ -20,7 +20,7 @@ A named list where each element is a character vector of matches
 found for that PII type. Empty character vectors indicate no matches.
 }
 \description{
-Scans text for personally identifiable information using regex patterns.
+Finds personal data in a string and returns the matches by type.
 }
 \examples{
 detect_pii("Call me at 555-123-4567 or email me at test@example.com")

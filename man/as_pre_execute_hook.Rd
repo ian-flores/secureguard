@@ -14,9 +14,10 @@ A function with signature \verb{function(code)} that returns \code{TRUE} if
 all guardrails pass, or \code{FALSE} (with warnings) if any fail.
 }
 \description{
-Takes one or more code guardrails and returns a function suitable for
-securer's \code{pre_execute_hook} parameter. The hook returns \code{FALSE} to block
-code that fails any guardrail, or \code{TRUE} to allow it.
+Turns code guardrails into a function you can pass to securer's
+\code{pre_execute_hook} argument. securer calls it before running each piece of
+code. It returns \code{FALSE} to block code that fails any guardrail and \code{TRUE}
+to let it run.
 }
 \examples{
 hook <- as_pre_execute_hook(

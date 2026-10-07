@@ -14,14 +14,15 @@ new_guardrail(name, type, check_fn, description = "")
 \item{check_fn}{A function taking a single argument and returning a
 \code{\link[=guardrail_result]{guardrail_result()}}.}
 
-\item{description}{Character(1). Human-readable description.}
+\item{description}{Character(1). A short description of what the
+guardrail checks.}
 }
 \value{
 An S7 object of class \code{secureguard}.
 }
 \description{
-Low-level constructor for guardrail objects. Prefer the \verb{guard_*()} factory
-functions for end-user guardrails.
+Builds a guardrail from a function that does the checking. Use it to write
+your own checks. For the built-in checks, use the \verb{guard_*()} functions.
 }
 \examples{
 g <- new_guardrail(

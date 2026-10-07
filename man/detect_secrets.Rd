@@ -10,15 +10,14 @@ detect_secrets(text, types = NULL)
 \item{text}{Character(1). The text to scan.}
 
 \item{types}{Character vector of secret types to check. Defaults to all
-available types from \code{\link[=secret_patterns]{secret_patterns()}}. See \code{\link[=secret_patterns]{secret_patterns()}} for the
-full list of ~40 supported types.}
+available types from \code{\link[=secret_patterns]{secret_patterns()}}.}
 }
 \value{
 A named list where each element is a character vector of matches
 found for that secret type. Empty character vectors indicate no matches.
 }
 \description{
-Scans text for secrets and credentials using regex patterns.
+Finds secrets in a string and returns the matches by type.
 }
 \examples{
 detect_secrets("API_KEY = 'sk_live_abc123def456ghi789jkl0'")

@@ -2,7 +2,7 @@
 % Please edit documentation in R/guardrail.R
 \name{guardrail_result_class}
 \alias{guardrail_result_class}
-\title{S7 class: guardrail_result}
+\title{The guardrail_result class}
 \usage{
 guardrail_result_class(
   pass = logical(0),
@@ -25,7 +25,8 @@ redacted text).}
 An S7 object of class \code{guardrail_result}.
 }
 \description{
-An S7 value type representing a structured return value from guardrail checks.
+The S7 class for what a guardrail check returns. Use \code{\link[=guardrail_result]{guardrail_result()}}
+to create one.
 }
 \examples{
 # Prefer guardrail_result() constructor over direct construction

@@ -28,9 +28,8 @@ Default \code{50}.}
 A guardrail object of class \code{"secureguard"} with type \code{"code"}.
 }
 \description{
-Creates a guardrail that checks R code against complexity limits using
-AST statistics. Prevents overly complex or deeply nested code from being
-executed.
+Fails code that is nested too deeply or has too many calls, assignments,
+or top-level expressions. The counts come from \code{\link[=ast_stats]{ast_stats()}}.
 }
 \examples{
 g <- guard_code_complexity()

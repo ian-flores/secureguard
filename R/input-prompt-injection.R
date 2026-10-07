@@ -1,15 +1,16 @@
 #' Prompt injection guardrail
 #'
-#' Creates a guardrail that detects prompt injection attempts in input text.
+#' Looks for text that tries to override the agent's instructions, such as
+#' "ignore all previous instructions". The checks are regular expressions.
 #'
 #' @param sensitivity Character(1). One of `"low"`, `"medium"` (default), or
-#'   `"high"`. Controls the number of injection patterns checked. See
-#'   [injection_patterns()] for details.
-#' @param custom_patterns Named character vector of additional regex patterns to
-#'   check. Names are used as pattern identifiers in match results.
-#' @param allow_patterns Character vector of regex patterns. If a detected match
-#'   also matches one of these patterns, it is excluded (whitelisted) to reduce
-#'   false positives.
+#'   `"high"`. Higher levels check more patterns, so they catch more but also
+#'   flag more harmless text. See [injection_patterns()].
+#' @param custom_patterns Named character vector of extra regex patterns to
+#'   check. The names identify each pattern in the results.
+#' @param allow_patterns Character vector of regex patterns. A match that also
+#'   matches one of these is ignored. Use it to stop phrases you know are
+#'   harmless from being flagged.
 #' @return A guardrail object of class `"secureguard"` with type `"input"`.
 #' @export
 #' @examples

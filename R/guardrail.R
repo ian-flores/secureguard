@@ -1,13 +1,15 @@
-#' S7 class: secureguard
+#' The secureguard class
 #'
-#' An S7 value type representing a guardrail. Prefer the `guard_*()` factory
-#' functions for end-user guardrails.
+#' The S7 class behind every guardrail. You rarely need it directly. Use
+#' [new_guardrail()] to write your own check, or one of the `guard_*()`
+#' functions for a built-in one.
 #'
 #' @param name Character(1). Short identifier for the guardrail.
 #' @param type Character(1). One of `"input"`, `"code"`, or `"output"`.
 #' @param check_fn A function taking a single argument and returning a
 #'   [guardrail_result()].
-#' @param description Character(1). Human-readable description.
+#' @param description Character(1). A short description of what the
+#'   guardrail checks.
 #' @return An S7 object of class `secureguard`.
 #' @export
 #' @examples
@@ -29,14 +31,15 @@ secureguard_class <- new_class("secureguard", properties = list(
 
 #' Create a new guardrail
 #'
-#' Low-level constructor for guardrail objects. Prefer the `guard_*()` factory
-#' functions for end-user guardrails.
+#' Builds a guardrail from a function that does the checking. Use it to write
+#' your own checks. For the built-in checks, use the `guard_*()` functions.
 #'
 #' @param name Character(1). Short identifier for the guardrail.
 #' @param type Character(1). One of `"input"`, `"code"`, or `"output"`.
 #' @param check_fn A function taking a single argument and returning a
 #'   [guardrail_result()].
-#' @param description Character(1). Human-readable description.
+#' @param description Character(1). A short description of what the
+#'   guardrail checks.
 #' @return An S7 object of class `secureguard`.
 #' @export
 #' @examples
@@ -80,9 +83,10 @@ new_guardrail <- function(name, type, check_fn, description = "") {
   )
 }
 
-#' S7 class: guardrail_result
+#' The guardrail_result class
 #'
-#' An S7 value type representing a structured return value from guardrail checks.
+#' The S7 class for what a guardrail check returns. Use [guardrail_result()]
+#' to create one.
 #'
 #' @param pass Logical(1). Did the check pass?
 #' @param reason Character(1) or `NULL`. Why the check failed.
@@ -111,7 +115,8 @@ guardrail_result_class <- new_class("guardrail_result", properties = list(
 
 #' Create a guardrail result
 #'
-#' Structured return value from guardrail checks.
+#' Every check function returns one of these. It says whether the check
+#' passed and, if it didn't, why.
 #'
 #' @param pass Logical(1). Did the check pass?
 #' @param reason Character(1) or `NULL`. Why the check failed.
@@ -157,7 +162,9 @@ guardrail_result <- function(pass, reason = NULL, warnings = character(0),
 
 #' Compose guardrails
 #'
-#' Combine multiple guardrails into a single composite guardrail.
+#' Combines several guardrails of the same type into one. The result is a
+#' guardrail too, so you can run it, compose it again, or put it in a
+#' pipeline.
 #'
 #' @param ... Guardrail objects to compose.
 #' @param mode Character(1). `"all"` requires every guardrail to pass (default).

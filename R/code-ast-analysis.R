@@ -1,8 +1,8 @@
 #' Default blocked functions
 #'
-#' Returns the default character vector of function names considered dangerous
-#' for LLM-generated code. These include system-level calls, dynamic evaluation,
-#' and file/network operations.
+#' The functions [guard_code_analysis()] blocks unless you give it your own
+#' list. They run shell commands, evaluate code built at run time, call
+#' compiled code, delete files, or open network connections.
 #'
 #' @return Character vector of blocked function names.
 #' @export
@@ -28,19 +28,21 @@ default_blocked_functions <- function() {
 
 #' Code AST analysis guardrail
 #'
-#' Creates a guardrail that inspects R code for calls to blocked functions.
-#' Uses AST walking to detect direct calls and optionally indirect invocation
-#' via `do.call()`.
+#' Parses R code and fails if it calls a blocked function. Because it reads
+#' the parsed code rather than the text, it also finds calls made through
+#' `do.call("system", ...)` and namespaced calls like `base::system()`.
 #'
 #' @param blocked_functions Character vector of function names to block.
-#'   Defaults to [default_blocked_functions()]. Names can include namespace
-#'   prefixes (e.g. `"processx::run"`).
-#' @param allow_namespaces Character vector of package prefixes to allow even
-#'   if a function from that package appears in `blocked_functions`. For
-#'   example, `allow_namespaces = "dplyr"` would allow `dplyr::filter`.
-#' @param detect_indirect Logical(1). If `TRUE` (default), also detect indirect
-#'   calls via `do.call("system", ...)` where the first argument is a string
-#'   literal matching a blocked function.
+#'   Defaults to [default_blocked_functions()]. A bare name like `"system"`
+#'   also blocks `base::system()`. A name with a package prefix, like
+#'   `"processx::run"`, blocks only that package's function.
+#' @param allow_namespaces Character vector of package names. Namespaced calls
+#'   into these packages are allowed even if the function is in
+#'   `blocked_functions`. For example, `allow_namespaces = "processx"` lets
+#'   `processx::run()` through.
+#' @param detect_indirect Logical(1). If `TRUE` (default), also catch calls
+#'   like `do.call("system", ...)`, where the first argument is a string
+#'   naming a blocked function.
 #' @return A guardrail object of class `"secureguard"` with type `"code"`.
 #' @export
 #' @examples

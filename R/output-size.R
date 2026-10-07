@@ -1,6 +1,7 @@
 #' Output size guardrail
 #'
-#' Creates a guardrail that checks whether output exceeds size limits.
+#' Fails output that is too big, by number of characters, lines, or
+#' elements.
 #'
 #' @param max_chars Integer(1). Maximum number of characters in the text
 #'   representation. Default `100000`.

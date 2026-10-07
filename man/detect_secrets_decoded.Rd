@@ -14,11 +14,12 @@ available types from \code{\link[=secret_patterns]{secret_patterns()}}.}
 }
 \value{
 A named list where each element is a character vector of matches
-found for that secret type, de-duplicated across all decoded variants.
+found for that secret type, with duplicates across the decoded versions
+removed.
 }
 \description{
-Scans the original text plus base64-decoded and URL-decoded variants for
-secrets. This catches credentials that have been obfuscated via encoding.
+Like \code{\link[=detect_secrets]{detect_secrets()}}, but also scans base64-decoded and URL-decoded
+versions of the text. This finds keys that were encoded to hide them.
 }
 \examples{
 # Detect a base64-encoded AWS key

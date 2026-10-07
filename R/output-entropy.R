@@ -1,7 +1,7 @@
 #' Shannon entropy of a string
 #'
-#' Calculates the Shannon entropy (in bits) of a character string based on
-#' character frequency.
+#' Measures how random a string looks, in bits, from how often each
+#' character appears.
 #'
 #' @param s Character(1). The string to measure.
 #' @return Numeric(1). The Shannon entropy in bits. Returns 0 for empty strings
@@ -24,8 +24,7 @@ shannon_entropy <- function(s) {
 
 #' Check if a string has high entropy
 #'
-#' Determines whether a string has suspiciously high Shannon entropy,
-#' suggesting it may be a secret, key, or random token.
+#' Checks whether a string looks random enough to be a key or token.
 #'
 #' @param s Character(1). The string to check.
 #' @param base64_threshold Numeric(1). Entropy threshold for base64-like
@@ -65,8 +64,9 @@ is_high_entropy <- function(s,
 
 #' Entropy output guardrail
 #'
-#' Creates a guardrail that scans output for high-entropy substrings that
-#' may indicate leaked secrets, tokens, or keys.
+#' Looks for long, random-looking strings in output. Keys and tokens tend to
+#' look like this, including ones [guard_output_secrets()] has no pattern
+#' for.
 #'
 #' @param min_length Integer(1). Minimum token length to check (default 20).
 #' @param base64_threshold Numeric(1). Entropy threshold for base64-like
@@ -76,7 +76,7 @@ is_high_entropy <- function(s,
 #' @param action Character(1). What to do when high-entropy strings are found:
 #'   - `"block"` (default): fail the check.
 #'   - `"redact"`: pass but replace high-entropy tokens with `[HIGH_ENTROPY]`.
-#'   - `"warn"`: pass with advisory warnings.
+#'   - `"warn"`: pass, but add a warning.
 #' @return A guardrail object of class `"secureguard"` with type `"output"`.
 #' @export
 #' @seealso [shannon_entropy()], [is_high_entropy()]

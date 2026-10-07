@@ -1,6 +1,7 @@
 #' Secret output guardrail
 #'
-#' Creates a guardrail that scans output for secrets and credentials.
+#' Looks for API keys, tokens, passwords, and connection strings in output.
+#' It can block the output, redact the matches, or warn.
 #'
 #' @param detect Character vector of secret types to detect. Defaults to all
 #'   types from [secret_patterns()]: `"api_key"`, `"aws_key"`, `"password"`,
@@ -19,11 +20,14 @@
 #'   `"shopify_custom_app"`, `"shopify_private_app"`, `"jwt"`,
 #'   `"cloudinary_url"`, `"firebase_url"`, `"postgres_conn"`,
 #'   `"mysql_conn"`, `"mongodb_conn"`, `"redis_conn"`,
-#'   `"facebook_access_token"`, `"amazon_mws_token"`.
+#'   `"facebook_access_token"`, `"amazon_mws_token"`, `"vault_token"`,
+#'   `"doppler_token"`, `"supabase_key"`, `"vercel_token"`,
+#'   `"datadog_api_key"`, `"linear_api_key"`, `"railway_token"`,
+#'   `"planetscale_token"`.
 #' @param action Character(1). What to do when secrets are found:
 #'   - `"block"` (default): fail the check.
 #'   - `"redact"`: pass but replace secrets with `[REDACTED_API_KEY]` etc.
-#'   - `"warn"`: pass with advisory warnings.
+#'   - `"warn"`: pass, but add a warning.
 #' @return A guardrail object of class `"secureguard"` with type `"output"`.
 #' @export
 #' @examples

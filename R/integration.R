@@ -1,8 +1,9 @@
 #' Convert code guardrails to a securer pre-execute hook
 #'
-#' Takes one or more code guardrails and returns a function suitable for
-#' securer's `pre_execute_hook` parameter. The hook returns `FALSE` to block
-#' code that fails any guardrail, or `TRUE` to allow it.
+#' Turns code guardrails into a function you can pass to securer's
+#' `pre_execute_hook` argument. securer calls it before running each piece of
+#' code. It returns `FALSE` to block code that fails any guardrail and `TRUE`
+#' to let it run.
 #'
 #' @param ... Guardrail objects with `type = "code"`.
 #' @return A function with signature `function(code)` that returns `TRUE` if
@@ -56,15 +57,16 @@ as_pre_execute_hook <- function(...) {
 
 #' Run output guardrails on a result
 #'
-#' Checks an R object against one or more output guardrails. For guardrails
-#' with `action = "redact"`, the redacted text is applied to the result.
+#' Runs output guardrails on an R object. When a guardrail with
+#' `action = "redact"` finds something, the returned `result` is the redacted
+#' text instead of the original object.
 #'
 #' @param result An R object to check.
 #' @param ... Guardrail objects with `type = "output"`.
 #' @return A list with components:
 #'   - `pass`: logical, `TRUE` if all guardrails pass.
 #'   - `result`: the (possibly redacted) result.
-#'   - `warnings`: character vector of advisory warnings.
+#'   - `warnings`: character vector of warnings that didn't fail the check.
 #'   - `reasons`: character vector of failure reasons.
 #' @export
 #' @examples
@@ -142,8 +144,8 @@ guard_output <- function(result, ...) {
 
 #' Create a complete guardrail pipeline
 #'
-#' Bundles input, code, and output guardrails into a single pipeline object
-#' with convenience methods for each stage.
+#' Holds input, code, and output guardrails in one object, with a method to
+#' run each stage.
 #'
 #' @param input_guardrails List of guardrails with `type = "input"`.
 #' @param code_guardrails List of guardrails with `type = "code"`.

@@ -24,15 +24,16 @@ strings (default 4.5).}
 \itemize{
 \item \code{"block"} (default): fail the check.
 \item \code{"redact"}: pass but replace high-entropy tokens with \verb{[HIGH_ENTROPY]}.
-\item \code{"warn"}: pass with advisory warnings.
+\item \code{"warn"}: pass, but add a warning.
 }}
 }
 \value{
 A guardrail object of class \code{"secureguard"} with type \code{"output"}.
 }
 \description{
-Creates a guardrail that scans output for high-entropy substrings that
-may indicate leaked secrets, tokens, or keys.
+Looks for long, random-looking strings in output. Keys and tokens tend to
+look like this, including ones \code{\link[=guard_output_secrets]{guard_output_secrets()}} has no pattern
+for.
 }
 \examples{
 g <- guard_output_entropy()

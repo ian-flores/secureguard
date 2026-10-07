@@ -2,7 +2,7 @@
 % Please edit documentation in R/guardrail.R
 \name{secureguard_class}
 \alias{secureguard_class}
-\title{S7 class: secureguard}
+\title{The secureguard class}
 \usage{
 secureguard_class(
   name = character(0),
@@ -19,14 +19,16 @@ secureguard_class(
 \item{check_fn}{A function taking a single argument and returning a
 \code{\link[=guardrail_result]{guardrail_result()}}.}
 
-\item{description}{Character(1). Human-readable description.}
+\item{description}{Character(1). A short description of what the
+guardrail checks.}
 }
 \value{
 An S7 object of class \code{secureguard}.
 }
 \description{
-An S7 value type representing a guardrail. Prefer the \verb{guard_*()} factory
-functions for end-user guardrails.
+The S7 class behind every guardrail. You rarely need it directly. Use
+\code{\link[=new_guardrail]{new_guardrail()}} to write your own check, or one of the \verb{guard_*()}
+functions for a built-in one.
 }
 \examples{
 # Prefer new_guardrail() or guard_*() factories over direct construction

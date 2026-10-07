@@ -1,19 +1,19 @@
 #' Code dependency guardrail
 #'
-#' Creates a guardrail that controls which packages can be used in R code.
-#' Detects package usage via `library()`, `require()`, `pkg::fn`,
-#' `pkg:::fn`, and `loadNamespace()` calls.
+#' Controls which packages R code may use. It finds packages loaded with
+#' `library()`, `require()`, or `loadNamespace()`, and packages called with
+#' `pkg::fn` or `pkg:::fn`.
 #'
-#' @param allowed_packages Character vector of permitted package names
-#'   (allowlist mode). If non-`NULL`, only these packages (plus base packages
-#'   if `allow_base = TRUE`) are permitted. Cannot be used together with
+#' @param allowed_packages Character vector of package names to allow. If
+#'   set, only these packages (plus base packages if `allow_base = TRUE`) may
+#'   be used. Cannot be used together with
 #'   `denied_packages`.
-#' @param denied_packages Character vector of denied package names (denylist
-#'   mode). If non-`NULL`, these packages are blocked. Cannot be used together
+#' @param denied_packages Character vector of package names to block. If set,
+#'   every other package is allowed. Cannot be used together
 #'   with `allowed_packages`.
 #' @param allow_base Logical(1). If `TRUE` (default), base R packages
 #'   (`base`, `utils`, `stats`, `methods`, `grDevices`, `graphics`,
-#'   `datasets`) are always permitted regardless of allowlist/denylist.
+#'   `datasets`) are always allowed, whatever the other two arguments say.
 #' @return A guardrail object of class `"secureguard"` with type `"code"`.
 #' @export
 #' @examples

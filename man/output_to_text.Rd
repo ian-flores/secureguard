@@ -14,8 +14,7 @@ to its value, or to its error message when the tool failed.}
 Character(1). A text representation of \code{x}.
 }
 \description{
-Converts arbitrary R objects to a single character string for pattern
-scanning by output guardrails.
+Turns any R object into one string so output guardrails can scan it.
 }
 \examples{
 output_to_text("hello")

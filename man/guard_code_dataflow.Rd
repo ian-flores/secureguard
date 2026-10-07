@@ -27,18 +27,18 @@ guard_code_dataflow(
 
 \item{block_file_read}{Logical(1). Block file read operations
 (\code{readLines}, \code{read.csv}, \code{read.table}, \code{readRDS}, \code{load}, \code{scan},
-\code{source}, \code{file}). Default \code{TRUE} as of secureguard 0.3.0 — the
-previous \code{FALSE} default left an asymmetric exfiltration path
-relative to writes and network. Opt in to reads with
-\code{block_file_read = FALSE} when your workflow genuinely needs them.}
+\code{source}, \code{file}). Default \code{TRUE}. Before secureguard 0.3.0 the default
+was \code{FALSE}, which meant code could still read a file and leak its
+contents while writes and network calls were blocked. Set it to \code{FALSE}
+if your code needs to read files.}
 }
 \value{
 A guardrail object of class \code{"secureguard"} with type \code{"code"}.
 }
 \description{
-Creates a guardrail that detects data flow patterns in R code using AST
-analysis. Can block environment access, network operations, file writes,
-and file reads.
+Parses R code and fails if it reads environment variables, uses the
+network, or reads or writes files. You can turn each of these off
+separately. Namespaced calls such as \code{base::Sys.getenv()} are caught too.
 }
 \examples{
 g <- guard_code_dataflow()

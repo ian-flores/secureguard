@@ -13,8 +13,8 @@ parse_code(code)
 A parsed expression object (from \code{\link[base:parse]{base::parse()}}).
 }
 \description{
-Parses an R code string into a list of expressions, with clear
-error messages on failure.
+Parses a string of R code. If the code doesn't parse, the error says
+why.
 }
 \examples{
 expr <- parse_code("x <- 1 + 2")
