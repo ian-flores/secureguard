@@ -1,7 +1,8 @@
 # PII output guardrail
 
-Creates a guardrail that scans output for personally identifiable
-information (PII).
+Looks for personal data (PII), such as social security numbers, email
+addresses, and phone numbers, in output. It can block the output, redact
+the matches, or warn.
 
 ## Usage
 
@@ -27,7 +28,7 @@ guard_output_pii(detect = NULL, action = c("block", "redact", "warn"))
 
   - `"redact"`: pass but replace PII with `[REDACTED_SSN]` etc.
 
-  - `"warn"`: pass with advisory warnings.
+  - `"warn"`: pass, but add a warning.
 
 ## Value
 

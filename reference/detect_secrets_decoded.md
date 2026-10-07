@@ -1,8 +1,9 @@
 # Detect secrets in text with decode-then-scan
 
-Scans the original text plus base64-decoded and URL-decoded variants for
-secrets. This catches credentials that have been obfuscated via
-encoding.
+Like
+[`detect_secrets()`](https://ian-flores.github.io/secureguard/reference/detect_secrets.md),
+but also scans base64-decoded and URL-decoded versions of the text. This
+finds keys that were encoded to hide them.
 
 ## Usage
 
@@ -25,7 +26,8 @@ detect_secrets_decoded(text, types = NULL)
 ## Value
 
 A named list where each element is a character vector of matches found
-for that secret type, de-duplicated across all decoded variants.
+for that secret type, with duplicates across the decoded versions
+removed.
 
 ## Examples
 

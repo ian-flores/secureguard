@@ -21,7 +21,8 @@ walk_code(code, visitor)
 
 ## Value
 
-A list of accumulated findings from all top-level expressions.
+A list of the non-`NULL` values the callbacks returned, across all
+top-level expressions.
 
 ## Examples
 

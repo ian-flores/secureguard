@@ -1,6 +1,8 @@
 # Compose guardrails
 
-Combine multiple guardrails into a single composite guardrail.
+Combines several guardrails of the same type into one. The result is a
+guardrail too, so you can run it, compose it again, or put it in a
+pipeline.
 
 ## Usage
 

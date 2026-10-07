@@ -1,7 +1,9 @@
 # Entropy output guardrail
 
-Creates a guardrail that scans output for high-entropy substrings that
-may indicate leaked secrets, tokens, or keys.
+Looks for long, random-looking strings in output. Keys and tokens tend
+to look like this, including ones
+[`guard_output_secrets()`](https://ian-flores.github.io/secureguard/reference/guard_output_secrets.md)
+has no pattern for.
 
 ## Usage
 
@@ -37,7 +39,7 @@ guard_output_entropy(
   - `"redact"`: pass but replace high-entropy tokens with
     `[HIGH_ENTROPY]`.
 
-  - `"warn"`: pass with advisory warnings.
+  - `"warn"`: pass, but add a warning.
 
 ## Value
 

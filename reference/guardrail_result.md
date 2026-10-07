@@ -1,6 +1,7 @@
 # Create a guardrail result
 
-Structured return value from guardrail checks.
+Every check function returns one of these. It says whether the check
+passed and, if it didn't, why.
 
 ## Usage
 

@@ -5,12 +5,16 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Advanced Guardrail Patterns • secureguard</title>
+<title>Advanced guardrail patterns • secureguard</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/Hanken_Grotesk-0.4.10/font.css" rel="stylesheet">
+<link href="../deps/Space_Mono-0.4.10/font.css" rel="stylesheet">
+<link href="../deps/Fraunces-0.4.10/font.css" rel="stylesheet">
+<link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Advanced Guardrail Patterns">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
+<meta property="og:title" content="Advanced guardrail patterns">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -58,7 +62,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
-      <h1>Advanced Guardrail Patterns</h1>
+      <h1>Advanced guardrail patterns</h1>
             
       
       <small class="dont-index">Source: <a href="https://github.com/ian-flores/secureguard/blob/main/vignettes/advanced-patterns.Rmd" class="external-link"><code>vignettes/advanced-patterns.Rmd</code></a></small>
@@ -68,99 +72,46 @@
     
     
 <div class="section level2">
-<h2 id="what-this-vignette-covers">What This Vignette Covers<a class="anchor" aria-label="anchor" href="#what-this-vignette-covers"></a>
+<h2 id="whats-here">What’s here<a class="anchor" aria-label="anchor" href="#whats-here"></a>
 </h2>
-<p><code><a href="../articles/secureguard.html">vignette("secureguard")</a></code> introduces the defense layers
-and built-in guardrails. This vignette covers building custom guardrails
-for domain-specific threats, composing guardrails with pass/fail logic,
-assembling pipelines, and wiring everything into securer for sandboxed
-execution.</p>
+<p><code><a href="../articles/secureguard.html">vignette("secureguard")</a></code> introduces the three kinds of
+guardrail and the built-in checks. This one shows how to write your own
+guardrails, combine them, build a pipeline, and connect it to
+securer.</p>
 </div>
 <div class="section level2">
-<h2 id="how-a-guardrail-pipeline-works">How a Guardrail Pipeline Works<a class="anchor" aria-label="anchor" href="#how-a-guardrail-pipeline-works"></a>
+<h2 id="how-a-pipeline-works">How a pipeline works<a class="anchor" aria-label="anchor" href="#how-a-pipeline-works"></a>
 </h2>
-<p>The following diagram shows the flow of data through a
-<code><a href="../reference/secure_pipeline.html">secure_pipeline()</a></code>, the recommended way to wire guardrails
-into an agent loop:</p>
-<pre><code>         User prompt
-              |
-              v
-    +--------------------+
-    |  check_input()     |    Input guardrails:
-    |  - injection       |    prompt injection, topic scope, PII
-    |  - topic scope     |
-    |  - input PII       |
-    +--------------------+
-              |
-         Pass? ----No----&gt; Return failure (stage: input)
-              |
-             Yes
-              |
-              v
-         LLM generates code
-              |
-              v
-    +--------------------+
-    |  check_code()      |    Code guardrails:
-    |  - AST analysis    |    blocked functions, complexity,
-    |  - complexity      |    dependencies, data flow
-    |  - dependencies    |
-    |  - data flow       |
-    +--------------------+
-              |
-         Pass? ----No----&gt; Return failure (stage: code)
-              |
-             Yes
-              |
-              v
-      Execute in sandbox
-        (securer)
-              |
-              v
-    +--------------------+
-    |  check_output()    |    Output guardrails:
-    |  - PII             |    PII blocking, secret redaction,
-    |  - secrets         |    size limits
-    |  - size            |
-    +--------------------+
-              |
-         Pass? ----No----&gt; Return failure (stage: output)
-              |
-             Yes
-              |
-              v
-      Return result to user
-      (possibly redacted)</code></pre>
-<p>Each stage short-circuits on failure: if input guardrails reject the
-prompt, the LLM never sees it. If code guardrails reject the generated
-code, it never executes. This minimizes both risk and wasted
-computation.</p>
+<p>This is what happens to one agent turn inside a
+<code><a href="../reference/secure_pipeline.html">secure_pipeline()</a></code>, which is the easiest way to put
+guardrails into an agent loop:</p>
+<figure class="hairline"><svg role="img" aria-label="The prompt is checked, the model writes code, the code is checked, it runs in the sandbox, the output is checked; a failed check stops the turn at that stage" viewbox="0 0 1000 200" xmlns="http://www.w3.org/2000/svg"><defs><marker id="pl-arrow" viewbox="0 0 10 10" refx="9" refy="5" markerwidth="7" markerheight="7" orient="auto-start-reverse"><path d="M1 1L9 5L1 9" fill="none" stroke="#2b1f12" stroke-width="1"></path></marker><pattern id="pl-hatch" width="6" height="6" patternunits="userSpaceOnUse" patterntransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke="#bf5a36" stroke-width="0.6" opacity="0.55"></line></pattern></defs><text x="66.0" y="74.325" font-family="Space Mono, ui-monospace, monospace" font-size="9.5" fill="#6b5638" text-anchor="middle" font-weight="400" letter-spacing="1.2">USER</text><text x="66.0" y="88.325" font-family="Space Mono, ui-monospace, monospace" font-size="9.5" fill="#6b5638" text-anchor="middle" font-weight="400" letter-spacing="1.2">PROMPT</text><path d="M112 78.0H130" fill="none" stroke="#2b1f12" stroke-width="0.75" marker-end="url(#pl-arrow)"></path><rect x="132" y="40" width="140" height="76" fill="none" stroke="#2b1f12" stroke-width="0.75"></rect><text x="202.0" y="68.0" font-family="Space Mono, ui-monospace, monospace" font-size="10.5" fill="#2b1f12" text-anchor="middle" font-weight="700" letter-spacing="1.2">check_input()</text><text x="202.0" y="82.0" font-family="Space Mono, ui-monospace, monospace" font-size="9" fill="#6b5638" text-anchor="middle" font-weight="400" letter-spacing="0.4">injection, topic,</text><text x="202.0" y="95.0" font-family="Space Mono, ui-monospace, monospace" font-size="9" fill="#6b5638" text-anchor="middle" font-weight="400" letter-spacing="0.4">personal data</text><path d="M202.0 116V160" fill="none" stroke="#2b1f12" stroke-width="0.75" marker-end="url(#pl-arrow)" stroke-dasharray="3 3"></path><text x="208.0" y="138" font-family="Space Mono, ui-monospace, monospace" font-size="9" fill="#6b5638" text-anchor="start" font-weight="400" letter-spacing="0.4">fail</text><text x="202.0" y="178" font-family="Space Mono, ui-monospace, monospace" font-size="8.5" fill="#bf5a36" text-anchor="middle" font-weight="400" letter-spacing="1.4">STOP · STAGE: INPUT</text><path d="M272 78.0H300" fill="none" stroke="#2b1f12" stroke-width="0.75" marker-end="url(#pl-arrow)"></path><text x="348.0" y="74.325" font-family="Space Mono, ui-monospace, monospace" font-size="9.5" fill="#6b5638" text-anchor="middle" font-weight="400" letter-spacing="1.2">MODEL</text><text x="348.0" y="88.325" font-family="Space Mono, ui-monospace, monospace" font-size="9.5" fill="#6b5638" text-anchor="middle" font-weight="400" letter-spacing="1.2">WRITES CODE</text><path d="M394 78.0H412" fill="none" stroke="#2b1f12" stroke-width="0.75" marker-end="url(#pl-arrow)"></path><rect x="414" y="40" width="140" height="76" fill="none" stroke="#2b1f12" stroke-width="0.75"></rect><text x="484.0" y="68.0" font-family="Space Mono, ui-monospace, monospace" font-size="10.5" fill="#2b1f12" text-anchor="middle" font-weight="700" letter-spacing="1.2">check_code()</text><text x="484.0" y="82.0" font-family="Space Mono, ui-monospace, monospace" font-size="9" fill="#6b5638" text-anchor="middle" font-weight="400" letter-spacing="0.4">functions, complexity,</text><text x="484.0" y="95.0" font-family="Space Mono, ui-monospace, monospace" font-size="9" fill="#6b5638" text-anchor="middle" font-weight="400" letter-spacing="0.4">packages, data flow</text><path d="M484.0 116V160" fill="none" stroke="#2b1f12" stroke-width="0.75" marker-end="url(#pl-arrow)" stroke-dasharray="3 3"></path><text x="490.0" y="138" font-family="Space Mono, ui-monospace, monospace" font-size="9" fill="#6b5638" text-anchor="start" font-weight="400" letter-spacing="0.4">fail</text><text x="484.0" y="178" font-family="Space Mono, ui-monospace, monospace" font-size="8.5" fill="#bf5a36" text-anchor="middle" font-weight="400" letter-spacing="1.4">STOP · STAGE: CODE</text><path d="M554 78.0H582" fill="none" stroke="#2b1f12" stroke-width="0.75" marker-end="url(#pl-arrow)"></path><text x="630.0" y="74.325" font-family="Space Mono, ui-monospace, monospace" font-size="9.5" fill="#6b5638" text-anchor="middle" font-weight="400" letter-spacing="1.2">RUN IN THE</text><text x="630.0" y="88.325" font-family="Space Mono, ui-monospace, monospace" font-size="9.5" fill="#6b5638" text-anchor="middle" font-weight="400" letter-spacing="1.2">SANDBOX</text><path d="M676 78.0H694" fill="none" stroke="#2b1f12" stroke-width="0.75" marker-end="url(#pl-arrow)"></path><rect x="696" y="40" width="140" height="76" fill="none" stroke="#2b1f12" stroke-width="0.75"></rect><text x="766.0" y="68.0" font-family="Space Mono, ui-monospace, monospace" font-size="10.5" fill="#2b1f12" text-anchor="middle" font-weight="700" letter-spacing="1.2">check_output()</text><text x="766.0" y="82.0" font-family="Space Mono, ui-monospace, monospace" font-size="9" fill="#6b5638" text-anchor="middle" font-weight="400" letter-spacing="0.4">personal data,</text><text x="766.0" y="95.0" font-family="Space Mono, ui-monospace, monospace" font-size="9" fill="#6b5638" text-anchor="middle" font-weight="400" letter-spacing="0.4">secrets, size</text><path d="M766.0 116V160" fill="none" stroke="#2b1f12" stroke-width="0.75" marker-end="url(#pl-arrow)" stroke-dasharray="3 3"></path><text x="772.0" y="138" font-family="Space Mono, ui-monospace, monospace" font-size="9" fill="#6b5638" text-anchor="start" font-weight="400" letter-spacing="0.4">fail</text><text x="766.0" y="178" font-family="Space Mono, ui-monospace, monospace" font-size="8.5" fill="#bf5a36" text-anchor="middle" font-weight="400" letter-spacing="1.4">STOP · STAGE: OUTPUT</text><path d="M836 78.0H866" fill="none" stroke="#2b1f12" stroke-width="0.75" marker-end="url(#pl-arrow)"></path><rect x="868" y="48" width="120" height="60" fill="none" stroke="#bf5a36" stroke-width="0.75"></rect><text x="928.0" y="75.0" font-family="Space Mono, ui-monospace, monospace" font-size="10.5" fill="#bf5a36" text-anchor="middle" font-weight="700" letter-spacing="1.2">RESULT</text><text x="928.0" y="89.0" font-family="Space Mono, ui-monospace, monospace" font-size="9" fill="#6b5638" text-anchor="middle" font-weight="400" letter-spacing="0.4">maybe redacted</text></svg><figcaption>Fig. 1 · secure_pipeline(): each check can stop the turn</figcaption></figure><p>A failure stops the turn. If the input check fails, the model never
+sees the prompt. If the code check fails, the code never runs. You skip
+the risky step and the work that would have followed it.</p>
 </div>
 <div class="section level2">
-<h2 id="creating-custom-guardrails">Creating Custom Guardrails<a class="anchor" aria-label="anchor" href="#creating-custom-guardrails"></a>
+<h2 id="writing-your-own-guardrails">Writing your own guardrails<a class="anchor" aria-label="anchor" href="#writing-your-own-guardrails"></a>
 </h2>
-<p>The built-in guardrails cover common threats: prompt injection,
-dangerous function calls, PII leakage, and secret exposure. But every
-application has domain-specific risks that generic guardrails will not
-catch. An agent that generates SQL needs SQL injection detection. A
-healthcare application needs HIPAA-specific PII patterns. A financial
-tool needs checks for account numbers and routing numbers.</p>
-<p>Every guardrail, built-in or custom, is an S3 object of class
-<code>secureguard</code> with four properties: <code>name</code>,
+<p>The built-in guardrails handle the common cases: prompt injection,
+dangerous function calls, personal data, and secrets. Your application
+probably has risks of its own. An agent that writes SQL should be
+checked for SQL injection. A health app may need extra patterns for
+patient data. A finance tool may need to spot account and routing
+numbers.</p>
+<p>Every guardrail, built-in or yours, is an S3 object of class
+<code>secureguard</code> with four fields: <code>name</code>,
 <code>type</code>, <code>check_fn</code>, and <code>description</code>.
-The <code><a href="../reference/new_guardrail.html">new_guardrail()</a></code> constructor validates these and returns
-a guardrail you can use with <code><a href="../reference/run_guardrail.html">run_guardrail()</a></code>,
-<code><a href="../reference/compose_guardrails.html">compose_guardrails()</a></code>, and <code><a href="../reference/secure_pipeline.html">secure_pipeline()</a></code>.
-Custom guardrails work with built-in ones because they share the same
-interface.</p>
+<code><a href="../reference/new_guardrail.html">new_guardrail()</a></code> checks these fields and returns a guardrail
+that works with <code><a href="../reference/run_guardrail.html">run_guardrail()</a></code>,
+<code><a href="../reference/compose_guardrails.html">compose_guardrails()</a></code>, and <code><a href="../reference/secure_pipeline.html">secure_pipeline()</a></code>,
+just like the built-in ones.</p>
 <div class="section level3">
-<h3 id="a-sql-injection-detector">A SQL Injection Detector<a class="anchor" aria-label="anchor" href="#a-sql-injection-detector"></a>
+<h3 id="a-sql-injection-detector">A SQL injection detector<a class="anchor" aria-label="anchor" href="#a-sql-injection-detector"></a>
 </h3>
-<p>When an LLM generates SQL queries, it may produce syntactically valid
-but semantically dangerous output, especially if the user’s prompt
-contains adversarial patterns. A guardrail can catch these patterns
-before any query reaches a database.</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<p>An LLM can write SQL that is valid and still dangerous, especially
+when the prompt was written to trick it. This guardrail looks for the
+usual patterns before a query gets near a database.</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ian-flores.github.io/secureguard/">secureguard</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">guard_sql_injection</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="op">)</span> <span class="op">{</span></span>
@@ -197,7 +148,7 @@ before any query reaches a database.</p>
 <span>  <span class="op">)</span></span>
 <span><span class="op">}</span></span></code></pre></div>
 <p>Now use it like any built-in guardrail:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">g</span> <span class="op">&lt;-</span> <span class="fu">guard_sql_injection</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">g</span></span>
 <span><span class="co">#&gt; &lt;secureguard&gt; <span style="font-weight: bold;">sql_injection</span> (input)</span></span>
@@ -213,12 +164,11 @@ before any query reaches a database.</p>
 <span><span class="co">#&gt; Reason: Potential SQL injection detected</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="a-code-length-limiter">A Code Length Limiter<a class="anchor" aria-label="anchor" href="#a-code-length-limiter"></a>
+<h3 id="a-code-length-limit">A code length limit<a class="anchor" aria-label="anchor" href="#a-code-length-limit"></a>
 </h3>
-<p>Custom guardrails of type <code>"code"</code> work exactly the same
-way. Here is one that limits the number of lines in LLM-generated
-code:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<p>A guardrail of type <code>"code"</code> is built the same way. This
+one limits how many lines the generated code can have:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">guard_code_length</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">max_lines</span> <span class="op">=</span> <span class="fl">100L</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">check_fn</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">code</span><span class="op">)</span> <span class="op">{</span></span>
 <span>    <span class="va">n_lines</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/strsplit.html" class="external-link">strsplit</a></span><span class="op">(</span><span class="va">code</span>, <span class="st">"\n"</span>, fixed <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">[[</span><span class="fl">1L</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
@@ -251,19 +201,16 @@ code:</p>
 <span><span class="co">#&gt; Reason: Code has 10 lines (max 5)</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="anatomy-of-a-check_fn">Anatomy of a check_fn<a class="anchor" aria-label="anchor" href="#anatomy-of-a-check_fn"></a>
+<h3 id="what-a-check_fn-needs">What a check_fn needs<a class="anchor" aria-label="anchor" href="#what-a-check_fn-needs"></a>
 </h3>
-<p>Every <code>check_fn</code> must:</p>
-<ol style="list-style-type: decimal">
-<li>Accept a single argument (the text or object to check).</li>
-<li>Return a <code><a href="../reference/guardrail_result.html">guardrail_result()</a></code> with at minimum
-<code>pass = TRUE</code> or <code>pass = FALSE</code>.</li>
-<li>Optionally include <code>reason</code> (why it failed),
-<code>warnings</code> (advisory notes), and <code>details</code> (a
-named list of metadata).</li>
-</ol>
-<p>The <code>@</code> operator accesses properties on the result:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<p>A <code>check_fn</code> takes one argument, the text or object to
+check. It returns a <code><a href="../reference/guardrail_result.html">guardrail_result()</a></code> with
+<code>pass = TRUE</code> or <code>pass = FALSE</code>. It can also set
+<code>reason</code> to say why it failed, <code>warnings</code> for
+things worth flagging that shouldn’t fail the check, and
+<code>details</code>, a named list of anything else.</p>
+<p>Use <code>@</code> to read fields from the result:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_guardrail.html">run_guardrail</a></span><span class="op">(</span><span class="fu"><a href="../reference/guard_code_analysis.html">guard_code_analysis</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"system('ls')"</span><span class="op">)</span></span>
 <span><span class="va">result</span><span class="op">@</span><span class="va">pass</span></span>
 <span><span class="co">#&gt; [1] FALSE</span></span>
@@ -275,23 +222,21 @@ named list of metadata).</li>
 </div>
 </div>
 <div class="section level2">
-<h2 id="composing-guardrails">Composing Guardrails<a class="anchor" aria-label="anchor" href="#composing-guardrails"></a>
+<h2 id="combining-guardrails">Combining guardrails<a class="anchor" aria-label="anchor" href="#combining-guardrails"></a>
 </h2>
-<p>In practice, you almost always want to run multiple guardrails
-together: checking for dangerous functions and excessive complexity, or
-detecting both prompt injection and off-topic prompts. secureguard
-provides two ways to combine them.</p>
+<p>You’ll usually want more than one check at a time, for example
+dangerous functions and complexity, or injection and topic. There are
+two ways to combine them.</p>
 <div class="section level3">
-<h3 id="compose_guardrails-same-type-composition">compose_guardrails(): Same-Type Composition<a class="anchor" aria-label="anchor" href="#compose_guardrails-same-type-composition"></a>
+<h3 id="compose_guardrails">compose_guardrails()<a class="anchor" aria-label="anchor" href="#compose_guardrails"></a>
 </h3>
-<p><code><a href="../reference/compose_guardrails.html">compose_guardrails()</a></code> merges multiple guardrails of the
-<strong>same type</strong> into a single composite guardrail. The result
-is itself a guardrail, so you can pass it to
-<code><a href="../reference/run_guardrail.html">run_guardrail()</a></code>, nest it inside another composition, or use
-it in a pipeline. Bundle all your code checks into a single “strict
-code” guardrail to treat them as one unit.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Compose three code guardrails -- ALL must pass (default)</span></span>
+<p><code><a href="../reference/compose_guardrails.html">compose_guardrails()</a></code> merges guardrails of the same type
+into one. The result is a guardrail too, so you can run it with
+<code><a href="../reference/run_guardrail.html">run_guardrail()</a></code>, put it inside another composition, or use
+it in a pipeline. Here, three code checks become one “strict code”
+guardrail:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Compose three code guardrails; all must pass (the default)</span></span>
 <span><span class="va">strict_code</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compose_guardrails.html">compose_guardrails</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="../reference/guard_code_analysis.html">guard_code_analysis</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  <span class="fu"><a href="../reference/guard_code_complexity.html">guard_code_complexity</a></span><span class="op">(</span>max_ast_depth <span class="op">=</span> <span class="fl">10</span>, max_calls <span class="op">=</span> <span class="fl">50</span><span class="op">)</span>,</span>
@@ -320,15 +265,14 @@ code” guardrail to treat them as one unit.</p>
 <span><span class="co">#&gt; processx</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="mode-any-at-least-one-must-pass">mode = “any”: At Least One Must Pass<a class="anchor" aria-label="anchor" href="#mode-any-at-least-one-must-pass"></a>
+<h3 id="mode-any">mode = “any”<a class="anchor" aria-label="anchor" href="#mode-any"></a>
 </h3>
-<p>The default <code>mode = "all"</code> is the right choice for
-security checks: all guards must pass. But sometimes you need the
-opposite logic: an allowlist where the input is acceptable if it matches
-<strong>any</strong> of several categories. With
-<code>mode = "any"</code>, the composite passes if at least one child
-guardrail passes:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<p>The default, <code>mode = "all"</code>, is what you want for security
+checks. Every check has to pass. Sometimes you want the reverse: input
+is fine if it matches any one of several categories. With
+<code>mode = "any"</code>, the composite passes when at least one of its
+guardrails passes:</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Accept prompts about either statistics OR machine learning</span></span>
 <span><span class="va">topic_guard</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compose_guardrails.html">compose_guardrails</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="../reference/guard_topic_scope.html">guard_topic_scope</a></span><span class="op">(</span>allowed_topics <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"statistics"</span>, <span class="st">"regression"</span>, <span class="st">"t-test"</span><span class="op">)</span><span class="op">)</span>,</span>
@@ -346,12 +290,11 @@ guardrail passes:</p>
 <span><span class="co">#&gt; allowed topic.</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="check_all-run-a-list-and-collect-results">check_all(): Run a List and Collect Results<a class="anchor" aria-label="anchor" href="#check_all-run-a-list-and-collect-results"></a>
+<h3 id="check_all">check_all()<a class="anchor" aria-label="anchor" href="#check_all"></a>
 </h3>
-<p>Sometimes you need individual results from each guardrail rather than
-a single composite result. <code><a href="../reference/check_all.html">check_all()</a></code> runs a list of
-guardrails and returns a summary:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<p><code><a href="../reference/check_all.html">check_all()</a></code> runs each guardrail in a list and keeps
+every result, so you can see how each one did:</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">guards</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="../reference/guard_code_analysis.html">guard_code_analysis</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  <span class="fu"><a href="../reference/guard_code_complexity.html">guard_code_complexity</a></span><span class="op">(</span>max_ast_depth <span class="op">=</span> <span class="fl">10</span><span class="op">)</span>,</span>
@@ -367,9 +310,9 @@ guardrails and returns a summary:</p>
 <span><span class="co"># Inspect individual results</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">vapply</a></span><span class="op">(</span><span class="va">result</span><span class="op">$</span><span class="va">results</span>, <span class="kw">function</span><span class="op">(</span><span class="va">r</span><span class="op">)</span> <span class="va">r</span><span class="op">@</span><span class="va">pass</span>, <span class="fu"><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] TRUE TRUE TRUE</span></span></code></pre></div>
-<p>When a check fails, <code><a href="../reference/check_all.html">check_all()</a></code> collects all failure
-reasons:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<p>When something fails, <code>result$reasons</code> has the reason from
+each failing check:</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/check_all.html">check_all</a></span><span class="op">(</span><span class="va">guards</span>, <span class="st">"Sys.getenv('SECRET_KEY')"</span><span class="op">)</span></span>
 <span><span class="va">result</span><span class="op">$</span><span class="va">pass</span></span>
 <span><span class="co">#&gt; [1] FALSE</span></span>
@@ -377,43 +320,32 @@ reasons:</p>
 <span><span class="co">#&gt; [1] "Data flow violation(s): Sys.getenv"</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="when-to-use-compose_guardrails-vs-check_all">When to Use compose_guardrails() vs check_all()<a class="anchor" aria-label="anchor" href="#when-to-use-compose_guardrails-vs-check_all"></a>
+<h3 id="which-one-to-use">Which one to use<a class="anchor" aria-label="anchor" href="#which-one-to-use"></a>
 </h3>
-<p>Both functions combine multiple guardrails, but they serve different
-purposes and return different types:</p>
-<p><strong>Use <code><a href="../reference/compose_guardrails.html">compose_guardrails()</a></code></strong> when you want
-a single guardrail object that you can pass to
-<code><a href="../reference/run_guardrail.html">run_guardrail()</a></code>, nest inside another
-<code><a href="../reference/compose_guardrails.html">compose_guardrails()</a></code>, or use in a
-<code><a href="../reference/secure_pipeline.html">secure_pipeline()</a></code>. The composed guardrail behaves as one
-unit: you get a single pass/fail result. This is the right choice when
-you are building reusable guardrail configurations (e.g., a “strict
-code” composite) that you want to treat as a single check.</p>
-<p><strong>Use <code><a href="../reference/check_all.html">check_all()</a></code></strong> when you need
-diagnostic detail. It returns individual results for each guardrail in
-the list, so you can report exactly which checks failed and why. This is
-useful in logging, debugging, and user-facing error messages where “code
-guardrail failed” is less helpful than “blocked function
-<code><a href="https://rdrr.io/r/base/system.html" class="external-link">system()</a></code> detected by code_analysis; exceeded max AST depth
-of 10 per code_complexity.”</p>
-<p>In practice, many applications use both:
-<code><a href="../reference/compose_guardrails.html">compose_guardrails()</a></code> to build reusable guardrail groups,
-and <code><a href="../reference/check_all.html">check_all()</a></code> at the top level to get per-group
-diagnostics.</p>
+<p><code><a href="../reference/compose_guardrails.html">compose_guardrails()</a></code> gives you a guardrail. You get one
+pass or fail, and you can reuse the object anywhere a guardrail is
+accepted. It suits a fixed set of checks you want to treat as one, like
+the “strict code” example.</p>
+<p><code><a href="../reference/check_all.html">check_all()</a></code> gives you a list of results. Use it when you
+need to say which check failed and why, in logs or in an error message.
+“Code guardrail failed” doesn’t help anyone. “code_analysis blocked
+<code><a href="https://rdrr.io/r/base/system.html" class="external-link">system()</a></code>” does.</p>
+<p>Plenty of applications use both: <code><a href="../reference/compose_guardrails.html">compose_guardrails()</a></code> to
+build groups, and <code><a href="../reference/check_all.html">check_all()</a></code> on top to see which group
+failed.</p>
 </div>
 </div>
 <div class="section level2">
-<h2 id="building-pipelines-with-secure_pipeline">Building Pipelines with secure_pipeline()<a class="anchor" aria-label="anchor" href="#building-pipelines-with-secure_pipeline"></a>
+<h2 id="pipelines">Pipelines<a class="anchor" aria-label="anchor" href="#pipelines"></a>
 </h2>
-<p>Individual guardrails and compositions are useful for targeted
-checks, but a production agent needs all three defense layers working
-together. A pipeline bundles guardrails for input, code, and output into
-one object with methods for each stage. You define your security policy
-once and apply it to every agent turn.</p>
+<p>A real agent needs input, code, and output checks together.
+<code><a href="../reference/secure_pipeline.html">secure_pipeline()</a></code> holds all three in one object, with a
+method for each stage. You write the rules once and use them on every
+turn.</p>
 <div class="section level3">
-<h3 id="defining-a-pipeline">Defining a Pipeline<a class="anchor" aria-label="anchor" href="#defining-a-pipeline"></a>
+<h3 id="defining-a-pipeline">Defining a pipeline<a class="anchor" aria-label="anchor" href="#defining-a-pipeline"></a>
 </h3>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pipeline</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/secure_pipeline.html">secure_pipeline</a></span><span class="op">(</span></span>
 <span>  input_guardrails <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>    <span class="fu"><a href="../reference/guard_prompt_injection.html">guard_prompt_injection</a></span><span class="op">(</span>sensitivity <span class="op">=</span> <span class="st">"high"</span><span class="op">)</span>,</span>
@@ -434,14 +366,14 @@ once and apply it to every agent turn.</p>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="running-each-stage">Running Each Stage<a class="anchor" aria-label="anchor" href="#running-each-stage"></a>
+<h3 id="running-each-stage">Running each stage<a class="anchor" aria-label="anchor" href="#running-each-stage"></a>
 </h3>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Stage 1: validate user input</span></span>
 <span><span class="va">input_result</span> <span class="op">&lt;-</span> <span class="va">pipeline</span><span class="op">$</span><span class="fu">check_input</span><span class="op">(</span><span class="st">"Calculate the mean and sd of mtcars$mpg"</span><span class="op">)</span></span>
 <span><span class="va">input_result</span><span class="op">$</span><span class="va">pass</span></span>
 <span><span class="co">#&gt; [1] TRUE</span></span></code></pre></div>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Stage 2: validate LLM-generated code</span></span>
 <span><span class="va">code_result</span> <span class="op">&lt;-</span> <span class="va">pipeline</span><span class="op">$</span><span class="fu">check_code</span><span class="op">(</span><span class="st">"</span></span>
 <span><span class="st">  library(dplyr)</span></span>
@@ -450,7 +382,7 @@ once and apply it to every agent turn.</p>
 <span><span class="st">"</span><span class="op">)</span></span>
 <span><span class="va">code_result</span><span class="op">$</span><span class="va">pass</span></span>
 <span><span class="co">#&gt; [1] TRUE</span></span></code></pre></div>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Stage 3: filter execution output</span></span>
 <span><span class="va">output_result</span> <span class="op">&lt;-</span> <span class="va">pipeline</span><span class="op">$</span><span class="fu">check_output</span><span class="op">(</span><span class="st">"mean_mpg = 20.09, sd_mpg = 6.03"</span><span class="op">)</span></span>
 <span><span class="va">output_result</span><span class="op">$</span><span class="va">pass</span></span>
@@ -459,14 +391,13 @@ once and apply it to every agent turn.</p>
 <span><span class="co">#&gt; [1] "mean_mpg = 20.09, sd_mpg = 6.03"</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="pipeline-in-an-agent-loop">Pipeline in an Agent Loop<a class="anchor" aria-label="anchor" href="#pipeline-in-an-agent-loop"></a>
+<h3 id="a-pipeline-in-an-agent-loop">A pipeline in an agent loop<a class="anchor" aria-label="anchor" href="#a-pipeline-in-an-agent-loop"></a>
 </h3>
-<p>Call the three <code>check_*</code> methods in sequence inside your
-agent loop. Each stage short-circuits on failure: if
-<code>check_input()</code> rejects the prompt, you skip the LLM call
-entirely. If <code>check_code()</code> rejects the generated code, you
-skip execution. Here is the complete pattern:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<p>Call the three <code>check_*</code> methods in order. Stop as soon as
+one fails. If <code>check_input()</code> fails, don’t call the model. If
+<code>check_code()</code> fails, don’t run the code. The whole turn
+looks like this:</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">process_turn</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">pipeline</span>, <span class="va">user_prompt</span>, <span class="va">llm_fn</span>, <span class="va">execute_fn</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="co"># 1. Input guardrails</span></span>
 <span></span>
@@ -510,13 +441,13 @@ skip execution. Here is the complete pattern:</p>
 </div>
 </div>
 <div class="section level2">
-<h2 id="mixing-custom-and-built-in-guardrails">Mixing Custom and Built-In Guardrails<a class="anchor" aria-label="anchor" href="#mixing-custom-and-built-in-guardrails"></a>
+<h2 id="mixing-your-guardrails-with-the-built-in-ones">Mixing your guardrails with the built-in ones<a class="anchor" aria-label="anchor" href="#mixing-your-guardrails-with-the-built-in-ones"></a>
 </h2>
-<p>Custom and built-in guardrails share the same interface. You can mix
-them in <code><a href="../reference/compose_guardrails.html">compose_guardrails()</a></code>, <code><a href="../reference/check_all.html">check_all()</a></code>, and
-<code><a href="../reference/secure_pipeline.html">secure_pipeline()</a></code>. There is no registration step or plugin
-system; any <code>secureguard</code> object works everywhere:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<p>Your guardrails and the built-in ones are the same kind of object, so
+you can mix them in <code><a href="../reference/compose_guardrails.html">compose_guardrails()</a></code>,
+<code><a href="../reference/check_all.html">check_all()</a></code>, and <code><a href="../reference/secure_pipeline.html">secure_pipeline()</a></code>. There’s
+nothing to register:</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># The SQL injection guard from earlier alongside built-in input guards</span></span>
 <span><span class="va">input_guards</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compose_guardrails.html">compose_guardrails</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="../reference/guard_prompt_injection.html">guard_prompt_injection</a></span><span class="op">(</span><span class="op">)</span>,</span>
@@ -529,8 +460,8 @@ system; any <code>secureguard</code> object works everywhere:</p>
 <span><span class="fu"><a href="../reference/run_guardrail.html">run_guardrail</a></span><span class="op">(</span><span class="va">input_guards</span>, <span class="st">"' OR 1=1 --"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; &lt;guardrail_result&gt; FAIL</span></span>
 <span><span class="co">#&gt; Reason: Potential SQL injection detected</span></span></code></pre></div>
-<p>Similarly for code guardrails:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<p>The same goes for code guardrails:</p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Custom length guard composed with built-in code guards</span></span>
 <span><span class="va">code_guards</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compose_guardrails.html">compose_guardrails</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="../reference/guard_code_analysis.html">guard_code_analysis</a></span><span class="op">(</span><span class="op">)</span>,</span>
@@ -542,25 +473,24 @@ system; any <code>secureguard</code> object works everywhere:</p>
 <span><span class="co">#&gt; &lt;guardrail_result&gt; PASS</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="integration-with-securer">Integration with securer<a class="anchor" aria-label="anchor" href="#integration-with-securer"></a>
+<h2 id="using-secureguard-with-securer">Using secureguard with securer<a class="anchor" aria-label="anchor" href="#using-secureguard-with-securer"></a>
 </h2>
-<p>secureguard analyzes code and outputs to decide whether they are
-safe. <a href="https://github.com/ian-flores/securer" class="external-link">securer</a>
-provides OS-level sandboxing that limits what the code
-<strong>can</strong> do, regardless of what it tries. secureguard
-catches known-dangerous patterns before execution; securer contains
-unknown threats at the operating system level.</p>
-<p>securer is a suggested dependency; all of the patterns above work
-without it. The integration adds two things: pre-execution hooks and
-output guarding after execution.</p>
+<p>secureguard looks at code and output and decides whether they’re
+safe. <a href="https://github.com/ian-flores/securer" class="external-link">securer</a> runs
+the code in an operating system sandbox that limits what it can do,
+whatever it tries. secureguard stops patterns it knows are dangerous.
+securer contains the ones it doesn’t know about.</p>
+<p>securer is only suggested, not required. Everything above works
+without it. With it, you get a hook that checks code before securer runs
+it, and you can check the output afterwards.</p>
 <div class="section level3">
-<h3 id="pre-execute-hooks">Pre-Execute Hooks<a class="anchor" aria-label="anchor" href="#pre-execute-hooks"></a>
+<h3 id="checking-code-before-it-runs">Checking code before it runs<a class="anchor" aria-label="anchor" href="#checking-code-before-it-runs"></a>
 </h3>
-<p><code><a href="../reference/as_pre_execute_hook.html">as_pre_execute_hook()</a></code> converts code guardrails into a
-function that securer calls before executing each code snippet. It
-returns <code>TRUE</code> to allow execution or <code>FALSE</code> to
+<p><code><a href="../reference/as_pre_execute_hook.html">as_pre_execute_hook()</a></code> turns code guardrails into a
+function that securer calls before running each piece of code. It
+returns <code>TRUE</code> to let the code run and <code>FALSE</code> to
 block it.</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ian-flores.github.io/securer/" class="external-link">securer</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ian-flores.github.io/secureguard/">secureguard</a></span><span class="op">)</span></span>
 <span></span>
@@ -577,12 +507,12 @@ block it.</p>
 <span><span class="va">sess</span><span class="op">$</span><span class="fu">close</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="post-execute-output-guarding">Post-Execute Output Guarding<a class="anchor" aria-label="anchor" href="#post-execute-output-guarding"></a>
+<h3 id="checking-the-output">Checking the output<a class="anchor" aria-label="anchor" href="#checking-the-output"></a>
 </h3>
-<p><code><a href="../reference/guard_output.html">guard_output()</a></code> runs output guardrails on execution
-results. Guardrails with <code>action = "redact"</code> transform the
-output rather than blocking it:</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<p><code><a href="../reference/guard_output.html">guard_output()</a></code> runs output guardrails on what the code
+returned. Guardrails with <code>action = "redact"</code> replace the
+sensitive parts instead of blocking the whole result:</p>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="va">sess</span><span class="op">$</span><span class="fu">execute</span><span class="op">(</span><span class="st">"paste('My API key is', 'AKIAIOSFODNN7EXAMPLE')"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">checked</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/guard_output.html">guard_output</a></span><span class="op">(</span></span>
@@ -599,11 +529,10 @@ output rather than blocking it:</p>
 <span><span class="op">}</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="pipeline-hook">Pipeline Hook<a class="anchor" aria-label="anchor" href="#pipeline-hook"></a>
+<h3 id="a-hook-from-a-pipeline">A hook from a pipeline<a class="anchor" aria-label="anchor" href="#a-hook-from-a-pipeline"></a>
 </h3>
-<p>A pipeline can produce a pre-execute hook from its code
-guardrails:</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<p>A pipeline can turn its code guardrails into a hook:</p>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pipeline</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/secure_pipeline.html">secure_pipeline</a></span><span class="op">(</span></span>
 <span>  input_guardrails <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="../reference/guard_prompt_injection.html">guard_prompt_injection</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  code_guardrails <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
@@ -629,21 +558,19 @@ guardrails:</p>
 </div>
 </div>
 <div class="section level2">
-<h2 id="advanced-composition-patterns">Advanced Composition Patterns<a class="anchor" aria-label="anchor" href="#advanced-composition-patterns"></a>
+<h2 id="stricter-and-looser-settings">Stricter and looser settings<a class="anchor" aria-label="anchor" href="#stricter-and-looser-settings"></a>
 </h2>
-<p>The patterns above apply the same guardrails to every request. In
-practice, you often need to vary strictness based on context: who the
-user is, where the request came from, and what level of trust is
-appropriate.</p>
+<p>So far every request gets the same checks. Often you want to be
+stricter with some users than others, depending on who they are and
+where the request came from.</p>
 <div class="section level3">
-<h3 id="layered-sensitivity">Layered Sensitivity<a class="anchor" aria-label="anchor" href="#layered-sensitivity"></a>
+<h3 id="injection-sensitivity">Injection sensitivity<a class="anchor" aria-label="anchor" href="#injection-sensitivity"></a>
 </h3>
-<p>A public-facing chatbot is exposed to adversarial users and needs
-high-sensitivity injection detection and tight topic scoping. An
-internal analytics tool used by trusted data scientists can use lower
-sensitivity to avoid false positives on legitimate analytical
-prompts:</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<p>A public chatbot will meet people trying to break it, so it needs
+high injection sensitivity and a narrow list of topics. An internal tool
+for your own analysts can use low sensitivity, so ordinary prompts don’t
+get flagged by mistake:</p>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Public-facing: high sensitivity, strict topic scoping</span></span>
 <span><span class="va">public_guards</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compose_guardrails.html">compose_guardrails</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="../reference/guard_prompt_injection.html">guard_prompt_injection</a></span><span class="op">(</span>sensitivity <span class="op">=</span> <span class="st">"high"</span><span class="op">)</span>,</span>
@@ -672,19 +599,20 @@ prompts:</p>
 <span><span class="co">#&gt; &lt;guardrail_result&gt; PASS</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="graduated-code-restrictions">Graduated Code Restrictions<a class="anchor" aria-label="anchor" href="#graduated-code-restrictions"></a>
+<h3 id="code-restrictions">Code restrictions<a class="anchor" aria-label="anchor" href="#code-restrictions"></a>
 </h3>
-<p>You can do the same with code guardrails. A trusted internal user
-running vetted analysis scripts needs fewer restrictions than an
-untrusted external user whose prompts generate arbitrary code:</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<p>The same idea works for code. A trusted colleague running reviewed
+scripts needs fewer limits than an outside user whose prompts can
+produce any code at all:</p>
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Trusted context: only block the most dangerous operations</span></span>
 <span><span class="va">trusted_code</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compose_guardrails.html">compose_guardrails</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="../reference/guard_code_analysis.html">guard_code_analysis</a></span><span class="op">(</span>blocked_functions <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"system"</span>, <span class="st">"system2"</span>, <span class="st">"shell"</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  <span class="fu"><a href="../reference/guard_code_dataflow.html">guard_code_dataflow</a></span><span class="op">(</span></span>
 <span>    block_env_access <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>    block_network <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>    block_file_write <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>    block_file_write <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>    block_file_read <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -701,25 +629,24 @@ untrusted external user whose prompts generate arbitrary code:</p>
 <span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># The same code may pass in trusted but fail in untrusted</span></span>
+<span><span class="co"># Reading a file passes in the trusted setup but fails in the untrusted one</span></span>
 <span><span class="va">code</span> <span class="op">&lt;-</span> <span class="st">"readLines('data.csv')"</span></span>
 <span><span class="fu"><a href="../reference/run_guardrail.html">run_guardrail</a></span><span class="op">(</span><span class="va">trusted_code</span>, <span class="va">code</span><span class="op">)</span></span>
-<span><span class="co">#&gt; &lt;guardrail_result&gt; FAIL</span></span>
-<span><span class="co">#&gt; Reason: Data flow violation(s): readLines</span></span>
+<span><span class="co">#&gt; &lt;guardrail_result&gt; PASS</span></span>
 <span><span class="fu"><a href="../reference/run_guardrail.html">run_guardrail</a></span><span class="op">(</span><span class="va">untrusted_code</span>, <span class="va">code</span><span class="op">)</span></span>
 <span><span class="co">#&gt; &lt;guardrail_result&gt; FAIL</span></span>
 <span><span class="co">#&gt; Reason: Data flow violation(s): readLines</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="redact-vs-block-decision">Redact vs Block Decision<a class="anchor" aria-label="anchor" href="#redact-vs-block-decision"></a>
+<h3 id="redact-or-block">Redact or block<a class="anchor" aria-label="anchor" href="#redact-or-block"></a>
 </h3>
-<p>PII like social security numbers or patient records should block the
-entire response; partial disclosure is still a privacy violation. API
-keys and tokens can often be redacted in place, keeping the useful parts
-of the response while replacing the sensitive value. Output guardrails
-support three actions (<code>"block"</code>, <code>"redact"</code>,
-<code>"warn"</code>) for this:</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<p>Social security numbers and patient records should block the whole
+response. Showing part of a record is still a privacy breach. API keys
+and tokens can usually be redacted, which keeps the useful part of the
+answer and hides the value. Output guardrails take an
+<code>action</code> of <code>"block"</code>, <code>"redact"</code>, or
+<code>"warn"</code>:</p>
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># PII blocks the output entirely</span></span>
 <span><span class="co"># Secrets get redacted so the response is still useful</span></span>
 <span><span class="va">pipeline</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/secure_pipeline.html">secure_pipeline</a></span><span class="op">(</span></span>
@@ -749,55 +676,42 @@ support three actions (<code>"block"</code>, <code>"redact"</code>,
 <h2 id="summary">Summary<a class="anchor" aria-label="anchor" href="#summary"></a>
 </h2>
 <table class="table">
-<colgroup>
-<col width="31%">
-<col width="34%">
-<col width="34%">
-</colgroup>
 <thead><tr class="header">
-<th>Pattern</th>
-<th>Function</th>
-<th>Use Case</th>
+<th>To do this</th>
+<th>Use</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td>Custom guardrail</td>
+<td>Write your own check</td>
 <td><code><a href="../reference/new_guardrail.html">new_guardrail()</a></code></td>
-<td>Domain-specific checks</td>
 </tr>
 <tr class="even">
-<td>Same-type composition</td>
+<td>Merge checks of one type into one guardrail</td>
 <td><code><a href="../reference/compose_guardrails.html">compose_guardrails()</a></code></td>
-<td>Merge guards into one reusable unit</td>
 </tr>
 <tr class="odd">
-<td>Batch check</td>
+<td>Run a list of checks and see each result</td>
 <td><code><a href="../reference/check_all.html">check_all()</a></code></td>
-<td>Individual results per guard (diagnostics)</td>
 </tr>
 <tr class="even">
-<td>Full pipeline</td>
+<td>Check input, code, and output in one object</td>
 <td><code><a href="../reference/secure_pipeline.html">secure_pipeline()</a></code></td>
-<td>Three-layer defense for production</td>
 </tr>
 <tr class="odd">
-<td>Pre-execute hook</td>
+<td>Check code before securer runs it</td>
 <td><code><a href="../reference/as_pre_execute_hook.html">as_pre_execute_hook()</a></code></td>
-<td>securer integration</td>
 </tr>
 <tr class="even">
-<td>Output guard</td>
+<td>Check or redact a result after it runs</td>
 <td><code><a href="../reference/guard_output.html">guard_output()</a></code></td>
-<td>Post-execution filtering</td>
 </tr>
 </tbody>
 </table>
-<p>Build small guards that each target one threat. Combine them with
-<code><a href="../reference/compose_guardrails.html">compose_guardrails()</a></code> or <code><a href="../reference/check_all.html">check_all()</a></code>, and wire
-them into pipelines that check every stage of an agent workflow. When
-the built-in guardrails do not cover your domain, write your own with
-<code><a href="../reference/new_guardrail.html">new_guardrail()</a></code>. Custom guards and built-in guards have the
-same interface and compose the same way.</p>
+<p>Keep each guardrail small, aimed at one problem. Combine them with
+<code><a href="../reference/compose_guardrails.html">compose_guardrails()</a></code> or <code><a href="../reference/check_all.html">check_all()</a></code>, and put
+them in a pipeline that checks every stage of the turn. If the built-in
+checks don’t fit your case, write one with <code><a href="../reference/new_guardrail.html">new_guardrail()</a></code>.
+It will work anywhere the built-in ones do.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
@@ -806,7 +720,20 @@ same interface and compose the same way.</p>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Ian Flores Siaca.</p>
+  <div class="title-block">
+<div>
+<b>Sheet</b>2 of 4
+</div>
+<div>
+<b>Quadrangle</b>secureguard
+</div>
+<div>
+<b>Survey</b>Guardrails
+</div>
+<div>
+<b>Series</b>secure-r-dev
+</div>
+</div>
 </div>
 
 <div class="pkgdown-footer-right">

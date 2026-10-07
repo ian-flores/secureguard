@@ -1,8 +1,8 @@
 # Code complexity guardrail
 
-Creates a guardrail that checks R code against complexity limits using
-AST statistics. Prevents overly complex or deeply nested code from being
-executed.
+Fails code that is nested too deeply or has too many calls, assignments,
+or top-level expressions. The counts come from
+[`ast_stats()`](https://ian-flores.github.io/secureguard/reference/ast_stats.md).
 
 ## Usage
 

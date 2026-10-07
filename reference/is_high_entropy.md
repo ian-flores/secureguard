@@ -1,7 +1,6 @@
 # Check if a string has high entropy
 
-Determines whether a string has suspiciously high Shannon entropy,
-suggesting it may be a secret, key, or random token.
+Checks whether a string looks random enough to be a key or token.
 
 ## Usage
 

@@ -1,6 +1,6 @@
 # Detect PII in text
 
-Scans text for personally identifiable information using regex patterns.
+Finds personal data in a string and returns the matches by type.
 
 ## Usage
 

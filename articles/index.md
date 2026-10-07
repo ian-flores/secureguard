@@ -2,10 +2,10 @@
 
 ### Getting Started
 
-- [Getting Started with
+- [Getting started with
   secureguard](https://ian-flores.github.io/secureguard/articles/secureguard.md):
 
 ### Advanced
 
-- [Advanced Guardrail
-  Patterns](https://ian-flores.github.io/secureguard/articles/advanced-patterns.md):
+- [Advanced guardrail
+  patterns](https://ian-flores.github.io/secureguard/articles/advanced-patterns.md):

@@ -1,8 +1,9 @@
 # Code AST analysis guardrail
 
-Creates a guardrail that inspects R code for calls to blocked functions.
-Uses AST walking to detect direct calls and optionally indirect
-invocation via [`do.call()`](https://rdrr.io/r/base/do.call.html).
+Parses R code and fails if it calls a blocked function. Because it reads
+the parsed code rather than the text, it also finds calls made through
+`do.call("system", ...)` and namespaced calls like
+[`base::system()`](https://rdrr.io/r/base/system.html).
 
 ## Usage
 
@@ -20,20 +21,24 @@ guard_code_analysis(
 
   Character vector of function names to block. Defaults to
   [`default_blocked_functions()`](https://ian-flores.github.io/secureguard/reference/default_blocked_functions.md).
-  Names can include namespace prefixes (e.g. `"processx::run"`).
+  A bare name like `"system"` also blocks
+  [`base::system()`](https://rdrr.io/r/base/system.html). A name with a
+  package prefix, like `"processx::run"`, blocks only that package's
+  function.
 
 - allow_namespaces:
 
-  Character vector of package prefixes to allow even if a function from
-  that package appears in `blocked_functions`. For example,
-  `allow_namespaces = "dplyr"` would allow
-  [`dplyr::filter`](https://dplyr.tidyverse.org/reference/filter.html).
+  Character vector of package names. Namespaced calls into these
+  packages are allowed even if the function is in `blocked_functions`.
+  For example, `allow_namespaces = "processx"` lets
+  [`processx::run()`](http://processx.r-lib.org/reference/run.md)
+  through.
 
 - detect_indirect:
 
-  Logical(1). If `TRUE` (default), also detect indirect calls via
-  `do.call("system", ...)` where the first argument is a string literal
-  matching a blocked function.
+  Logical(1). If `TRUE` (default), also catch calls like
+  `do.call("system", ...)`, where the first argument is a string naming
+  a blocked function.
 
 ## Value
 

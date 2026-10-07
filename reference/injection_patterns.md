@@ -1,7 +1,8 @@
 # Prompt injection detection patterns
 
-Returns a named list of regex patterns for detecting prompt injection
-attacks, filtered by sensitivity level.
+The regular expressions
+[`guard_prompt_injection()`](https://ian-flores.github.io/secureguard/reference/guard_prompt_injection.md)
+uses. Higher sensitivity levels include more of them.
 
 ## Usage
 
@@ -14,8 +15,8 @@ injection_patterns(sensitivity = c("medium", "low", "high"))
 - sensitivity:
 
   Character(1). One of `"low"`, `"medium"` (default), or `"high"`.
-  Higher sensitivity includes more patterns and is more likely to
-  produce false positives.
+  Higher levels include more patterns and flag more harmless text by
+  mistake.
 
 ## Value
 

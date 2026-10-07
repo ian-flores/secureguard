@@ -1,8 +1,8 @@
 # Walk an AST node recursively
 
-Visits every node in a parsed R expression, calling visitor callbacks
-for calls, symbols, and literals. Findings from callbacks are
-accumulated and returned.
+Visits every node in a parsed R expression and calls your callbacks on
+function calls, symbols, and literals. Anything a callback returns,
+other than `NULL`, is collected and returned.
 
 ## Usage
 
@@ -24,21 +24,21 @@ walk_ast(expr, visitor, depth = 0L)
 
   `on_call`
 
-  :   `function(expr, fn_name, depth)` – called for function calls.
-      `fn_name` is extracted via
+  :   `function(expr, fn_name, depth)`, called for function calls.
+      `fn_name` comes from
       [`call_fn_name()`](https://ian-flores.github.io/secureguard/reference/call_fn_name.md).
 
   `on_symbol`
 
-  :   `function(expr, name, depth)` – called for symbols (names).
+  :   `function(expr, name, depth)`, called for symbols (names).
 
   `on_literal`
 
-  :   `function(expr, depth)` – called for literal values (numeric,
-      character, logical, NULL, etc.).
+  :   `function(expr, depth)`, called for literal values (numbers,
+      strings, logicals, `NULL`, and so on).
 
-  Each callback should return `NULL` to continue without accumulating,
-  or any other value to add it to the findings list.
+  A callback returns `NULL` to record nothing, or any other value to add
+  it to the results.
 
 - depth:
 
@@ -47,8 +47,7 @@ walk_ast(expr, visitor, depth = 0L)
 
 ## Value
 
-A list of findings accumulated from visitor callbacks (excluding `NULL`
-returns).
+A list of the non-`NULL` values the callbacks returned.
 
 ## Examples
 

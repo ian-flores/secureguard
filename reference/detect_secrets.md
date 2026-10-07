@@ -1,6 +1,6 @@
 # Detect secrets in text
 
-Scans text for secrets and credentials using regex patterns.
+Finds secrets in a string and returns the matches by type.
 
 ## Usage
 
@@ -19,9 +19,6 @@ detect_secrets(text, types = NULL)
   Character vector of secret types to check. Defaults to all available
   types from
   [`secret_patterns()`](https://ian-flores.github.io/secureguard/reference/secret_patterns.md).
-  See
-  [`secret_patterns()`](https://ian-flores.github.io/secureguard/reference/secret_patterns.md)
-  for the full list of ~40 supported types.
 
 ## Value
 

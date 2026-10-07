@@ -1,7 +1,7 @@
 # Parse code string into expressions
 
-Parses an R code string into a list of expressions, with clear error
-messages on failure.
+Parses a string of R code. If the code doesn't parse, the error says
+why.
 
 ## Usage
 

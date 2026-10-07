@@ -1,8 +1,10 @@
 # Default blocked functions
 
-Returns the default character vector of function names considered
-dangerous for LLM-generated code. These include system-level calls,
-dynamic evaluation, and file/network operations.
+The functions
+[`guard_code_analysis()`](https://ian-flores.github.io/secureguard/reference/guard_code_analysis.md)
+blocks unless you give it your own list. They run shell commands,
+evaluate code built at run time, call compiled code, delete files, or
+open network connections.
 
 ## Usage
 

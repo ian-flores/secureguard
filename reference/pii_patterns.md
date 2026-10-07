@@ -1,7 +1,6 @@
 # PII detection patterns
 
-Returns a named list of regex patterns for detecting personally
-identifiable information (PII) in text.
+The regular expressions used to find personal data (PII) in text.
 
 ## Usage
 

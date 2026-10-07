@@ -1,7 +1,9 @@
-# S7 class: secureguard
+# The secureguard class
 
-An S7 value type representing a guardrail. Prefer the `guard_*()`
-factory functions for end-user guardrails.
+The S7 class behind every guardrail. You rarely need it directly. Use
+[`new_guardrail()`](https://ian-flores.github.io/secureguard/reference/new_guardrail.md)
+to write your own check, or one of the `guard_*()` functions for a
+built-in one.
 
 ## Usage
 
@@ -31,7 +33,7 @@ secureguard_class(
 
 - description:
 
-  Character(1). Human-readable description.
+  Character(1). A short description of what the guardrail checks.
 
 ## Value
 

@@ -1,7 +1,8 @@
 # Create a new guardrail
 
-Low-level constructor for guardrail objects. Prefer the `guard_*()`
-factory functions for end-user guardrails.
+Builds a guardrail from a function that does the checking. Use it to
+write your own checks. For the built-in checks, use the `guard_*()`
+functions.
 
 ## Usage
 
@@ -26,7 +27,7 @@ new_guardrail(name, type, check_fn, description = "")
 
 - description:
 
-  Character(1). Human-readable description.
+  Character(1). A short description of what the guardrail checks.
 
 ## Value
 

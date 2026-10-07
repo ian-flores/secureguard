@@ -1,4 +1,4 @@
-# Compute summary statistics for R code AST
+# Count calls, assignments, and nesting in R code
 
 Parses the code and returns counts of calls, assignments, symbols,
 expressions, and maximum nesting depth.

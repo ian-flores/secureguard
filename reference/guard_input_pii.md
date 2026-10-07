@@ -1,7 +1,7 @@
 # Input PII guardrail
 
-Creates a guardrail that detects personally identifiable information in
-input text and either blocks or warns.
+Looks for personal data, such as social security numbers and email
+addresses, in input text. It can fail the check or just warn.
 
 ## Usage
 
@@ -24,7 +24,7 @@ guard_input_pii(
 - action:
 
   Character(1). What to do when PII is found: `"block"` (default) fails
-  the check, `"warn"` passes with advisory warnings.
+  the check, `"warn"` passes but adds a warning.
 
 ## Value
 

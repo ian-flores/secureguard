@@ -4,6 +4,18 @@
 
 ### Bug fixes
 
+- Security:
+  [`guard_code_analysis()`](https://ian-flores.github.io/secureguard/reference/guard_code_analysis.md),
+  [`guard_code_dataflow()`](https://ian-flores.github.io/secureguard/reference/guard_code_dataflow.md),
+  and
+  [`guard_code_dependencies()`](https://ian-flores.github.io/secureguard/reference/guard_code_dependencies.md)
+  now match namespace-qualified calls on their bare name. Before,
+  [`base::system()`](https://rdrr.io/r/base/system.html),
+  [`base::readLines()`](https://rdrr.io/r/base/readLines.html),
+  [`utils::download.file()`](https://rdrr.io/r/utils/download.file.html),
+  and [`base::library()`](https://rdrr.io/r/base/library.html) got past
+  checks that blocked the unqualified call.
+
 - [`output_to_text()`](https://ian-flores.github.io/secureguard/reference/output_to_text.md)
   now unwraps
   [`ellmer::ContentToolResult`](https://ellmer.tidyverse.org/reference/Content.html)

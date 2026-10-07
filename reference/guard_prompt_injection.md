@@ -1,7 +1,7 @@
 # Prompt injection guardrail
 
-Creates a guardrail that detects prompt injection attempts in input
-text.
+Looks for text that tries to override the agent's instructions, such as
+"ignore all previous instructions". The checks are regular expressions.
 
 ## Usage
 
@@ -18,20 +18,20 @@ guard_prompt_injection(
 - sensitivity:
 
   Character(1). One of `"low"`, `"medium"` (default), or `"high"`.
-  Controls the number of injection patterns checked. See
-  [`injection_patterns()`](https://ian-flores.github.io/secureguard/reference/injection_patterns.md)
-  for details.
+  Higher levels check more patterns, so they catch more but also flag
+  more harmless text. See
+  [`injection_patterns()`](https://ian-flores.github.io/secureguard/reference/injection_patterns.md).
 
 - custom_patterns:
 
-  Named character vector of additional regex patterns to check. Names
-  are used as pattern identifiers in match results.
+  Named character vector of extra regex patterns to check. The names
+  identify each pattern in the results.
 
 - allow_patterns:
 
-  Character vector of regex patterns. If a detected match also matches
-  one of these patterns, it is excluded (whitelisted) to reduce false
-  positives.
+  Character vector of regex patterns. A match that also matches one of
+  these is ignored. Use it to stop phrases you know are harmless from
+  being flagged.
 
 ## Value
 

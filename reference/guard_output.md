@@ -1,7 +1,8 @@
 # Run output guardrails on a result
 
-Checks an R object against one or more output guardrails. For guardrails
-with `action = "redact"`, the redacted text is applied to the result.
+Runs output guardrails on an R object. When a guardrail with
+`action = "redact"` finds something, the returned `result` is the
+redacted text instead of the original object.
 
 ## Usage
 
@@ -27,7 +28,7 @@ A list with components:
 
 - `result`: the (possibly redacted) result.
 
-- `warnings`: character vector of advisory warnings.
+- `warnings`: character vector of warnings that didn't fail the check.
 
 - `reasons`: character vector of failure reasons.
 

@@ -1,7 +1,6 @@
 # Convert an R object to scannable text
 
-Converts arbitrary R objects to a single character string for pattern
-scanning by output guardrails.
+Turns any R object into one string so output guardrails can scan it.
 
 ## Usage
 

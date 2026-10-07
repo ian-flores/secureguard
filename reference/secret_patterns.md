@@ -1,10 +1,8 @@
 # Secret detection patterns
 
-Returns a named list of regex patterns for detecting secrets and
-credentials in text. Covers ~40 secret types across cloud providers,
-SaaS platforms, payment processors, package registries, version control,
-AI/ML services, e-commerce, infrastructure, databases, and social
-platforms.
+The regular expressions used to find secrets in text. There are 59 of
+them, for cloud providers, payment services, package registries, source
+control hosts, AI services, database connection strings, and more.
 
 ## Usage
 

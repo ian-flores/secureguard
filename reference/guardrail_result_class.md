@@ -1,7 +1,8 @@
-# S7 class: guardrail_result
+# The guardrail_result class
 
-An S7 value type representing a structured return value from guardrail
-checks.
+The S7 class for what a guardrail check returns. Use
+[`guardrail_result()`](https://ian-flores.github.io/secureguard/reference/guardrail_result.md)
+to create one.
 
 ## Usage
 

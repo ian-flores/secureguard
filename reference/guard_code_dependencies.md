@@ -1,11 +1,10 @@
 # Code dependency guardrail
 
-Creates a guardrail that controls which packages can be used in R code.
-Detects package usage via
+Controls which packages R code may use. It finds packages loaded with
 [`library()`](https://rdrr.io/r/base/library.html),
-[`require()`](https://rdrr.io/r/base/library.html), `pkg::fn`,
-`pkg:::fn`, and [`loadNamespace()`](https://rdrr.io/r/base/ns-load.html)
-calls.
+[`require()`](https://rdrr.io/r/base/library.html), or
+[`loadNamespace()`](https://rdrr.io/r/base/ns-load.html), and packages
+called with `pkg::fn` or `pkg:::fn`.
 
 ## Usage
 
@@ -21,22 +20,20 @@ guard_code_dependencies(
 
 - allowed_packages:
 
-  Character vector of permitted package names (allowlist mode). If
-  non-`NULL`, only these packages (plus base packages if
-  `allow_base = TRUE`) are permitted. Cannot be used together with
-  `denied_packages`.
+  Character vector of package names to allow. If set, only these
+  packages (plus base packages if `allow_base = TRUE`) may be used.
+  Cannot be used together with `denied_packages`.
 
 - denied_packages:
 
-  Character vector of denied package names (denylist mode). If
-  non-`NULL`, these packages are blocked. Cannot be used together with
-  `allowed_packages`.
+  Character vector of package names to block. If set, every other
+  package is allowed. Cannot be used together with `allowed_packages`.
 
 - allow_base:
 
   Logical(1). If `TRUE` (default), base R packages (`base`, `utils`,
   `stats`, `methods`, `grDevices`, `graphics`, `datasets`) are always
-  permitted regardless of allowlist/denylist.
+  allowed, whatever the other two arguments say.
 
 ## Value
 

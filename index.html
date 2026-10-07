@@ -8,9 +8,13 @@
 <title>Input, Code, and Output Guardrails for Large Language Model Agents • secureguard</title>
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
-<script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/Hanken_Grotesk-0.4.10/font.css" rel="stylesheet">
+<link href="deps/Space_Mono-0.4.10/font.css" rel="stylesheet">
+<link href="deps/Fraunces-0.4.10/font.css" rel="stylesheet">
+<link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Input, Code, and Output Guardrails for Large Language Model Agents">
+<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><link href="extra.css" rel="stylesheet">
+<meta property="og:title" content="Input, Code, and Output Guardrails for Large Language Model Agents">
 <meta name="description" content="Composable guardrails for Large Language Model (LLM) agent workflows. Provides three defense layers -- input validation (prompt injection detection, topic scoping, Personally Identifiable Information (PII) filtering), code analysis (Abstract Syntax Tree (AST) based function blocking, complexity limits, dependency control, data flow restrictions), and output filtering (PII redaction, secret detection, size limits). All analysis is local with zero external API calls. Integrates with securer pre-execution hooks for seamless sandboxed execution.">
 <meta property="og:description" content="Composable guardrails for Large Language Model (LLM) agent workflows. Provides three defense layers -- input validation (prompt injection detection, topic scoping, Personally Identifiable Information (PII) filtering), code analysis (Abstract Syntax Tree (AST) based function blocking, complexity limits, dependency control, data flow restrictions), and output filtering (PII redaction, secret detection, size limits). All analysis is local with zero external API calls. Integrates with securer pre-execution hooks for seamless sandboxed execution.">
 </head>
@@ -59,128 +63,78 @@
 </h1></div>
 <!-- badges: start -->
 
-<blockquote>
-<p><strong>Note:</strong> Experimental release. APIs may change before the 1.0 stabilization — track the lifecycle badge above for the current tier.</p>
-</blockquote>
-<p>Composable guardrails for LLM agent workflows in R. Three defense layers – input validation, code analysis, and output filtering – all running locally with zero external API calls.</p>
-<div class="section level2">
-<h2 id="why-secureguard">Why secureguard?<a class="anchor" aria-label="anchor" href="#why-secureguard"></a>
-</h2>
-<p>Most guardrail solutions require external API calls or cloud services. secureguard runs entirely locally – regex-based prompt injection detection, R AST analysis for dangerous code patterns, and PII/secret scanning – all without sending your data anywhere.</p>
-</div>
-<div class="section level2">
-<h2 id="companion-packages">Companion Packages<a class="anchor" aria-label="anchor" href="#companion-packages"></a>
-</h2>
-<p>secureguard is one of four packages for building governed AI agents in R:</p>
-<pre><code>                    ┌─────────────┐
-                    │   securer    │
-                    └──────┬──────┘
-              ┌────────────┴─────────────┐
-              │                          │
-       ┌──────▼──────┐         ┌─────────▼────────┐
-       │ securetools  │         │&gt;&gt;&gt; secureguard&lt;&lt;&lt;│
-       └─────────────┘         └─────────┬────────┘
-                                ┌────────▼─────┐
-                                │ securebench   │
-                                └──────────────┘</code></pre>
-<p>secureguard provides the guardrail layer – input validation, code analysis, and output filtering that can run standalone or integrate with securer’s pre-execute hooks. securebench at the bottom of the stack benchmarks guardrail accuracy with precision/recall/F1 metrics. Each package is installed individually (see Installation below).</p>
-<table class="table">
-<colgroup>
-<col width="60%">
-<col width="40%">
-</colgroup>
-<thead><tr>
-<th>Package</th>
-<th>Role</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><a href="https://github.com/ian-flores/securer" class="external-link">securer</a></td>
-<td>Sandboxed R execution with tool-call IPC</td>
-</tr>
-<tr>
-<td><a href="https://github.com/ian-flores/securetools" class="external-link">securetools</a></td>
-<td>Pre-built security-hardened tool definitions</td>
-</tr>
-<tr>
-<td><a href="https://github.com/ian-flores/secureguard" class="external-link">secureguard</a></td>
-<td>Input/code/output guardrails (injection, PII, secrets)</td>
-</tr>
-<tr>
-<td><a href="https://github.com/ian-flores/securebench" class="external-link">securebench</a></td>
-<td>Security-focused guardrail benchmarks, complementary to <a href="https://vitals.tidyverse.org/" class="external-link">vitals</a>
-</td>
-</tr>
-</tbody>
-</table>
-<p>For adjacent capabilities, use the broader R LLM ecosystem:</p>
-<ul>
-<li>
-<strong>Tracing and observability</strong>: <a href="https://ellmer.tidyverse.org/" class="external-link">ellmer</a>’s native OpenTelemetry instrumentation via the <a href="https://otel.r-lib.org/" class="external-link">otel</a> package (supersedes the archived securetrace).</li>
-<li>
-<strong>Document chunking, embeddings, and RAG retrieval</strong>: <a href="https://github.com/tidyverse/ragnar" class="external-link">ragnar</a> (supersedes the archived securecontext).</li>
-</ul>
-</div>
+<p>secureguard checks what goes into an LLM agent, the R code it writes, and what comes back out. It catches things like prompt injection, calls to <code><a href="https://rdrr.io/r/base/system.html" class="external-link">system()</a></code>, and API keys or social security numbers in the output.</p>
+<p>Everything runs on your machine. The checks are regular expressions and R’s own parser, so no text is sent to another service to be judged.</p>
+<p>The package is experimental, and function names may still change.</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("pak")</span></span>
 <span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"ian-flores/secureguard"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="quick-example">Quick Example<a class="anchor" aria-label="anchor" href="#quick-example"></a>
+<h2 id="a-quick-look">A quick look<a class="anchor" aria-label="anchor" href="#a-quick-look"></a>
 </h2>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<p>Stop dangerous code before it runs:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ian-flores.github.io/secureguard/">secureguard</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Block dangerous code before it runs</span></span>
 <span><span class="va">hook</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/as_pre_execute_hook.html">as_pre_execute_hook</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="reference/guard_code_analysis.html">guard_code_analysis</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  <span class="fu"><a href="reference/guard_code_complexity.html">guard_code_complexity</a></span><span class="op">(</span>max_ast_depth <span class="op">=</span> <span class="fl">15</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
-<span><span class="fu">hook</span><span class="op">(</span><span class="st">"mean(1:10)"</span><span class="op">)</span>    <span class="co"># TRUE -- safe</span></span>
-<span><span class="fu">hook</span><span class="op">(</span><span class="st">"system('ls')"</span><span class="op">)</span>  <span class="co"># FALSE -- blocked</span></span>
 <span></span>
-<span><span class="co"># Check output for sensitive data</span></span>
-<span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/guard_output.html">guard_output</a></span><span class="op">(</span></span>
+<span><span class="fu">hook</span><span class="op">(</span><span class="st">"mean(1:10)"</span><span class="op">)</span>    <span class="co"># TRUE: fine to run</span></span>
+<span><span class="fu">hook</span><span class="op">(</span><span class="st">"system('ls')"</span><span class="op">)</span>  <span class="co"># FALSE, with a warning naming `system`</span></span></code></pre></div>
+<p>Catch sensitive data in a result:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/guard_output.html">guard_output</a></span><span class="op">(</span></span>
 <span>  <span class="st">"User SSN: 123-45-6789"</span>,</span>
 <span>  <span class="fu"><a href="reference/guard_output_pii.html">guard_output_pii</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  <span class="fu"><a href="reference/guard_output_secrets.html">guard_output_secrets</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">out</span><span class="op">$</span><span class="va">pass</span>     <span class="co"># FALSE</span></span>
 <span><span class="va">out</span><span class="op">$</span><span class="va">reasons</span>  <span class="co"># "PII detected in output: ssn"</span></span></code></pre></div>
+<p>Or keep the result and hide the sensitive parts:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/guard_output.html">guard_output</a></span><span class="op">(</span></span>
+<span>  <span class="st">"Key: AKIAIOSFODNN7EXAMPLE, mail me at jo@example.com"</span>,</span>
+<span>  <span class="fu"><a href="reference/guard_output_pii.html">guard_output_pii</a></span><span class="op">(</span>action <span class="op">=</span> <span class="st">"redact"</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="reference/guard_output_secrets.html">guard_output_secrets</a></span><span class="op">(</span>action <span class="op">=</span> <span class="st">"redact"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">out</span><span class="op">$</span><span class="va">result</span>  <span class="co"># "Key: [REDACTED_AWS_KEY], mail me at [REDACTED_EMAIL]"</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="features">Features<a class="anchor" aria-label="anchor" href="#features"></a>
+<h2 id="what-it-checks">What it checks<a class="anchor" aria-label="anchor" href="#what-it-checks"></a>
 </h2>
-<div class="section level3">
-<h3 id="input-guardrails">Input Guardrails<a class="anchor" aria-label="anchor" href="#input-guardrails"></a>
-</h3>
+<p>There are three kinds of guardrail, one for each point where things can go wrong.</p>
+<p><strong>Input</strong>, before the prompt reaches the model:</p>
 <table class="table">
+<colgroup>
+<col width="50%">
+<col width="50%">
+</colgroup>
 <thead><tr>
 <th>Function</th>
-<th>Description</th>
+<th>What it does</th>
 </tr></thead>
 <tbody>
 <tr>
 <td><code><a href="reference/guard_prompt_injection.html">guard_prompt_injection()</a></code></td>
-<td>Detect prompt injection attempts</td>
+<td>Flags text that tries to override the agent’s instructions</td>
 </tr>
 <tr>
 <td><code><a href="reference/guard_topic_scope.html">guard_topic_scope()</a></code></td>
-<td>Enforce allowed/blocked topic lists</td>
+<td>Keeps the conversation to topics you allow</td>
 </tr>
 <tr>
 <td><code><a href="reference/guard_input_pii.html">guard_input_pii()</a></code></td>
-<td>Filter PII from user prompts</td>
+<td>Flags personal data in the prompt</td>
 </tr>
 </tbody>
 </table>
-</div>
-<div class="section level3">
-<h3 id="code-guardrails">Code Guardrails<a class="anchor" aria-label="anchor" href="#code-guardrails"></a>
-</h3>
+<p><strong>Code</strong>, after the model writes R code and before it runs:</p>
 <table class="table">
 <colgroup>
 <col width="50%">
@@ -188,31 +142,29 @@
 </colgroup>
 <thead><tr>
 <th>Function</th>
-<th>Description</th>
+<th>What it does</th>
 </tr></thead>
 <tbody>
 <tr>
 <td><code><a href="reference/guard_code_analysis.html">guard_code_analysis()</a></code></td>
-<td>AST-based blocked function detection</td>
+<td>Blocks calls like <code><a href="https://rdrr.io/r/base/system.html" class="external-link">system()</a></code> or <code><a href="https://rdrr.io/r/base/eval.html" class="external-link">eval()</a></code>, even when they’re hidden behind <code><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call()</a></code>
+</td>
 </tr>
 <tr>
 <td><code><a href="reference/guard_code_complexity.html">guard_code_complexity()</a></code></td>
-<td>Depth, call count, expression limits</td>
+<td>Limits how deep, long, or busy the code can be</td>
 </tr>
 <tr>
 <td><code><a href="reference/guard_code_dependencies.html">guard_code_dependencies()</a></code></td>
-<td>Namespace allow/block lists</td>
+<td>Allows or blocks specific packages</td>
 </tr>
 <tr>
 <td><code><a href="reference/guard_code_dataflow.html">guard_code_dataflow()</a></code></td>
-<td>Block env access, network, file read/write (file_read defaults to TRUE since 0.3.0)</td>
+<td>Blocks reading environment variables, files, or the network</td>
 </tr>
 </tbody>
 </table>
-</div>
-<div class="section level3">
-<h3 id="output-guardrails">Output Guardrails<a class="anchor" aria-label="anchor" href="#output-guardrails"></a>
-</h3>
+<p><strong>Output</strong>, before the result goes back to the model or the user:</p>
 <table class="table">
 <colgroup>
 <col width="50%">
@@ -220,94 +172,74 @@
 </colgroup>
 <thead><tr>
 <th>Function</th>
-<th>Description</th>
+<th>What it does</th>
 </tr></thead>
 <tbody>
 <tr>
 <td><code><a href="reference/guard_output_pii.html">guard_output_pii()</a></code></td>
-<td>PII detection with block/redact/warn actions</td>
+<td>Finds personal data, then blocks, redacts, or warns</td>
 </tr>
 <tr>
 <td><code><a href="reference/guard_output_secrets.html">guard_output_secrets()</a></code></td>
-<td>Secret detection with block/redact/warn actions</td>
+<td>Finds API keys and passwords, then blocks, redacts, or warns</td>
 </tr>
 <tr>
 <td><code><a href="reference/guard_output_entropy.html">guard_output_entropy()</a></code></td>
-<td>Detect high-entropy tokens (likely keys/secrets)</td>
+<td>Flags long random-looking strings, which are often keys</td>
 </tr>
 <tr>
 <td><code><a href="reference/guard_output_size.html">guard_output_size()</a></code></td>
-<td>Character, line, and element limits</td>
+<td>Caps the number of characters, lines, or elements</td>
 </tr>
 </tbody>
 </table>
-</div>
-<div class="section level3">
-<h3 id="integration">Integration<a class="anchor" aria-label="anchor" href="#integration"></a>
-</h3>
-<table class="table">
-<thead><tr>
-<th>Function</th>
-<th>Description</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><code><a href="reference/as_pre_execute_hook.html">as_pre_execute_hook()</a></code></td>
-<td>Convert code guardrails to a securer hook</td>
-</tr>
-<tr>
-<td><code><a href="reference/guard_output.html">guard_output()</a></code></td>
-<td>Run output guardrails with redaction support</td>
-</tr>
-<tr>
-<td><code><a href="reference/secure_pipeline.html">secure_pipeline()</a></code></td>
-<td>Bundle input + code + output guardrails</td>
-</tr>
-</tbody>
-</table>
-</div>
+<p>To run several guardrails together, use <code><a href="reference/guard_output.html">guard_output()</a></code> for outputs, <code><a href="reference/as_pre_execute_hook.html">as_pre_execute_hook()</a></code> to turn code checks into a hook for <a href="https://github.com/ian-flores/securer" class="external-link">securer</a>, or <code><a href="reference/secure_pipeline.html">secure_pipeline()</a></code> to bundle all three kinds.</p>
 </div>
 <div class="section level2">
-<h2 id="securer-integration">securer Integration<a class="anchor" aria-label="anchor" href="#securer-integration"></a>
+<h2 id="with-securer">With securer<a class="anchor" aria-label="anchor" href="#with-securer"></a>
 </h2>
-<p>secureguard integrates with <a href="https://github.com/ian-flores/securer" class="external-link">securer</a> for sandboxed R execution:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<p>secureguard works on its own, but it pairs well with securer, which runs the agent’s code in a sandbox. The guardrails reject bad code before it ever reaches the sandbox:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ian-flores.github.io/securer/" class="external-link">securer</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ian-flores.github.io/secureguard/">secureguard</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">pipeline</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/secure_pipeline.html">secure_pipeline</a></span><span class="op">(</span></span>
-<span>  input_guardrails <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="reference/guard_prompt_injection.html">guard_prompt_injection</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>  code_guardrails <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="reference/guard_code_analysis.html">guard_code_analysis</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  input_guardrails  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="reference/guard_prompt_injection.html">guard_prompt_injection</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  code_guardrails   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="reference/guard_code_analysis.html">guard_code_analysis</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  output_guardrails <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="reference/guard_output_pii.html">guard_output_pii</a></span><span class="op">(</span><span class="op">)</span>, <span class="fu"><a href="reference/guard_output_secrets.html">guard_output_secrets</a></span><span class="op">(</span>action <span class="op">=</span> <span class="st">"redact"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">sess</span> <span class="op">&lt;-</span> <span class="va"><a href="https://ian-flores.github.io/securer/reference/SecureSession.html" class="external-link">SecureSession</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span></span>
-<span>  pre_execute_hook <span class="op">=</span> <span class="va">pipeline</span><span class="op">$</span><span class="fu">as_pre_execute_hook</span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
+<span><span class="va">sess</span> <span class="op">&lt;-</span> <span class="va"><a href="https://ian-flores.github.io/securer/reference/SecureSession.html" class="external-link">SecureSession</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span>pre_execute_hook <span class="op">=</span> <span class="va">pipeline</span><span class="op">$</span><span class="fu">as_pre_execute_hook</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Safe code executes normally</span></span>
-<span><span class="va">result</span> <span class="op">&lt;-</span> <span class="va">sess</span><span class="op">$</span><span class="fu">execute</span><span class="op">(</span><span class="st">"mean(1:10)"</span><span class="op">)</span></span>
+<span><span class="va">result</span> <span class="op">&lt;-</span> <span class="va">sess</span><span class="op">$</span><span class="fu">execute</span><span class="op">(</span><span class="st">"mean(1:10)"</span><span class="op">)</span>  <span class="co"># runs</span></span>
+<span><span class="va">sess</span><span class="op">$</span><span class="fu">execute</span><span class="op">(</span><span class="st">"system('ls')"</span><span class="op">)</span>          <span class="co"># error: blocked by the guardrail</span></span>
 <span></span>
-<span><span class="co"># Dangerous code is blocked before reaching the sandbox</span></span>
-<span><span class="va">sess</span><span class="op">$</span><span class="fu">execute</span><span class="op">(</span><span class="st">"system('ls')"</span><span class="op">)</span>  <span class="co"># Error: blocked by guardrail</span></span>
-<span></span>
-<span><span class="co"># Check output</span></span>
-<span><span class="va">out</span> <span class="op">&lt;-</span> <span class="va">pipeline</span><span class="op">$</span><span class="fu">check_output</span><span class="op">(</span><span class="va">result</span><span class="op">)</span></span>
+<span><span class="va">pipeline</span><span class="op">$</span><span class="fu">check_output</span><span class="op">(</span><span class="va">result</span><span class="op">)</span></span>
 <span><span class="va">sess</span><span class="op">$</span><span class="fu">close</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="documentation">Documentation<a class="anchor" aria-label="anchor" href="#documentation"></a>
+<h2 id="related-packages">Related packages<a class="anchor" aria-label="anchor" href="#related-packages"></a>
 </h2>
+<p>secureguard is part of a small set of packages for running LLM agents in R more safely:</p>
 <ul>
-<li><a href="https://ian-flores.github.io/secureguard/articles/secureguard.html">Getting Started with secureguard</a></li>
-<li><a href="https://ian-flores.github.io/secureguard/articles/advanced-patterns.html">Advanced Guardrail Patterns</a></li>
-<li><a href="https://ian-flores.github.io/secureguard/">Full reference documentation</a></li>
+<li>
+<a href="https://github.com/ian-flores/securer" class="external-link">securer</a> runs agent code in a sandbox.</li>
+<li>
+<a href="https://github.com/ian-flores/securetools" class="external-link">securetools</a> has ready-made tools (file access, SQL, web requests) with limits built in.</li>
+<li>
+<a href="https://github.com/ian-flores/securebench" class="external-link">securebench</a> measures how well your guardrails work. It complements <a href="https://vitals.tidyverse.org/" class="external-link">vitals</a>.</li>
 </ul>
+<p>They build on Posit’s tools rather than replacing them. For tracing, use <a href="https://ellmer.tidyverse.org/" class="external-link">ellmer</a>’s OpenTelemetry support through the <a href="https://otel.r-lib.org/" class="external-link">otel</a> package. For retrieval (RAG), use <a href="https://github.com/tidyverse/ragnar" class="external-link">ragnar</a>.</p>
 </div>
 <div class="section level2">
-<h2 id="contributing">Contributing<a class="anchor" aria-label="anchor" href="#contributing"></a>
+<h2 id="learn-more">Learn more<a class="anchor" aria-label="anchor" href="#learn-more"></a>
 </h2>
-<p>Contributions are welcome! Please file issues on GitHub and submit pull requests.</p>
+<ul>
+<li><a href="https://ian-flores.github.io/secureguard/articles/secureguard.html">Getting started</a></li>
+<li><a href="https://ian-flores.github.io/secureguard/articles/advanced-patterns.html">Advanced patterns</a></li>
+<li><a href="https://ian-flores.github.io/secureguard/reference/">Function reference</a></li>
+</ul>
+<p>Found a bug or have an idea? <a href="https://github.com/ian-flores/secureguard/issues" class="external-link">Open an issue</a>.</p>
 </div>
 <div class="section level2">
 <h2 id="license">License<a class="anchor" aria-label="anchor" href="#license"></a>
@@ -361,7 +293,20 @@
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Ian Flores Siaca.</p>
+  <div class="title-block">
+<div>
+<b>Sheet</b>2 of 4
+</div>
+<div>
+<b>Quadrangle</b>secureguard
+</div>
+<div>
+<b>Survey</b>Guardrails
+</div>
+<div>
+<b>Series</b>secure-r-dev
+</div>
+</div>
 </div>
 
 <div class="pkgdown-footer-right">

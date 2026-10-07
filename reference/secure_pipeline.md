@@ -1,7 +1,7 @@
 # Create a complete guardrail pipeline
 
-Bundles input, code, and output guardrails into a single pipeline object
-with convenience methods for each stage.
+Holds input, code, and output guardrails in one object, with a method to
+run each stage.
 
 ## Usage
 

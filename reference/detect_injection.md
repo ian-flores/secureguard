@@ -1,7 +1,8 @@
 # Detect prompt injection attempts
 
-Scans text for prompt injection patterns at the specified sensitivity
-level.
+Runs the patterns from
+[`injection_patterns()`](https://ian-flores.github.io/secureguard/reference/injection_patterns.md)
+against a string and returns what matched.
 
 ## Usage
 

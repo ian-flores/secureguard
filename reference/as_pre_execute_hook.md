@@ -1,8 +1,9 @@
 # Convert code guardrails to a securer pre-execute hook
 
-Takes one or more code guardrails and returns a function suitable for
-securer's `pre_execute_hook` parameter. The hook returns `FALSE` to
-block code that fails any guardrail, or `TRUE` to allow it.
+Turns code guardrails into a function you can pass to securer's
+`pre_execute_hook` argument. securer calls it before running each piece
+of code. It returns `FALSE` to block code that fails any guardrail and
+`TRUE` to let it run.
 
 ## Usage
 

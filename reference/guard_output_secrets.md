@@ -1,6 +1,7 @@
 # Secret output guardrail
 
-Creates a guardrail that scans output for secrets and credentials.
+Looks for API keys, tokens, passwords, and connection strings in output.
+It can block the output, redact the matches, or warn.
 
 ## Usage
 
@@ -30,7 +31,10 @@ guard_output_secrets(detect = NULL, action = c("block", "redact", "warn"))
   `"shopify_access_token"`, `"shopify_secret"`, `"shopify_custom_app"`,
   `"shopify_private_app"`, `"jwt"`, `"cloudinary_url"`,
   `"firebase_url"`, `"postgres_conn"`, `"mysql_conn"`, `"mongodb_conn"`,
-  `"redis_conn"`, `"facebook_access_token"`, `"amazon_mws_token"`.
+  `"redis_conn"`, `"facebook_access_token"`, `"amazon_mws_token"`,
+  `"vault_token"`, `"doppler_token"`, `"supabase_key"`,
+  `"vercel_token"`, `"datadog_api_key"`, `"linear_api_key"`,
+  `"railway_token"`, `"planetscale_token"`.
 
 - action:
 
@@ -40,7 +44,7 @@ guard_output_secrets(detect = NULL, action = c("block", "redact", "warn"))
 
   - `"redact"`: pass but replace secrets with `[REDACTED_API_KEY]` etc.
 
-  - `"warn"`: pass with advisory warnings.
+  - `"warn"`: pass, but add a warning.
 
 ## Value
 

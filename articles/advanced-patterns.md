@@ -1,101 +1,51 @@
-# Advanced Guardrail Patterns
+# Advanced guardrail patterns
 
-## What This Vignette Covers
+## What’s here
 
 [`vignette("secureguard")`](https://ian-flores.github.io/secureguard/articles/secureguard.md)
-introduces the defense layers and built-in guardrails. This vignette
-covers building custom guardrails for domain-specific threats, composing
-guardrails with pass/fail logic, assembling pipelines, and wiring
-everything into securer for sandboxed execution.
+introduces the three kinds of guardrail and the built-in checks. This
+one shows how to write your own guardrails, combine them, build a
+pipeline, and connect it to securer.
 
-## How a Guardrail Pipeline Works
+## How a pipeline works
 
-The following diagram shows the flow of data through a
+This is what happens to one agent turn inside a
 [`secure_pipeline()`](https://ian-flores.github.io/secureguard/reference/secure_pipeline.md),
-the recommended way to wire guardrails into an agent loop:
+which is the easiest way to put guardrails into an agent loop:
 
-             User prompt
-                  |
-                  v
-        +--------------------+
-        |  check_input()     |    Input guardrails:
-        |  - injection       |    prompt injection, topic scope, PII
-        |  - topic scope     |
-        |  - input PII       |
-        +--------------------+
-                  |
-             Pass? ----No----> Return failure (stage: input)
-                  |
-                 Yes
-                  |
-                  v
-             LLM generates code
-                  |
-                  v
-        +--------------------+
-        |  check_code()      |    Code guardrails:
-        |  - AST analysis    |    blocked functions, complexity,
-        |  - complexity      |    dependencies, data flow
-        |  - dependencies    |
-        |  - data flow       |
-        +--------------------+
-                  |
-             Pass? ----No----> Return failure (stage: code)
-                  |
-                 Yes
-                  |
-                  v
-          Execute in sandbox
-            (securer)
-                  |
-                  v
-        +--------------------+
-        |  check_output()    |    Output guardrails:
-        |  - PII             |    PII blocking, secret redaction,
-        |  - secrets         |    size limits
-        |  - size            |
-        +--------------------+
-                  |
-             Pass? ----No----> Return failure (stage: output)
-                  |
-                 Yes
-                  |
-                  v
-          Return result to user
-          (possibly redacted)
+![](data:image/svg+xml;base64,PHN2ZyByb2xlPSJpbWciIGFyaWEtbGFiZWw9IlRoZSBwcm9tcHQgaXMgY2hlY2tlZCwgdGhlIG1vZGVsIHdyaXRlcyBjb2RlLCB0aGUgY29kZSBpcyBjaGVja2VkLCBpdCBydW5zIGluIHRoZSBzYW5kYm94LCB0aGUgb3V0cHV0IGlzIGNoZWNrZWQ7IGEgZmFpbGVkIGNoZWNrIHN0b3BzIHRoZSB0dXJuIGF0IHRoYXQgc3RhZ2UiIHZpZXdib3g9IjAgMCAxMDAwIDIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48bWFya2VyIGlkPSJwbC1hcnJvdyIgdmlld2JveD0iMCAwIDEwIDEwIiByZWZ4PSI5IiByZWZ5PSI1IiBtYXJrZXJ3aWR0aD0iNyIgbWFya2VyaGVpZ2h0PSI3IiBvcmllbnQ9ImF1dG8tc3RhcnQtcmV2ZXJzZSI+PHBhdGggZD0iTTEgMUw5IDVMMSA5IiBmaWxsPSJub25lIiBzdHJva2U9IiMyYjFmMTIiIHN0cm9rZS13aWR0aD0iMSIgLz48L21hcmtlcj48cGF0dGVybiBpZD0icGwtaGF0Y2giIHdpZHRoPSI2IiBoZWlnaHQ9IjYiIHBhdHRlcm51bml0cz0idXNlclNwYWNlT25Vc2UiIHBhdHRlcm50cmFuc2Zvcm09InJvdGF0ZSg0NSkiPjxsaW5lIHgxPSIwIiB5MT0iMCIgeDI9IjAiIHkyPSI2IiBzdHJva2U9IiNiZjVhMzYiIHN0cm9rZS13aWR0aD0iMC42IiBvcGFjaXR5PSIwLjU1Ij48L2xpbmU+PC9wYXR0ZXJuPjwvZGVmcz48dGV4dCB4PSI2Ni4wIiB5PSI3NC4zMjUiIGZvbnQtZmFtaWx5PSJTcGFjZSBNb25vLCB1aS1tb25vc3BhY2UsIG1vbm9zcGFjZSIgZm9udC1zaXplPSI5LjUiIGZpbGw9IiM2YjU2MzgiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtd2VpZ2h0PSI0MDAiIGxldHRlci1zcGFjaW5nPSIxLjIiPlVTRVI8L3RleHQ+PHRleHQgeD0iNjYuMCIgeT0iODguMzI1IiBmb250LWZhbWlseT0iU3BhY2UgTW9ubywgdWktbW9ub3NwYWNlLCBtb25vc3BhY2UiIGZvbnQtc2l6ZT0iOS41IiBmaWxsPSIjNmI1NjM4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LXdlaWdodD0iNDAwIiBsZXR0ZXItc3BhY2luZz0iMS4yIj5QUk9NUFQ8L3RleHQ+PHBhdGggZD0iTTExMiA3OC4wSDEzMCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMmIxZjEyIiBzdHJva2Utd2lkdGg9IjAuNzUiIG1hcmtlci1lbmQ9InVybCgjcGwtYXJyb3cpIiAvPjxyZWN0IHg9IjEzMiIgeT0iNDAiIHdpZHRoPSIxNDAiIGhlaWdodD0iNzYiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzJiMWYxMiIgc3Ryb2tlLXdpZHRoPSIwLjc1IiAvPjx0ZXh0IHg9IjIwMi4wIiB5PSI2OC4wIiBmb250LWZhbWlseT0iU3BhY2UgTW9ubywgdWktbW9ub3NwYWNlLCBtb25vc3BhY2UiIGZvbnQtc2l6ZT0iMTAuNSIgZmlsbD0iIzJiMWYxMiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC13ZWlnaHQ9IjcwMCIgbGV0dGVyLXNwYWNpbmc9IjEuMiI+Y2hlY2tfaW5wdXQoKTwvdGV4dD48dGV4dCB4PSIyMDIuMCIgeT0iODIuMCIgZm9udC1mYW1pbHk9IlNwYWNlIE1vbm8sIHVpLW1vbm9zcGFjZSwgbW9ub3NwYWNlIiBmb250LXNpemU9IjkiIGZpbGw9IiM2YjU2MzgiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtd2VpZ2h0PSI0MDAiIGxldHRlci1zcGFjaW5nPSIwLjQiPmluamVjdGlvbiwgdG9waWMsPC90ZXh0Pjx0ZXh0IHg9IjIwMi4wIiB5PSI5NS4wIiBmb250LWZhbWlseT0iU3BhY2UgTW9ubywgdWktbW9ub3NwYWNlLCBtb25vc3BhY2UiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzZiNTYzOCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC13ZWlnaHQ9IjQwMCIgbGV0dGVyLXNwYWNpbmc9IjAuNCI+cGVyc29uYWwgZGF0YTwvdGV4dD48cGF0aCBkPSJNMjAyLjAgMTE2VjE2MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMmIxZjEyIiBzdHJva2Utd2lkdGg9IjAuNzUiIG1hcmtlci1lbmQ9InVybCgjcGwtYXJyb3cpIiBzdHJva2UtZGFzaGFycmF5PSIzIDMiIC8+PHRleHQgeD0iMjA4LjAiIHk9IjEzOCIgZm9udC1mYW1pbHk9IlNwYWNlIE1vbm8sIHVpLW1vbm9zcGFjZSwgbW9ub3NwYWNlIiBmb250LXNpemU9IjkiIGZpbGw9IiM2YjU2MzgiIHRleHQtYW5jaG9yPSJzdGFydCIgZm9udC13ZWlnaHQ9IjQwMCIgbGV0dGVyLXNwYWNpbmc9IjAuNCI+ZmFpbDwvdGV4dD48dGV4dCB4PSIyMDIuMCIgeT0iMTc4IiBmb250LWZhbWlseT0iU3BhY2UgTW9ubywgdWktbW9ub3NwYWNlLCBtb25vc3BhY2UiIGZvbnQtc2l6ZT0iOC41IiBmaWxsPSIjYmY1YTM2IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LXdlaWdodD0iNDAwIiBsZXR0ZXItc3BhY2luZz0iMS40Ij5TVE9QIMK3IFNUQUdFOiBJTlBVVDwvdGV4dD48cGF0aCBkPSJNMjcyIDc4LjBIMzAwIiBmaWxsPSJub25lIiBzdHJva2U9IiMyYjFmMTIiIHN0cm9rZS13aWR0aD0iMC43NSIgbWFya2VyLWVuZD0idXJsKCNwbC1hcnJvdykiIC8+PHRleHQgeD0iMzQ4LjAiIHk9Ijc0LjMyNSIgZm9udC1mYW1pbHk9IlNwYWNlIE1vbm8sIHVpLW1vbm9zcGFjZSwgbW9ub3NwYWNlIiBmb250LXNpemU9IjkuNSIgZmlsbD0iIzZiNTYzOCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC13ZWlnaHQ9IjQwMCIgbGV0dGVyLXNwYWNpbmc9IjEuMiI+TU9ERUw8L3RleHQ+PHRleHQgeD0iMzQ4LjAiIHk9Ijg4LjMyNSIgZm9udC1mYW1pbHk9IlNwYWNlIE1vbm8sIHVpLW1vbm9zcGFjZSwgbW9ub3NwYWNlIiBmb250LXNpemU9IjkuNSIgZmlsbD0iIzZiNTYzOCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC13ZWlnaHQ9IjQwMCIgbGV0dGVyLXNwYWNpbmc9IjEuMiI+V1JJVEVTIENPREU8L3RleHQ+PHBhdGggZD0iTTM5NCA3OC4wSDQxMiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMmIxZjEyIiBzdHJva2Utd2lkdGg9IjAuNzUiIG1hcmtlci1lbmQ9InVybCgjcGwtYXJyb3cpIiAvPjxyZWN0IHg9IjQxNCIgeT0iNDAiIHdpZHRoPSIxNDAiIGhlaWdodD0iNzYiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzJiMWYxMiIgc3Ryb2tlLXdpZHRoPSIwLjc1IiAvPjx0ZXh0IHg9IjQ4NC4wIiB5PSI2OC4wIiBmb250LWZhbWlseT0iU3BhY2UgTW9ubywgdWktbW9ub3NwYWNlLCBtb25vc3BhY2UiIGZvbnQtc2l6ZT0iMTAuNSIgZmlsbD0iIzJiMWYxMiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC13ZWlnaHQ9IjcwMCIgbGV0dGVyLXNwYWNpbmc9IjEuMiI+Y2hlY2tfY29kZSgpPC90ZXh0Pjx0ZXh0IHg9IjQ4NC4wIiB5PSI4Mi4wIiBmb250LWZhbWlseT0iU3BhY2UgTW9ubywgdWktbW9ub3NwYWNlLCBtb25vc3BhY2UiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzZiNTYzOCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC13ZWlnaHQ9IjQwMCIgbGV0dGVyLXNwYWNpbmc9IjAuNCI+ZnVuY3Rpb25zLCBjb21wbGV4aXR5LDwvdGV4dD48dGV4dCB4PSI0ODQuMCIgeT0iOTUuMCIgZm9udC1mYW1pbHk9IlNwYWNlIE1vbm8sIHVpLW1vbm9zcGFjZSwgbW9ub3NwYWNlIiBmb250LXNpemU9IjkiIGZpbGw9IiM2YjU2MzgiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtd2VpZ2h0PSI0MDAiIGxldHRlci1zcGFjaW5nPSIwLjQiPnBhY2thZ2VzLCBkYXRhIGZsb3c8L3RleHQ+PHBhdGggZD0iTTQ4NC4wIDExNlYxNjAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzJiMWYxMiIgc3Ryb2tlLXdpZHRoPSIwLjc1IiBtYXJrZXItZW5kPSJ1cmwoI3BsLWFycm93KSIgc3Ryb2tlLWRhc2hhcnJheT0iMyAzIiAvPjx0ZXh0IHg9IjQ5MC4wIiB5PSIxMzgiIGZvbnQtZmFtaWx5PSJTcGFjZSBNb25vLCB1aS1tb25vc3BhY2UsIG1vbm9zcGFjZSIgZm9udC1zaXplPSI5IiBmaWxsPSIjNmI1NjM4IiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGZvbnQtd2VpZ2h0PSI0MDAiIGxldHRlci1zcGFjaW5nPSIwLjQiPmZhaWw8L3RleHQ+PHRleHQgeD0iNDg0LjAiIHk9IjE3OCIgZm9udC1mYW1pbHk9IlNwYWNlIE1vbm8sIHVpLW1vbm9zcGFjZSwgbW9ub3NwYWNlIiBmb250LXNpemU9IjguNSIgZmlsbD0iI2JmNWEzNiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC13ZWlnaHQ9IjQwMCIgbGV0dGVyLXNwYWNpbmc9IjEuNCI+U1RPUCDCtyBTVEFHRTogQ09ERTwvdGV4dD48cGF0aCBkPSJNNTU0IDc4LjBINTgyIiBmaWxsPSJub25lIiBzdHJva2U9IiMyYjFmMTIiIHN0cm9rZS13aWR0aD0iMC43NSIgbWFya2VyLWVuZD0idXJsKCNwbC1hcnJvdykiIC8+PHRleHQgeD0iNjMwLjAiIHk9Ijc0LjMyNSIgZm9udC1mYW1pbHk9IlNwYWNlIE1vbm8sIHVpLW1vbm9zcGFjZSwgbW9ub3NwYWNlIiBmb250LXNpemU9IjkuNSIgZmlsbD0iIzZiNTYzOCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC13ZWlnaHQ9IjQwMCIgbGV0dGVyLXNwYWNpbmc9IjEuMiI+UlVOIElOIFRIRTwvdGV4dD48dGV4dCB4PSI2MzAuMCIgeT0iODguMzI1IiBmb250LWZhbWlseT0iU3BhY2UgTW9ubywgdWktbW9ub3NwYWNlLCBtb25vc3BhY2UiIGZvbnQtc2l6ZT0iOS41IiBmaWxsPSIjNmI1NjM4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LXdlaWdodD0iNDAwIiBsZXR0ZXItc3BhY2luZz0iMS4yIj5TQU5EQk9YPC90ZXh0PjxwYXRoIGQ9Ik02NzYgNzguMEg2OTQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzJiMWYxMiIgc3Ryb2tlLXdpZHRoPSIwLjc1IiBtYXJrZXItZW5kPSJ1cmwoI3BsLWFycm93KSIgLz48cmVjdCB4PSI2OTYiIHk9IjQwIiB3aWR0aD0iMTQwIiBoZWlnaHQ9Ijc2IiBmaWxsPSJub25lIiBzdHJva2U9IiMyYjFmMTIiIHN0cm9rZS13aWR0aD0iMC43NSIgLz48dGV4dCB4PSI3NjYuMCIgeT0iNjguMCIgZm9udC1mYW1pbHk9IlNwYWNlIE1vbm8sIHVpLW1vbm9zcGFjZSwgbW9ub3NwYWNlIiBmb250LXNpemU9IjEwLjUiIGZpbGw9IiMyYjFmMTIiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtd2VpZ2h0PSI3MDAiIGxldHRlci1zcGFjaW5nPSIxLjIiPmNoZWNrX291dHB1dCgpPC90ZXh0Pjx0ZXh0IHg9Ijc2Ni4wIiB5PSI4Mi4wIiBmb250LWZhbWlseT0iU3BhY2UgTW9ubywgdWktbW9ub3NwYWNlLCBtb25vc3BhY2UiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzZiNTYzOCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC13ZWlnaHQ9IjQwMCIgbGV0dGVyLXNwYWNpbmc9IjAuNCI+cGVyc29uYWwgZGF0YSw8L3RleHQ+PHRleHQgeD0iNzY2LjAiIHk9Ijk1LjAiIGZvbnQtZmFtaWx5PSJTcGFjZSBNb25vLCB1aS1tb25vc3BhY2UsIG1vbm9zcGFjZSIgZm9udC1zaXplPSI5IiBmaWxsPSIjNmI1NjM4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LXdlaWdodD0iNDAwIiBsZXR0ZXItc3BhY2luZz0iMC40Ij5zZWNyZXRzLCBzaXplPC90ZXh0PjxwYXRoIGQ9Ik03NjYuMCAxMTZWMTYwIiBmaWxsPSJub25lIiBzdHJva2U9IiMyYjFmMTIiIHN0cm9rZS13aWR0aD0iMC43NSIgbWFya2VyLWVuZD0idXJsKCNwbC1hcnJvdykiIHN0cm9rZS1kYXNoYXJyYXk9IjMgMyIgLz48dGV4dCB4PSI3NzIuMCIgeT0iMTM4IiBmb250LWZhbWlseT0iU3BhY2UgTW9ubywgdWktbW9ub3NwYWNlLCBtb25vc3BhY2UiIGZvbnQtc2l6ZT0iOSIgZmlsbD0iIzZiNTYzOCIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXdlaWdodD0iNDAwIiBsZXR0ZXItc3BhY2luZz0iMC40Ij5mYWlsPC90ZXh0Pjx0ZXh0IHg9Ijc2Ni4wIiB5PSIxNzgiIGZvbnQtZmFtaWx5PSJTcGFjZSBNb25vLCB1aS1tb25vc3BhY2UsIG1vbm9zcGFjZSIgZm9udC1zaXplPSI4LjUiIGZpbGw9IiNiZjVhMzYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtd2VpZ2h0PSI0MDAiIGxldHRlci1zcGFjaW5nPSIxLjQiPlNUT1AgwrcgU1RBR0U6IE9VVFBVVDwvdGV4dD48cGF0aCBkPSJNODM2IDc4LjBIODY2IiBmaWxsPSJub25lIiBzdHJva2U9IiMyYjFmMTIiIHN0cm9rZS13aWR0aD0iMC43NSIgbWFya2VyLWVuZD0idXJsKCNwbC1hcnJvdykiIC8+PHJlY3QgeD0iODY4IiB5PSI0OCIgd2lkdGg9IjEyMCIgaGVpZ2h0PSI2MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjYmY1YTM2IiBzdHJva2Utd2lkdGg9IjAuNzUiIC8+PHRleHQgeD0iOTI4LjAiIHk9Ijc1LjAiIGZvbnQtZmFtaWx5PSJTcGFjZSBNb25vLCB1aS1tb25vc3BhY2UsIG1vbm9zcGFjZSIgZm9udC1zaXplPSIxMC41IiBmaWxsPSIjYmY1YTM2IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LXdlaWdodD0iNzAwIiBsZXR0ZXItc3BhY2luZz0iMS4yIj5SRVNVTFQ8L3RleHQ+PHRleHQgeD0iOTI4LjAiIHk9Ijg5LjAiIGZvbnQtZmFtaWx5PSJTcGFjZSBNb25vLCB1aS1tb25vc3BhY2UsIG1vbm9zcGFjZSIgZm9udC1zaXplPSI5IiBmaWxsPSIjNmI1NjM4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LXdlaWdodD0iNDAwIiBsZXR0ZXItc3BhY2luZz0iMC40Ij5tYXliZSByZWRhY3RlZDwvdGV4dD48L3N2Zz4=)
 
-Each stage short-circuits on failure: if input guardrails reject the
-prompt, the LLM never sees it. If code guardrails reject the generated
-code, it never executes. This minimizes both risk and wasted
-computation.
+Fig. 1 · secure_pipeline(): each check can stop the turn
 
-## Creating Custom Guardrails
+A failure stops the turn. If the input check fails, the model never sees
+the prompt. If the code check fails, the code never runs. You skip the
+risky step and the work that would have followed it.
 
-The built-in guardrails cover common threats: prompt injection,
-dangerous function calls, PII leakage, and secret exposure. But every
-application has domain-specific risks that generic guardrails will not
-catch. An agent that generates SQL needs SQL injection detection. A
-healthcare application needs HIPAA-specific PII patterns. A financial
-tool needs checks for account numbers and routing numbers.
+## Writing your own guardrails
 
-Every guardrail, built-in or custom, is an S3 object of class
-`secureguard` with four properties: `name`, `type`, `check_fn`, and
-`description`. The
+The built-in guardrails handle the common cases: prompt injection,
+dangerous function calls, personal data, and secrets. Your application
+probably has risks of its own. An agent that writes SQL should be
+checked for SQL injection. A health app may need extra patterns for
+patient data. A finance tool may need to spot account and routing
+numbers.
+
+Every guardrail, built-in or yours, is an S3 object of class
+`secureguard` with four fields: `name`, `type`, `check_fn`, and
+`description`.
 [`new_guardrail()`](https://ian-flores.github.io/secureguard/reference/new_guardrail.md)
-constructor validates these and returns a guardrail you can use with
+checks these fields and returns a guardrail that works with
 [`run_guardrail()`](https://ian-flores.github.io/secureguard/reference/run_guardrail.md),
 [`compose_guardrails()`](https://ian-flores.github.io/secureguard/reference/compose_guardrails.md),
 and
-[`secure_pipeline()`](https://ian-flores.github.io/secureguard/reference/secure_pipeline.md).
-Custom guardrails work with built-in ones because they share the same
-interface.
+[`secure_pipeline()`](https://ian-flores.github.io/secureguard/reference/secure_pipeline.md),
+just like the built-in ones.
 
-### A SQL Injection Detector
+### A SQL injection detector
 
-When an LLM generates SQL queries, it may produce syntactically valid
-but semantically dangerous output, especially if the user’s prompt
-contains adversarial patterns. A guardrail can catch these patterns
-before any query reaches a database.
+An LLM can write SQL that is valid and still dangerous, especially when
+the prompt was written to trick it. This guardrail looks for the usual
+patterns before a query gets near a database.
 
 ``` r
 
@@ -155,10 +105,10 @@ run_guardrail(g, "SELECT * FROM users WHERE id = 1; DROP TABLE users; --")
 #> Reason: Potential SQL injection detected
 ```
 
-### A Code Length Limiter
+### A code length limit
 
-Custom guardrails of type `"code"` work exactly the same way. Here is
-one that limits the number of lines in LLM-generated code:
+A guardrail of type `"code"` is built the same way. This one limits how
+many lines the generated code can have:
 
 ``` r
 
@@ -194,18 +144,16 @@ run_guardrail(g_len, long_code)
 #> Reason: Code has 10 lines (max 5)
 ```
 
-### Anatomy of a check_fn
+### What a check_fn needs
 
-Every `check_fn` must:
+A `check_fn` takes one argument, the text or object to check. It returns
+a
+[`guardrail_result()`](https://ian-flores.github.io/secureguard/reference/guardrail_result.md)
+with `pass = TRUE` or `pass = FALSE`. It can also set `reason` to say
+why it failed, `warnings` for things worth flagging that shouldn’t fail
+the check, and `details`, a named list of anything else.
 
-1.  Accept a single argument (the text or object to check).
-2.  Return a
-    [`guardrail_result()`](https://ian-flores.github.io/secureguard/reference/guardrail_result.md)
-    with at minimum `pass = TRUE` or `pass = FALSE`.
-3.  Optionally include `reason` (why it failed), `warnings` (advisory
-    notes), and `details` (a named list of metadata).
-
-The `@` operator accesses properties on the result:
+Use `@` to read fields from the result:
 
 ``` r
 
@@ -219,26 +167,24 @@ result@details
 #> [1] "system"
 ```
 
-## Composing Guardrails
+## Combining guardrails
 
-In practice, you almost always want to run multiple guardrails together:
-checking for dangerous functions and excessive complexity, or detecting
-both prompt injection and off-topic prompts. secureguard provides two
-ways to combine them.
+You’ll usually want more than one check at a time, for example dangerous
+functions and complexity, or injection and topic. There are two ways to
+combine them.
 
-### compose_guardrails(): Same-Type Composition
+### compose_guardrails()
 
 [`compose_guardrails()`](https://ian-flores.github.io/secureguard/reference/compose_guardrails.md)
-merges multiple guardrails of the **same type** into a single composite
-guardrail. The result is itself a guardrail, so you can pass it to
+merges guardrails of the same type into one. The result is a guardrail
+too, so you can run it with
 [`run_guardrail()`](https://ian-flores.github.io/secureguard/reference/run_guardrail.md),
-nest it inside another composition, or use it in a pipeline. Bundle all
-your code checks into a single “strict code” guardrail to treat them as
-one unit.
+put it inside another composition, or use it in a pipeline. Here, three
+code checks become one “strict code” guardrail:
 
 ``` r
 
-# Compose three code guardrails -- ALL must pass (default)
+# Compose three code guardrails; all must pass (the default)
 strict_code <- compose_guardrails(
   guard_code_analysis(),
   guard_code_complexity(max_ast_depth = 10, max_calls = 50),
@@ -267,13 +213,12 @@ run_guardrail(strict_code, "processx::run('ls')")
 #> processx
 ```
 
-### mode = “any”: At Least One Must Pass
+### mode = “any”
 
-The default `mode = "all"` is the right choice for security checks: all
-guards must pass. But sometimes you need the opposite logic: an
-allowlist where the input is acceptable if it matches **any** of several
-categories. With `mode = "any"`, the composite passes if at least one
-child guardrail passes:
+The default, `mode = "all"`, is what you want for security checks. Every
+check has to pass. Sometimes you want the reverse: input is fine if it
+matches any one of several categories. With `mode = "any"`, the
+composite passes when at least one of its guardrails passes:
 
 ``` r
 
@@ -294,12 +239,11 @@ run_guardrail(topic_guard, "What is the weather today?")
 #> allowed topic.
 ```
 
-### check_all(): Run a List and Collect Results
+### check_all()
 
-Sometimes you need individual results from each guardrail rather than a
-single composite result.
 [`check_all()`](https://ian-flores.github.io/secureguard/reference/check_all.md)
-runs a list of guardrails and returns a summary:
+runs each guardrail in a list and keeps every result, so you can see how
+each one did:
 
 ``` r
 
@@ -320,9 +264,8 @@ vapply(result$results, function(r) r@pass, logical(1))
 #> [1] TRUE TRUE TRUE
 ```
 
-When a check fails,
-[`check_all()`](https://ian-flores.github.io/secureguard/reference/check_all.md)
-collects all failure reasons:
+When something fails, `result$reasons` has the reason from each failing
+check:
 
 ``` r
 
@@ -333,48 +276,33 @@ result$reasons
 #> [1] "Data flow violation(s): Sys.getenv"
 ```
 
-### When to Use compose_guardrails() vs check_all()
+### Which one to use
 
-Both functions combine multiple guardrails, but they serve different
-purposes and return different types:
-
-**Use
-[`compose_guardrails()`](https://ian-flores.github.io/secureguard/reference/compose_guardrails.md)**
-when you want a single guardrail object that you can pass to
-[`run_guardrail()`](https://ian-flores.github.io/secureguard/reference/run_guardrail.md),
-nest inside another
-[`compose_guardrails()`](https://ian-flores.github.io/secureguard/reference/compose_guardrails.md),
-or use in a
-[`secure_pipeline()`](https://ian-flores.github.io/secureguard/reference/secure_pipeline.md).
-The composed guardrail behaves as one unit: you get a single pass/fail
-result. This is the right choice when you are building reusable
-guardrail configurations (e.g., a “strict code” composite) that you want
-to treat as a single check.
-
-**Use
-[`check_all()`](https://ian-flores.github.io/secureguard/reference/check_all.md)**
-when you need diagnostic detail. It returns individual results for each
-guardrail in the list, so you can report exactly which checks failed and
-why. This is useful in logging, debugging, and user-facing error
-messages where “code guardrail failed” is less helpful than “blocked
-function [`system()`](https://rdrr.io/r/base/system.html) detected by
-code_analysis; exceeded max AST depth of 10 per code_complexity.”
-
-In practice, many applications use both:
 [`compose_guardrails()`](https://ian-flores.github.io/secureguard/reference/compose_guardrails.md)
-to build reusable guardrail groups, and
+gives you a guardrail. You get one pass or fail, and you can reuse the
+object anywhere a guardrail is accepted. It suits a fixed set of checks
+you want to treat as one, like the “strict code” example.
+
 [`check_all()`](https://ian-flores.github.io/secureguard/reference/check_all.md)
-at the top level to get per-group diagnostics.
+gives you a list of results. Use it when you need to say which check
+failed and why, in logs or in an error message. “Code guardrail failed”
+doesn’t help anyone. “code_analysis blocked
+[`system()`](https://rdrr.io/r/base/system.html)” does.
 
-## Building Pipelines with secure_pipeline()
+Plenty of applications use both:
+[`compose_guardrails()`](https://ian-flores.github.io/secureguard/reference/compose_guardrails.md)
+to build groups, and
+[`check_all()`](https://ian-flores.github.io/secureguard/reference/check_all.md)
+on top to see which group failed.
 
-Individual guardrails and compositions are useful for targeted checks,
-but a production agent needs all three defense layers working together.
-A pipeline bundles guardrails for input, code, and output into one
-object with methods for each stage. You define your security policy once
-and apply it to every agent turn.
+## Pipelines
 
-### Defining a Pipeline
+A real agent needs input, code, and output checks together.
+[`secure_pipeline()`](https://ian-flores.github.io/secureguard/reference/secure_pipeline.md)
+holds all three in one object, with a method for each stage. You write
+the rules once and use them on every turn.
+
+### Defining a pipeline
 
 ``` r
 
@@ -398,7 +326,7 @@ pipeline <- secure_pipeline(
 )
 ```
 
-### Running Each Stage
+### Running each stage
 
 ``` r
 
@@ -430,12 +358,11 @@ output_result$result  # possibly redacted text
 #> [1] "mean_mpg = 20.09, sd_mpg = 6.03"
 ```
 
-### Pipeline in an Agent Loop
+### A pipeline in an agent loop
 
-Call the three `check_*` methods in sequence inside your agent loop.
-Each stage short-circuits on failure: if `check_input()` rejects the
-prompt, you skip the LLM call entirely. If `check_code()` rejects the
-generated code, you skip execution. Here is the complete pattern:
+Call the three `check_*` methods in order. Stop as soon as one fails. If
+`check_input()` fails, don’t call the model. If `check_code()` fails,
+don’t run the code. The whole turn looks like this:
 
 ``` r
 
@@ -481,16 +408,15 @@ process_turn <- function(pipeline, user_prompt, llm_fn, execute_fn) {
 }
 ```
 
-## Mixing Custom and Built-In Guardrails
+## Mixing your guardrails with the built-in ones
 
-Custom and built-in guardrails share the same interface. You can mix
-them in
+Your guardrails and the built-in ones are the same kind of object, so
+you can mix them in
 [`compose_guardrails()`](https://ian-flores.github.io/secureguard/reference/compose_guardrails.md),
 [`check_all()`](https://ian-flores.github.io/secureguard/reference/check_all.md),
 and
 [`secure_pipeline()`](https://ian-flores.github.io/secureguard/reference/secure_pipeline.md).
-There is no registration step or plugin system; any `secureguard` object
-works everywhere:
+There’s nothing to register:
 
 ``` r
 
@@ -508,7 +434,7 @@ run_guardrail(input_guards, "' OR 1=1 --")
 #> Reason: Potential SQL injection detected
 ```
 
-Similarly for code guardrails:
+The same goes for code guardrails:
 
 ``` r
 
@@ -523,24 +449,24 @@ run_guardrail(code_guards, "x <- mean(1:10)")
 #> <guardrail_result> PASS
 ```
 
-## Integration with securer
+## Using secureguard with securer
 
-secureguard analyzes code and outputs to decide whether they are safe.
-[securer](https://github.com/ian-flores/securer) provides OS-level
-sandboxing that limits what the code **can** do, regardless of what it
-tries. secureguard catches known-dangerous patterns before execution;
-securer contains unknown threats at the operating system level.
+secureguard looks at code and output and decides whether they’re safe.
+[securer](https://github.com/ian-flores/securer) runs the code in an
+operating system sandbox that limits what it can do, whatever it tries.
+secureguard stops patterns it knows are dangerous. securer contains the
+ones it doesn’t know about.
 
-securer is a suggested dependency; all of the patterns above work
-without it. The integration adds two things: pre-execution hooks and
-output guarding after execution.
+securer is only suggested, not required. Everything above works without
+it. With it, you get a hook that checks code before securer runs it, and
+you can check the output afterwards.
 
-### Pre-Execute Hooks
+### Checking code before it runs
 
 [`as_pre_execute_hook()`](https://ian-flores.github.io/secureguard/reference/as_pre_execute_hook.md)
-converts code guardrails into a function that securer calls before
-executing each code snippet. It returns `TRUE` to allow execution or
-`FALSE` to block it.
+turns code guardrails into a function that securer calls before running
+each piece of code. It returns `TRUE` to let the code run and `FALSE` to
+block it.
 
 ``` r
 
@@ -560,11 +486,12 @@ sess$execute("Sys.getenv('KEY')") # blocked by dataflow
 sess$close()
 ```
 
-### Post-Execute Output Guarding
+### Checking the output
 
 [`guard_output()`](https://ian-flores.github.io/secureguard/reference/guard_output.md)
-runs output guardrails on execution results. Guardrails with
-`action = "redact"` transform the output rather than blocking it:
+runs output guardrails on what the code returned. Guardrails with
+`action = "redact"` replace the sensitive parts instead of blocking the
+whole result:
 
 ``` r
 
@@ -584,9 +511,9 @@ if (checked$pass) {
 }
 ```
 
-### Pipeline Hook
+### A hook from a pipeline
 
-A pipeline can produce a pre-execute hook from its code guardrails:
+A pipeline can turn its code guardrails into a hook:
 
 ``` r
 
@@ -614,19 +541,18 @@ output_check <- pipeline$check_output(execution_result)
 sess$close()
 ```
 
-## Advanced Composition Patterns
+## Stricter and looser settings
 
-The patterns above apply the same guardrails to every request. In
-practice, you often need to vary strictness based on context: who the
-user is, where the request came from, and what level of trust is
-appropriate.
+So far every request gets the same checks. Often you want to be stricter
+with some users than others, depending on who they are and where the
+request came from.
 
-### Layered Sensitivity
+### Injection sensitivity
 
-A public-facing chatbot is exposed to adversarial users and needs
-high-sensitivity injection detection and tight topic scoping. An
-internal analytics tool used by trusted data scientists can use lower
-sensitivity to avoid false positives on legitimate analytical prompts:
+A public chatbot will meet people trying to break it, so it needs high
+injection sensitivity and a narrow list of topics. An internal tool for
+your own analysts can use low sensitivity, so ordinary prompts don’t get
+flagged by mistake:
 
 ``` r
 
@@ -658,11 +584,11 @@ run_guardrail(
 #> <guardrail_result> PASS
 ```
 
-### Graduated Code Restrictions
+### Code restrictions
 
-You can do the same with code guardrails. A trusted internal user
-running vetted analysis scripts needs fewer restrictions than an
-untrusted external user whose prompts generate arbitrary code:
+The same idea works for code. A trusted colleague running reviewed
+scripts needs fewer limits than an outside user whose prompts can
+produce any code at all:
 
 ``` r
 
@@ -672,7 +598,8 @@ trusted_code <- compose_guardrails(
   guard_code_dataflow(
     block_env_access = TRUE,
     block_network = FALSE,
-    block_file_write = FALSE
+    block_file_write = FALSE,
+    block_file_read = FALSE
   )
 )
 
@@ -689,23 +616,22 @@ untrusted_code <- compose_guardrails(
   )
 )
 
-# The same code may pass in trusted but fail in untrusted
+# Reading a file passes in the trusted setup but fails in the untrusted one
 code <- "readLines('data.csv')"
 run_guardrail(trusted_code, code)
-#> <guardrail_result> FAIL
-#> Reason: Data flow violation(s): readLines
+#> <guardrail_result> PASS
 run_guardrail(untrusted_code, code)
 #> <guardrail_result> FAIL
 #> Reason: Data flow violation(s): readLines
 ```
 
-### Redact vs Block Decision
+### Redact or block
 
-PII like social security numbers or patient records should block the
-entire response; partial disclosure is still a privacy violation. API
-keys and tokens can often be redacted in place, keeping the useful parts
-of the response while replacing the sensitive value. Output guardrails
-support three actions (`"block"`, `"redact"`, `"warn"`) for this:
+Social security numbers and patient records should block the whole
+response. Showing part of a record is still a privacy breach. API keys
+and tokens can usually be redacted, which keeps the useful part of the
+answer and hides the value. Output guardrails take an `action` of
+`"block"`, `"redact"`, or `"warn"`:
 
 ``` r
 
@@ -736,22 +662,20 @@ result$reasons
 
 ## Summary
 
-| Pattern | Function | Use Case |
-|----|----|----|
-| Custom guardrail | [`new_guardrail()`](https://ian-flores.github.io/secureguard/reference/new_guardrail.md) | Domain-specific checks |
-| Same-type composition | [`compose_guardrails()`](https://ian-flores.github.io/secureguard/reference/compose_guardrails.md) | Merge guards into one reusable unit |
-| Batch check | [`check_all()`](https://ian-flores.github.io/secureguard/reference/check_all.md) | Individual results per guard (diagnostics) |
-| Full pipeline | [`secure_pipeline()`](https://ian-flores.github.io/secureguard/reference/secure_pipeline.md) | Three-layer defense for production |
-| Pre-execute hook | [`as_pre_execute_hook()`](https://ian-flores.github.io/secureguard/reference/as_pre_execute_hook.md) | securer integration |
-| Output guard | [`guard_output()`](https://ian-flores.github.io/secureguard/reference/guard_output.md) | Post-execution filtering |
+| To do this | Use |
+|----|----|
+| Write your own check | [`new_guardrail()`](https://ian-flores.github.io/secureguard/reference/new_guardrail.md) |
+| Merge checks of one type into one guardrail | [`compose_guardrails()`](https://ian-flores.github.io/secureguard/reference/compose_guardrails.md) |
+| Run a list of checks and see each result | [`check_all()`](https://ian-flores.github.io/secureguard/reference/check_all.md) |
+| Check input, code, and output in one object | [`secure_pipeline()`](https://ian-flores.github.io/secureguard/reference/secure_pipeline.md) |
+| Check code before securer runs it | [`as_pre_execute_hook()`](https://ian-flores.github.io/secureguard/reference/as_pre_execute_hook.md) |
+| Check or redact a result after it runs | [`guard_output()`](https://ian-flores.github.io/secureguard/reference/guard_output.md) |
 
-Build small guards that each target one threat. Combine them with
+Keep each guardrail small, aimed at one problem. Combine them with
 [`compose_guardrails()`](https://ian-flores.github.io/secureguard/reference/compose_guardrails.md)
 or
 [`check_all()`](https://ian-flores.github.io/secureguard/reference/check_all.md),
-and wire them into pipelines that check every stage of an agent
-workflow. When the built-in guardrails do not cover your domain, write
-your own with
+and put them in a pipeline that checks every stage of the turn. If the
+built-in checks don’t fit your case, write one with
 [`new_guardrail()`](https://ian-flores.github.io/secureguard/reference/new_guardrail.md).
-Custom guards and built-in guards have the same interface and compose
-the same way.
+It will work anywhere the built-in ones do.

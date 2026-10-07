@@ -7,11 +7,11 @@ Guardrail creation, composition, and execution
 - [`new_guardrail()`](https://ian-flores.github.io/secureguard/reference/new_guardrail.md)
   : Create a new guardrail
 - [`secureguard_class()`](https://ian-flores.github.io/secureguard/reference/secureguard_class.md)
-  : S7 class: secureguard
+  : The secureguard class
 - [`guardrail_result()`](https://ian-flores.github.io/secureguard/reference/guardrail_result.md)
   : Create a guardrail result
 - [`guardrail_result_class()`](https://ian-flores.github.io/secureguard/reference/guardrail_result_class.md)
-  : S7 class: guardrail_result
+  : The guardrail_result class
 - [`compose_guardrails()`](https://ian-flores.github.io/secureguard/reference/compose_guardrails.md)
   : Compose guardrails
 - [`run_guardrail()`](https://ian-flores.github.io/secureguard/reference/run_guardrail.md)
@@ -75,7 +75,7 @@ Parse and walk R code abstract syntax trees
 - [`ast_depth()`](https://ian-flores.github.io/secureguard/reference/ast_depth.md)
   : Compute maximum AST nesting depth
 - [`ast_stats()`](https://ian-flores.github.io/secureguard/reference/ast_stats.md)
-  : Compute summary statistics for R code AST
+  : Count calls, assignments, and nesting in R code
 
 ## Pattern Libraries
 
