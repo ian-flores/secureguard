@@ -199,7 +199,8 @@ strict_code
 
 # Clean code passes all three
 run_guardrail(strict_code, "dplyr::filter(mtcars, cyl == 4)")
-#> <guardrail_result> PASS
+#> <guardrail_result> FAIL
+#> Reason: Disallowed package(s):
 
 # system() fails code analysis
 run_guardrail(strict_code, "system('whoami')")
@@ -209,7 +210,7 @@ run_guardrail(strict_code, "system('whoami')")
 # processx fails dependency check
 run_guardrail(strict_code, "processx::run('ls')")
 #> <guardrail_result> FAIL
-#> Reason: Blocked function(s) detected: processx::run; Disallowed package(s):
+#> Reason: Blocked function(s) detected: processx::run; Disallowed package(s): ,
 #> processx
 ```
 

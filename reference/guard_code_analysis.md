@@ -2,8 +2,12 @@
 
 Parses R code and fails if it calls a blocked function. Because it reads
 the parsed code rather than the text, it also finds calls made through
-`do.call("system", ...)` and namespaced calls like
-[`base::system()`](https://rdrr.io/r/base/system.html).
+`do.call("system", ...)` or `do.call(system, ...)` and namespaced calls
+like [`base::system()`](https://rdrr.io/r/base/system.html). It does not
+resolve names computed at run time, such as
+`fn <- "system"; do.call(fn, ...)`; the defaults block
+[`get()`](https://rdrr.io/r/base/get.html) and
+[`match.fun()`](https://rdrr.io/r/base/match.fun.html) outright instead.
 
 ## Usage
 
@@ -38,7 +42,11 @@ guard_code_analysis(
 
   Logical(1). If `TRUE` (default), also catch calls like
   `do.call("system", ...)`, where the first argument is a string naming
-  a blocked function.
+  a blocked function. A bare or namespaced name works too:
+  `do.call(system, ...)`, `do.call(base::system, ...)`, and the same
+  through [`base::do.call()`](https://rdrr.io/r/base/do.call.html). If
+  `FALSE`, such a call counts only as a call to
+  [`do.call()`](https://rdrr.io/r/base/do.call.html) itself.
 
 ## Value
 

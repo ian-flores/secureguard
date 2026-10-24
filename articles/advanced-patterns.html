@@ -251,7 +251,8 @@ guardrail:</p>
 <span></span>
 <span><span class="co"># Clean code passes all three</span></span>
 <span><span class="fu"><a href="../reference/run_guardrail.html">run_guardrail</a></span><span class="op">(</span><span class="va">strict_code</span>, <span class="st">"dplyr::filter(mtcars, cyl == 4)"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; &lt;guardrail_result&gt; PASS</span></span>
+<span><span class="co">#&gt; &lt;guardrail_result&gt; FAIL</span></span>
+<span><span class="co">#&gt; Reason: Disallowed package(s):</span></span>
 <span></span>
 <span><span class="co"># system() fails code analysis</span></span>
 <span><span class="fu"><a href="../reference/run_guardrail.html">run_guardrail</a></span><span class="op">(</span><span class="va">strict_code</span>, <span class="st">"system('whoami')"</span><span class="op">)</span></span>
@@ -261,7 +262,7 @@ guardrail:</p>
 <span><span class="co"># processx fails dependency check</span></span>
 <span><span class="fu"><a href="../reference/run_guardrail.html">run_guardrail</a></span><span class="op">(</span><span class="va">strict_code</span>, <span class="st">"processx::run('ls')"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; &lt;guardrail_result&gt; FAIL</span></span>
-<span><span class="co">#&gt; Reason: Blocked function(s) detected: processx::run; Disallowed package(s):</span></span>
+<span><span class="co">#&gt; Reason: Blocked function(s) detected: processx::run; Disallowed package(s): ,</span></span>
 <span><span class="co">#&gt; processx</span></span></code></pre></div>
 </div>
 <div class="section level3">
