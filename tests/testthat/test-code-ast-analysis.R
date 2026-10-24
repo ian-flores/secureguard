@@ -107,13 +107,78 @@ test_that("do.call with variable is not detected (by design)", {
 })
 
 test_that("detect_indirect = FALSE skips do.call detection", {
-  # do.call("system",...) is detected via call_fn_name resolving to "system",
-  # which is already a direct match. detect_indirect doesn't change this behavior
-  # for string literal do.call since call_fn_name resolves it automatically.
   g <- guard_code_analysis(detect_indirect = FALSE)
   result <- run_guardrail(g, 'do.call("system", list("ls"))')
-  # call_fn_name still resolves do.call("system",...) to "system"
+  expect_true(result@pass)
+
+  # Direct and namespaced calls are still blocked
+  expect_false(run_guardrail(g, "system('ls')")@pass)
+  expect_false(run_guardrail(g, "base::system('ls')")@pass)
+})
+
+test_that("detect_indirect = FALSE still blocks do.call when it is blocked", {
+  g <- guard_code_analysis(
+    blocked_functions = c("system", "do.call"),
+    detect_indirect = FALSE
+  )
+  result <- run_guardrail(g, 'do.call("system", list("ls"))')
   expect_false(result@pass)
+  expect_equal(result@details$blocked_calls, "do.call")
+})
+
+test_that("detect_indirect = TRUE reports the do.call target", {
+  g <- guard_code_analysis(detect_indirect = TRUE)
+  result <- run_guardrail(g, 'do.call("base::system", list("ls"))')
+  expect_false(result@pass)
+  expect_true("base::system" %in% result@details$blocked_calls)
+})
+
+test_that("do.call with a function name rather than a string is detected", {
+  g <- guard_code_analysis()
+  for (code in c(
+    'do.call(system, list("ls"))',
+    'do.call(`system`, list("ls"))',
+    'do.call(base::system, list("ls"))',
+    'do.call(base:::system, list("ls"))'
+  )) {
+    result <- run_guardrail(g, code)
+    expect_false(result@pass, info = code)
+  }
+})
+
+test_that("base::do.call and base:::do.call resolve like do.call", {
+  g <- guard_code_analysis()
+  expect_false(run_guardrail(g, 'base::do.call("system", list("ls"))')@pass)
+  expect_false(run_guardrail(g, 'base:::do.call(system, list("ls"))')@pass)
+
+  g_off <- guard_code_analysis(detect_indirect = FALSE)
+  expect_true(run_guardrail(g_off, 'base::do.call("system", list("ls"))')@pass)
+  expect_true(run_guardrail(g_off, 'do.call(system, list("ls"))')@pass)
+})
+
+test_that("blocking do.call catches every do.call form", {
+  g <- guard_code_analysis(blocked_functions = "do.call")
+  for (code in c(
+    'do.call("mean", list(1))',
+    'do.call(mean, list(1))',
+    'base::do.call(mean, list(1))',
+    'do.call(get_fn(), list(1))'
+  )) {
+    result <- run_guardrail(g, code)
+    expect_false(result@pass, info = code)
+  }
+
+  g_off <- guard_code_analysis(
+    blocked_functions = "do.call", detect_indirect = FALSE
+  )
+  result <- run_guardrail(g_off, 'base::do.call(mean, list(1))')
+  expect_false(result@pass)
+  expect_equal(result@details$blocked_calls, "base::do.call")
+})
+
+test_that("chained calls don't error", {
+  g <- guard_code_analysis()
+  expect_true(run_guardrail(g, "g(1)(2)(3)")@pass)
 })
 
 test_that("invalid inputs are rejected", {

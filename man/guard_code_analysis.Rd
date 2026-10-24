@@ -23,7 +23,10 @@ into these packages are allowed even if the function is in
 
 \item{detect_indirect}{Logical(1). If \code{TRUE} (default), also catch calls
 like \code{do.call("system", ...)}, where the first argument is a string
-naming a blocked function.}
+naming a blocked function. A bare or namespaced name works too:
+\code{do.call(system, ...)}, \code{do.call(base::system, ...)}, and the same
+through \code{base::do.call()}. If \code{FALSE}, such a call counts only as a
+call to \code{do.call()} itself.}
 }
 \value{
 A guardrail object of class \code{"secureguard"} with type \code{"code"}.
@@ -31,7 +34,10 @@ A guardrail object of class \code{"secureguard"} with type \code{"code"}.
 \description{
 Parses R code and fails if it calls a blocked function. Because it reads
 the parsed code rather than the text, it also finds calls made through
-\code{do.call("system", ...)} and namespaced calls like \code{base::system()}.
+\code{do.call("system", ...)} or \code{do.call(system, ...)} and namespaced calls
+like \code{base::system()}. It does not resolve names computed at run time,
+such as \verb{fn <- "system"; do.call(fn, ...)}; the defaults block \code{get()}
+and \code{match.fun()} outright instead.
 }
 \examples{
 g <- guard_code_analysis()

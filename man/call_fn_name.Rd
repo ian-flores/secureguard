@@ -15,8 +15,15 @@ be determined (e.g., anonymous function calls).
 }
 \description{
 Returns the function name for simple calls (\code{fn(x)}), namespaced calls
-(\code{pkg::fn(x)}, \code{pkg:::fn(x)}), and \code{do.call()} with a string literal
-first argument (\code{do.call("fn", list(x))}).
+(\code{pkg::fn(x)}, \code{pkg:::fn(x)}), and \code{do.call()} calls that name their
+target directly: \code{do.call("fn", ...)}, \code{do.call(fn, ...)}, or
+\code{do.call(pkg::fn, ...)}. \code{base::do.call()} and \code{base:::do.call()} are
+resolved the same way. A \code{do.call()} whose target is computed, such as
+\code{do.call(get_fn(), ...)}, returns its own name.
+}
+\details{
+A symbol target is taken at face value: \code{do.call(fn, ...)} returns
+\code{"fn"} even if \code{fn} is a variable holding some other function's name.
 }
 \examples{
 expr <- parse_code("mean(x)")[[1]]
@@ -24,4 +31,7 @@ call_fn_name(expr)
 
 expr2 <- parse_code("stats::median(x)")[[1]]
 call_fn_name(expr2)
+
+expr3 <- parse_code("do.call(rbind, list(a, b))")[[1]]
+call_fn_name(expr3)
 }

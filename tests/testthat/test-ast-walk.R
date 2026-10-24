@@ -47,14 +47,41 @@ test_that("call_fn_name handles do.call with string literal", {
   expect_equal(call_fn_name(expr), "rbind")
 })
 
-test_that("call_fn_name returns NA for do.call with non-literal", {
-  expr <- parse(text = "do.call(fn_var, args)")[[1]]
-  expect_equal(call_fn_name(expr), "do.call")
+test_that("call_fn_name resolves do.call with a symbol or namespaced name", {
+  expect_equal(call_fn_name(quote(do.call(rbind, list(a, b)))), "rbind")
+  expect_equal(call_fn_name(quote(do.call(`rbind`, list(a, b)))), "rbind")
+  expect_equal(
+    call_fn_name(quote(do.call(base::rbind, list(a, b)))), "base::rbind"
+  )
+  expect_equal(
+    call_fn_name(quote(do.call(base:::rbind, list(a, b)))), "base:::rbind"
+  )
+})
+
+test_that("call_fn_name resolves do.call called through base:: or base:::", {
+  expect_equal(call_fn_name(quote(base::do.call("rbind", x))), "rbind")
+  expect_equal(call_fn_name(quote(base:::do.call(rbind, x))), "rbind")
+})
+
+test_that("call_fn_name finds the do.call target by name or position", {
+  expect_equal(call_fn_name(quote(do.call(args = x, what = "rbind"))), "rbind")
+  expect_equal(call_fn_name(quote(do.call(args = x, "rbind"))), "rbind")
+})
+
+test_that("call_fn_name falls back to do.call for an unnamed target", {
+  expect_equal(call_fn_name(quote(do.call(get_fn(), args))), "do.call")
+  expect_equal(
+    call_fn_name(quote(base::do.call(get_fn(), args))), "base::do.call"
+  )
 })
 
 test_that("call_fn_name returns NA for anonymous function call", {
   expr <- parse(text = "(function(x) x)(1)")[[1]]
   expect_true(is.na(call_fn_name(expr)))
+})
+
+test_that("call_fn_name returns NA for chained calls", {
+  expect_true(is.na(call_fn_name(quote(g(1)(2)(3)))))
 })
 
 test_that("call_fn_name handles operators", {
@@ -224,6 +251,13 @@ test_that("ast_stats counts all assignment forms", {
   "
   stats <- ast_stats(code)
   expect_equal(stats$n_assignments, 6L)
+})
+
+test_that("ast_stats counts assign() called through do.call", {
+  expect_equal(ast_stats('do.call(assign, list("x", 1))')$n_assignments, 1L)
+  expect_equal(
+    ast_stats('base::do.call("assign", list("x", 1))')$n_assignments, 1L
+  )
 })
 
 test_that("ast_stats counts symbols", {

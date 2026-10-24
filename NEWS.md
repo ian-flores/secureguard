@@ -8,6 +8,23 @@
   `utils::download.file()`, and `base::library()` got past checks that
   blocked the unqualified call.
 
+* Security: `call_fn_name()` now resolves `do.call()` targets given as a
+  name (`do.call(system, ...)`, `` do.call(`system`, ...) ``,
+  `do.call(base::system, ...)`) as well as a string, and resolves
+  `base::do.call()` and `base:::do.call()` like `do.call()`. All three code
+  guardrails see through these forms; before, they got past every check.
+  `guard_code_dependencies()` also reads the package from `do.call()`'s
+  argument list, so `do.call("library", list("pkg"))` is checked against
+  `"pkg"` rather than reported as a package named `library`.
+
+* `guard_code_analysis(detect_indirect = FALSE)` now works as documented:
+  `do.call("system", ...)` counts as a call to `do.call()`, not `system()`.
+  Blocking `"do.call"` now catches every `do.call()` call, including ones
+  whose target resolves to an allowed function.
+
+* `call_fn_name()` no longer errors on chained calls like `f(1)(2)(3)`, so the
+  code guardrails no longer fail on such code.
+
 * `output_to_text()` now unwraps `ellmer::ContentToolResult` objects (such as
   the results of commons agent tools) to their value, or to their error
   message. Previously it fell back to `str()`, which truncated long values so

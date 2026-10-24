@@ -208,3 +208,14 @@ test_that("pkg:: prefixes don't bypass dataflow checks", {
     expect_false(run_guardrail(g, code)@pass, label = code)
   }
 })
+
+test_that("do.call doesn't bypass dataflow checks", {
+  g <- guard_code_dataflow()
+  for (code in c(
+    'do.call(Sys.getenv, list("HOME"))',
+    'base::do.call("Sys.getenv", list("HOME"))',
+    'do.call(base::readLines, list("x.txt"))'
+  )) {
+    expect_false(run_guardrail(g, code)@pass, info = code)
+  }
+})

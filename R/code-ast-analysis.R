@@ -30,7 +30,10 @@ default_blocked_functions <- function() {
 #'
 #' Parses R code and fails if it calls a blocked function. Because it reads
 #' the parsed code rather than the text, it also finds calls made through
-#' `do.call("system", ...)` and namespaced calls like `base::system()`.
+#' `do.call("system", ...)` or `do.call(system, ...)` and namespaced calls
+#' like `base::system()`. It does not resolve names computed at run time,
+#' such as `fn <- "system"; do.call(fn, ...)`; the defaults block `get()`
+#' and `match.fun()` outright instead.
 #'
 #' @param blocked_functions Character vector of function names to block.
 #'   Defaults to [default_blocked_functions()]. A bare name like `"system"`
@@ -42,7 +45,10 @@ default_blocked_functions <- function() {
 #'   `processx::run()` through.
 #' @param detect_indirect Logical(1). If `TRUE` (default), also catch calls
 #'   like `do.call("system", ...)`, where the first argument is a string
-#'   naming a blocked function.
+#'   naming a blocked function. A bare or namespaced name works too:
+#'   `do.call(system, ...)`, `do.call(base::system, ...)`, and the same
+#'   through `base::do.call()`. If `FALSE`, such a call counts only as a
+#'   call to `do.call()` itself.
 #' @return A guardrail object of class `"secureguard"` with type `"code"`.
 #' @export
 #' @examples
@@ -67,40 +73,42 @@ guard_code_analysis <- function(blocked_functions = default_blocked_functions(),
       cli_abort("{.arg code} must be a single character string.")
     }
 
+    is_blocked <- function(fn_name) {
+      if (is.na(fn_name)) return(FALSE)
+
+      # Check if fn_name is in an allowed namespace
+      if (!is.null(allow_namespaces)) {
+        for (ns in allow_namespaces) {
+          prefix <- paste0(ns, "::")
+          prefix3 <- paste0(ns, ":::")
+          if (startsWith(fn_name, prefix) || startsWith(fn_name, prefix3)) {
+            return(FALSE)
+          }
+        }
+      }
+
+      # Direct match, on the full name ("processx::run") or the bare name,
+      # so that `base::system()` can't slip past a block on "system".
+      bare_name <- sub("^[^:]+:::?", "", fn_name)
+      fn_name %in% blocked_functions || bare_name %in% blocked_functions
+    }
+
     visitor <- list(
       on_call = function(expr, fn_name, depth) {
-        if (is.na(fn_name)) return(NULL)
-
-        # Check if fn_name is in an allowed namespace
-        if (!is.null(allow_namespaces)) {
-          for (ns in allow_namespaces) {
-            prefix <- paste0(ns, "::")
-            prefix3 <- paste0(ns, ":::")
-            if (startsWith(fn_name, prefix) || startsWith(fn_name, prefix3)) {
-              return(NULL)
-            }
+        # call_fn_name() resolves do.call("system", ...) to "system". The
+        # do.call itself is always checked; its target only with
+        # detect_indirect.
+        if (is_do_call(expr)) {
+          head_name <- fn_ref_name(expr[[1L]])
+          fn_name <- if (detect_indirect) {
+            unique(c(head_name, fn_name))
+          } else {
+            head_name
           }
         }
 
-        # Direct match, on the full name ("processx::run") or the bare name,
-        # so that `base::system()` can't slip past a block on "system".
-        bare_name <- sub("^[^:]+:::?", "", fn_name)
-        if (fn_name %in% blocked_functions || bare_name %in% blocked_functions) {
-          return(fn_name)
-        }
-
-        # Indirect via do.call
-        if (detect_indirect && fn_name == "do.call" && length(expr) >= 2L) {
-          # Already resolved by call_fn_name -- but we need the raw first arg
-          # call_fn_name returns the string literal for do.call, so fn_name
-          # would already be the resolved name. However, walk_ast visits the
-          # do.call node itself, and call_fn_name resolves do.call("system",...)
-          # to "system". So fn_name here is the resolved target. Already
-          # handled above by the direct match.
-          NULL
-        } else {
-          NULL
-        }
+        hits <- fn_name[vapply(fn_name, is_blocked, logical(1))]
+        if (length(hits) == 0L) NULL else hits
       }
     )
 

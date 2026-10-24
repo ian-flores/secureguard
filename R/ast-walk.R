@@ -139,8 +139,14 @@ walk_code <- function(code, visitor) {
 #' Extract function name from a call expression
 #'
 #' Returns the function name for simple calls (`fn(x)`), namespaced calls
-#' (`pkg::fn(x)`, `pkg:::fn(x)`), and `do.call()` with a string literal
-#' first argument (`do.call("fn", list(x))`).
+#' (`pkg::fn(x)`, `pkg:::fn(x)`), and `do.call()` calls that name their
+#' target directly: `do.call("fn", ...)`, `do.call(fn, ...)`, or
+#' `do.call(pkg::fn, ...)`. `base::do.call()` and `base:::do.call()` are
+#' resolved the same way. A `do.call()` whose target is computed, such as
+#' `do.call(get_fn(), ...)`, returns its own name.
+#'
+#' A symbol target is taken at face value: `do.call(fn, ...)` returns
+#' `"fn"` even if `fn` is a variable holding some other function's name.
 #'
 #' @param expr A call expression.
 #' @return Character(1). The function name, or `NA_character_` if it cannot
@@ -152,41 +158,68 @@ walk_code <- function(code, visitor) {
 #'
 #' expr2 <- parse_code("stats::median(x)")[[1]]
 #' call_fn_name(expr2)
+#'
+#' expr3 <- parse_code("do.call(rbind, list(a, b))")[[1]]
+#' call_fn_name(expr3)
 call_fn_name <- function(expr) {
   if (!is.call(expr)) {
     cli_abort("{.arg expr} must be a call expression.")
   }
 
-  head <- expr[[1L]]
-
-  # Namespaced calls: pkg::fn or pkg:::fn
-  if (is.call(head)) {
-    op <- as.character(head[[1L]])
-    if (op %in% c("::", ":::") && length(head) == 3L) {
-      pkg <- as.character(head[[2L]])
-      fn <- as.character(head[[3L]])
-      return(paste0(pkg, op, fn))
+  if (is_do_call(expr)) {
+    target <- fn_ref_name(do_call_arg(expr, "what"))
+    if (!is.na(target)) {
+      return(target)
     }
-    # Other call-head patterns (e.g., (function(x) x)(1)) -- not named
-    return(NA_character_)
   }
 
-  # Simple calls: fn(x)
-  if (is.symbol(head)) {
-    fn_name <- as.character(head)
+  fn_ref_name(expr[[1L]])
+}
 
-    # do.call with string literal first arg
-    if (fn_name == "do.call" && length(expr) >= 2L) {
-      first_arg <- expr[[2L]]
-      if (is.character(first_arg) && length(first_arg) == 1L) {
-        return(first_arg)
-      }
-    }
-
-    return(fn_name)
+# Name of a function reference: "fn", `fn`, a "fn" string, or pkg::fn /
+# pkg:::fn. NA_character_ for anything else, such as (function(x) x) or
+# f(1) in f(1)(2).
+fn_ref_name <- function(ref) {
+  if (is.character(ref) && length(ref) == 1L && !is.na(ref)) {
+    return(ref)
   }
-
+  if (is.symbol(ref) && nzchar(as.character(ref))) {
+    return(as.character(ref))
+  }
+  if (is.call(ref) && length(ref) == 3L && is.symbol(ref[[1L]]) &&
+      as.character(ref[[1L]]) %in% c("::", ":::") &&
+      is.symbol(ref[[2L]]) && is.symbol(ref[[3L]])) {
+    return(paste0(
+      as.character(ref[[2L]]), as.character(ref[[1L]]), as.character(ref[[3L]])
+    ))
+  }
   NA_character_
+}
+
+# Is `expr` a call to do.call(), base::do.call(), or base:::do.call()?
+is_do_call <- function(expr) {
+  fn_ref_name(expr[[1L]]) %in% c("do.call", "base::do.call", "base:::do.call")
+}
+
+# An argument of a do.call() call ("what", "args", ...), matched the way R
+# matches it: by exact name, else by position among the unnamed arguments.
+# NULL if it isn't supplied.
+do_call_arg <- function(expr, arg) {
+  args <- as.list(expr)[-1L]
+  arg_names <- names(args)
+  if (is.null(arg_names)) {
+    arg_names <- character(length(args))
+  }
+  if (arg %in% arg_names) {
+    return(args[[match(arg, arg_names)]])
+  }
+  open <- setdiff(c("what", "args", "quote", "envir"), arg_names)
+  unnamed <- which(arg_names == "")
+  i <- match(arg, open)
+  if (is.na(i) || i > length(unnamed)) {
+    return(NULL)
+  }
+  args[[unnamed[[i]]]]
 }
 
 #' Compute maximum AST nesting depth

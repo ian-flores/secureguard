@@ -106,3 +106,36 @@ test_that("base::library() is checked like library()", {
   expect_false(run_guardrail(g, "base::library(processx)")@pass)
   expect_false(run_guardrail(g, "base::require('processx')")@pass)
 })
+
+test_that("library() called through do.call is checked", {
+  g <- guard_code_dependencies(denied_packages = "evilpkg")
+  for (code in c(
+    'do.call("library", list("evilpkg"))',
+    'do.call(library, list("evilpkg"))',
+    'base::do.call(base::require, list("evilpkg"))',
+    'do.call(loadNamespace, list("evilpkg"))'
+  )) {
+    result <- run_guardrail(g, code)
+    expect_false(result@pass, info = code)
+    expect_true(
+      "evilpkg" %in% result@details$violations, info = code
+    )
+  }
+})
+
+test_that("do.call(library, ...) does not report a package named library", {
+  g <- guard_code_dependencies(allowed_packages = "dplyr")
+  for (code in c(
+    'do.call("library", list("dplyr"))',
+    'do.call(library, list("dplyr"))'
+  )) {
+    result <- run_guardrail(g, code)
+    expect_true(result@pass, info = code)
+  }
+})
+
+test_that("pkg::fn as a do.call target is detected", {
+  g <- guard_code_dependencies(denied_packages = "processx")
+  expect_false(run_guardrail(g, 'do.call(processx::run, list("ls"))')@pass)
+  expect_false(run_guardrail(g, 'do.call("processx:::run", list("ls"))')@pass)
+})

@@ -56,7 +56,7 @@ guard_code_dependencies <- function(allowed_packages = NULL,
 
         # library(x), require(x)
         if (sub("^[^:]+:::?", "", fn_name) %in% c("library", "require") && length(expr) >= 2L) {
-          pkg_arg <- expr[[2L]]
+          pkg_arg <- first_pkg_arg(expr)
           if (is.symbol(pkg_arg)) {
             detected_packages[length(detected_packages) + 1L] <<-
               as.character(pkg_arg)
@@ -68,20 +68,18 @@ guard_code_dependencies <- function(allowed_packages = NULL,
 
         # loadNamespace(x)
         if (fn_name == "loadNamespace" && length(expr) >= 2L) {
-          pkg_arg <- expr[[2L]]
+          pkg_arg <- first_pkg_arg(expr)
           if (is.character(pkg_arg) && length(pkg_arg) == 1L) {
             detected_packages[length(detected_packages) + 1L] <<- pkg_arg
           }
           return(NULL)
         }
 
-        # pkg::fn or pkg:::fn
-        head <- expr[[1L]]
-        if (is.call(head)) {
-          op <- as.character(head[[1L]])
-          if (op %in% c("::", ":::") && length(head) == 3L) {
-            pkg <- as.character(head[[2L]])
-            detected_packages[length(detected_packages) + 1L] <<- pkg
+        # pkg::fn or pkg:::fn, as the call itself or as a do.call() target
+        for (ref in unique(c(fn_ref_name(expr[[1L]]), fn_name))) {
+          if (!is.na(ref) && grepl(":::?", ref)) {
+            detected_packages[length(detected_packages) + 1L] <<-
+              sub(":::?.*$", "", ref)
           }
         }
 
@@ -145,4 +143,20 @@ guard_code_dependencies <- function(allowed_packages = NULL,
     check_fn = check_fn,
     description = paste0("Package dependency control (", mode_desc, ")")
   )
+}
+
+# The package argument of library(), require(), or loadNamespace(). Through
+# do.call() it's the first element of a literal `args` list, and only a
+# string counts: do.call() evaluates a bare name there as a variable.
+first_pkg_arg <- function(expr) {
+  if (!is_do_call(expr)) {
+    return(expr[[2L]])
+  }
+  args <- do_call_arg(expr, "args")
+  if (is.call(args) && length(args) >= 2L &&
+      fn_ref_name(args[[1L]]) %in% c("list", "c", "base::list", "base::c") &&
+      is.character(args[[2L]])) {
+    return(args[[2L]])
+  }
+  NULL
 }
